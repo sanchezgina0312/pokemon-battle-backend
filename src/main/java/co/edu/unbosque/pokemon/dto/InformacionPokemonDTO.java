@@ -1,10 +1,9 @@
 package co.edu.unbosque.pokemon.dto;
-
-import java.awt.List;
+import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
 
-public class InformacionPokemon {
+public class InformacionPokemonDTO {
 	
 	@SerializedName("id")
     private int id;
@@ -22,7 +21,7 @@ public class InformacionPokemon {
     private List<AtaquePokemonDTO> listaAtaques;
 
     @SerializedName("sprites")
-    private SpritesDTO imagenes;
+    private SpriteDTO imagenes;
 
     // --- GETTERS Y SETTERS ---
     public int getId() { return id; }
@@ -35,6 +34,6 @@ public class InformacionPokemon {
     public void setListaEstadisticas(List<EstadisticaPokemonDTO> listaEstadisticas) { this.listaEstadisticas = listaEstadisticas; }
     public List<AtaquePokemonDTO> getListaAtaques() { return listaAtaques; }
     public void setListaAtaques(List<AtaquePokemonDTO> listaAtaques) { this.listaAtaques = listaAtaques; }
-    public SpritesDTO getImagenes() { return imagenes; }
-    public void setImagenes(SpritesDTO imagenes) { this.imagenes = imagenes; }
+    public SpriteDTO getImagenes() { return imagenes; }
+    public void setImagenes(SpriteDTO imagenes) { this.imagenes = imagenes; }
 }
