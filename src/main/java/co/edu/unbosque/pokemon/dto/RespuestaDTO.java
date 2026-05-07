@@ -11,4 +11,5 @@ public class RespuestaDTO {
     public List<ReferenciaPokemonDTO> getListaResultados() { return listaResultados; }
     public void setListaResultados(List<ReferenciaPokemonDTO> listaResultados) { this.listaResultados = listaResultados; }
 
+    
 }

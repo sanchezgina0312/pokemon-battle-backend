@@ -9,4 +9,5 @@ public class AtaquePokemonDTO {
     public InformacionAtaqueDTO getInformacionAtaque() { return informacionAtaque; }
     public void setInformacionAtaque(InformacionAtaqueDTO informacionAtaque) { this.informacionAtaque = informacionAtaque; }
 
+    
 }
