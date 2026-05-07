@@ -1,7 +1,9 @@
 package co.edu.unbosque.pokemon;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class PokemonApplication {
@@ -10,6 +12,9 @@ public class PokemonApplication {
 		SpringApplication.run(PokemonApplication.class, args);
 	}
 	
-
+	@Bean
+	public ModelMapper getModelMapper() {
+		return new ModelMapper();
+	}
 
 }
