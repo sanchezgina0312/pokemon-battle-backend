@@ -1,5 +1,5 @@
 package co.edu.unbosque.pokemon.dto;
 
-public class Crear {
+public class Respuesta {
 
 }
