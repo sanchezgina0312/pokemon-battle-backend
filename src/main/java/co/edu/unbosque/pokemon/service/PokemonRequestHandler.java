@@ -12,7 +12,7 @@ import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
 import co.edu.unbosque.pokemon.dto.RespuestaDTO;
 
 public class PokemonRequestHandler {
-	
+	// Petición HTTP
 	private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_2)
             .connectTimeout(Duration.ofSeconds(10))
