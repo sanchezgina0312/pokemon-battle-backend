@@ -11,7 +11,7 @@ public class ReferenciaPokemonDTO {
 	private String url;
 
 	public ReferenciaPokemonDTO() {
-		
+
 	}
 
 	public ReferenciaPokemonDTO(String nombre, String url) {
@@ -40,6 +40,5 @@ public class ReferenciaPokemonDTO {
 	public String toString() {
 		return "ReferenciaPokemonDTO [nombre=" + nombre + ", url=" + url + "]";
 	}
-	
-	
+
 }
