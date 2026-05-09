@@ -26,6 +26,9 @@ public class InformacionPokemonDTO {
 
 	@SerializedName("types")
 	private List<TipoPokemonDTO> listaTipos;
+	
+	@SerializedName("cries")
+	private GritoPokemonDTO sonidos;
 
 	public List<TipoPokemonDTO> getListaTipos() {
 		return listaTipos;
@@ -97,6 +100,14 @@ public class InformacionPokemonDTO {
 
 	public void setImagenes(SpriteDTO imagenes) {
 		this.imagenes = imagenes;
+	}
+	
+	public GritoPokemonDTO getSonidos() {
+		return sonidos;
+	}
+
+	public void setSonidos(GritoPokemonDTO sonidos) {
+		this.sonidos = sonidos;
 	}
 
 	@Override
