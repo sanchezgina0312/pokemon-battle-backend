@@ -23,7 +23,7 @@ public class TipoPokemonDTO {
 	public void setInformacionTipo(InfoTipoDTO informacionTipo) {
 		this.informacionTipo = informacionTipo;
 	}
-
+	
 	@Override
 	public String toString() {
 		return "TipoPokemonDTO [informacionTipo=" + informacionTipo + "]";

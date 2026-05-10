@@ -7,28 +7,28 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Ataque {
-	
-    private @Id String nombreAtaqueApi;
-    private boolean estaBaneado;
-    private Integer poderModificado;
 
-    public Ataque() {
-		
+	private @Id String nombre;
+	private boolean estaBaneado;
+	private Integer poderModificado;
+
+	public Ataque() {
+
 	}
 
-	public Ataque(String nombreAtaqueApi, boolean estaBaneado, Integer poderModificado) {
+	public Ataque(String nombre, boolean estaBaneado, Integer poderModificado) {
 		super();
-		this.nombreAtaqueApi = nombreAtaqueApi;
+		this.nombre = nombre;
 		this.estaBaneado = estaBaneado;
 		this.poderModificado = poderModificado;
 	}
 
-	public String getNombreAtaqueApi() {
-		return nombreAtaqueApi;
+	public String getNombre() {
+		return nombre;
 	}
 
-	public void setNombreAtaqueApi(String nombreAtaqueApi) {
-		this.nombreAtaqueApi = nombreAtaqueApi;
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
 	}
 
 	public boolean isEstaBaneado() {
@@ -49,7 +49,7 @@ public class Ataque {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(estaBaneado, nombreAtaqueApi, poderModificado);
+		return Objects.hash(estaBaneado, nombre, poderModificado);
 	}
 
 	@Override
@@ -61,14 +61,14 @@ public class Ataque {
 		if (getClass() != obj.getClass())
 			return false;
 		Ataque other = (Ataque) obj;
-		return estaBaneado == other.estaBaneado && Objects.equals(nombreAtaqueApi, other.nombreAtaqueApi)
+		return estaBaneado == other.estaBaneado && Objects.equals(nombre, other.nombre)
 				&& Objects.equals(poderModificado, other.poderModificado);
 	}
 
 	@Override
 	public String toString() {
-		return "Ataque [nombreAtaqueApi=" + nombreAtaqueApi + ", estaBaneado=" + estaBaneado + ", poderModificado="
-				+ poderModificado + "]";
+		return "Ataque [nombre=" + nombre + ", estaBaneado=" + estaBaneado + ", poderModificado=" + poderModificado
+				+ "]";
 	}
-    
+
 }

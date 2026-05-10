@@ -1,6 +1,6 @@
 package co.edu.unbosque.pokemon.dto;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -16,34 +16,27 @@ public class InformacionPokemonDTO {
 	private int peso;
 
 	@SerializedName("stats")
-	private List<EstadisticaPokemonDTO> listaEstadisticas;
+	private ArrayList<EstadisticaPokemonDTO> listaEstadisticas;
 
 	@SerializedName("moves")
-	private List<AtaquePokemonDTO> listaAtaques;
+	private ArrayList<AtaquePokemonDTO> listaAtaques;
 
 	@SerializedName("sprites")
 	private SpriteDTO imagenes;
 
 	@SerializedName("types")
-	private List<TipoPokemonDTO> listaTipos;
-	
+	private ArrayList<TipoPokemonDTO> listaTipos;
+
 	@SerializedName("cries")
 	private GritoPokemonDTO sonidos;
-
-	public List<TipoPokemonDTO> getListaTipos() {
-		return listaTipos;
-	}
-
-	public void setListaTipos(List<TipoPokemonDTO> listaTipos) {
-		this.listaTipos = listaTipos;
-	}
 
 	public InformacionPokemonDTO() {
 
 	}
 
-	public InformacionPokemonDTO(int id, String nombre, int peso, List<EstadisticaPokemonDTO> listaEstadisticas,
-			List<AtaquePokemonDTO> listaAtaques, SpriteDTO imagenes, List<TipoPokemonDTO> listaTipos) {
+	public InformacionPokemonDTO(int id, String nombre, int peso, ArrayList<EstadisticaPokemonDTO> listaEstadisticas,
+			ArrayList<AtaquePokemonDTO> listaAtaques, SpriteDTO imagenes, ArrayList<TipoPokemonDTO> listaTipos,
+			GritoPokemonDTO sonidos) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
@@ -52,6 +45,7 @@ public class InformacionPokemonDTO {
 		this.listaAtaques = listaAtaques;
 		this.imagenes = imagenes;
 		this.listaTipos = listaTipos;
+		this.sonidos = sonidos;
 	}
 
 	public int getId() {
@@ -78,19 +72,19 @@ public class InformacionPokemonDTO {
 		this.peso = peso;
 	}
 
-	public List<EstadisticaPokemonDTO> getListaEstadisticas() {
+	public ArrayList<EstadisticaPokemonDTO> getListaEstadisticas() {
 		return listaEstadisticas;
 	}
 
-	public void setListaEstadisticas(List<EstadisticaPokemonDTO> listaEstadisticas) {
+	public void setListaEstadisticas(ArrayList<EstadisticaPokemonDTO> listaEstadisticas) {
 		this.listaEstadisticas = listaEstadisticas;
 	}
 
-	public List<AtaquePokemonDTO> getListaAtaques() {
+	public ArrayList<AtaquePokemonDTO> getListaAtaques() {
 		return listaAtaques;
 	}
 
-	public void setListaAtaques(List<AtaquePokemonDTO> listaAtaques) {
+	public void setListaAtaques(ArrayList<AtaquePokemonDTO> listaAtaques) {
 		this.listaAtaques = listaAtaques;
 	}
 
@@ -101,7 +95,15 @@ public class InformacionPokemonDTO {
 	public void setImagenes(SpriteDTO imagenes) {
 		this.imagenes = imagenes;
 	}
-	
+
+	public ArrayList<TipoPokemonDTO> getListaTipos() {
+		return listaTipos;
+	}
+
+	public void setListaTipos(ArrayList<TipoPokemonDTO> listaTipos) {
+		this.listaTipos = listaTipos;
+	}
+
 	public GritoPokemonDTO getSonidos() {
 		return sonidos;
 	}
@@ -113,7 +115,8 @@ public class InformacionPokemonDTO {
 	@Override
 	public String toString() {
 		return "InformacionPokemonDTO [id=" + id + ", nombre=" + nombre + ", peso=" + peso + ", listaEstadisticas="
-				+ listaEstadisticas + ", listaAtaques=" + listaAtaques + ", imagenes=" + imagenes + "]";
+				+ listaEstadisticas + ", listaAtaques=" + listaAtaques + ", imagenes=" + imagenes + ", listaTipos="
+				+ listaTipos + ", sonidos=" + sonidos + "]";
 	}
 
 }

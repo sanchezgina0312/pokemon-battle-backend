@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class InformacionAtaqueDTO {
 
 	@SerializedName("name")
-	private String nombreAtaque;
+	private String nombre;
 
 	@SerializedName("url")
 	private String urlAtaque;
@@ -14,18 +14,18 @@ public class InformacionAtaqueDTO {
 
 	}
 
-	public InformacionAtaqueDTO(String nombreAtaque, String urlAtaque) {
+	public InformacionAtaqueDTO(String nombre, String urlAtaque) {
 		super();
-		this.nombreAtaque = nombreAtaque;
+		this.nombre = nombre;
 		this.urlAtaque = urlAtaque;
 	}
 
-	public String getNombreAtaque() {
-		return nombreAtaque;
+	public String getNombre() {
+		return nombre;
 	}
 
-	public void setNombreAtaque(String nombreAtaque) {
-		this.nombreAtaque = nombreAtaque;
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
 	}
 
 	public String getUrlAtaque() {
@@ -38,7 +38,7 @@ public class InformacionAtaqueDTO {
 
 	@Override
 	public String toString() {
-		return "InformacionAtaqueDTO [nombreAtaque=" + nombreAtaque + ", urlAtaque=" + urlAtaque + "]";
+		return "InformacionAtaqueDTO [nombre=" + nombre + ", urlAtaque=" + urlAtaque + "]";
 	}
 
 }
