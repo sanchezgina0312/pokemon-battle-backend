@@ -1,7 +1,7 @@
 package co.edu.unbosque.pokemon.dto;
 
+import java.util.ArrayList; // Importante para que funcione
 import com.google.gson.annotations.SerializedName;
-import java.util.List;
 
 public class ItemDetalleDTO {
 
@@ -17,24 +17,20 @@ public class ItemDetalleDTO {
 	@SerializedName("sprites")
 	private SpriteItemDTO imagenes;
 
-	@SerializedName("names")
-	private List<TraduccionNombreDTO> listaNombresTraducidos;
-
 	@SerializedName("flavor_text_entries")
-	private List<DescripcionDTO> listaDescripciones;
+	private ArrayList<DescripcionDTO> listaDescripciones;
 
 	public ItemDetalleDTO() {
 
 	}
 
 	public ItemDetalleDTO(int id, String nombreIngles, int costo, SpriteItemDTO imagenes,
-			List<TraduccionNombreDTO> listaNombresTraducidos, List<DescripcionDTO> listaDescripciones) {
+			ArrayList<DescripcionDTO> listaDescripciones) {
 		super();
 		this.id = id;
 		this.nombreIngles = nombreIngles;
 		this.costo = costo;
 		this.imagenes = imagenes;
-		this.listaNombresTraducidos = listaNombresTraducidos;
 		this.listaDescripciones = listaDescripciones;
 	}
 
@@ -70,20 +66,18 @@ public class ItemDetalleDTO {
 		this.imagenes = imagenes;
 	}
 
-	public List<TraduccionNombreDTO> getListaNombresTraducidos() {
-		return listaNombresTraducidos;
-	}
-
-	public void setListaNombresTraducidos(List<TraduccionNombreDTO> listaNombresTraducidos) {
-		this.listaNombresTraducidos = listaNombresTraducidos;
-	}
-
-	public List<DescripcionDTO> getListaDescripciones() {
+	public ArrayList<DescripcionDTO> getListaDescripciones() {
 		return listaDescripciones;
 	}
 
-	public void setListaDescripciones(List<DescripcionDTO> listaDescripciones) {
+	public void setListaDescripciones(ArrayList<DescripcionDTO> listaDescripciones) {
 		this.listaDescripciones = listaDescripciones;
+	}
+
+	@Override
+	public String toString() {
+		return "ItemDetalleDTO [id=" + id + ", nombreIngles=" + nombreIngles + ", costo=" + costo + ", imagenes="
+				+ imagenes + ", listaDescripciones=" + listaDescripciones + "]";
 	}
 
 }

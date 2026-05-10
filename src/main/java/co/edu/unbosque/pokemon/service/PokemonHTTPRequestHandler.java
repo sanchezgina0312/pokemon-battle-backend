@@ -5,143 +5,173 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.List;
+import java.util.ArrayList;
 
 import com.google.gson.Gson;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import co.edu.unbosque.pokemon.dto.DescripcionDTO;
-import co.edu.unbosque.pokemon.dto.DetalleMovimientoDTO;
 import co.edu.unbosque.pokemon.dto.EspeciePokemonDTO;
 import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
-import co.edu.unbosque.pokemon.dto.ItemDetalleDTO;
+import co.edu.unbosque.pokemon.dto.ReferenciaPokemonDTO;
 import co.edu.unbosque.pokemon.dto.RespuestaDTO;
+import co.edu.unbosque.pokemon.dto.TipoPokemonDTO;
+import co.edu.unbosque.pokemon.dto.TraduccionDTO;
 
 public class PokemonHTTPRequestHandler {
 
 	private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2)
 			.connectTimeout(Duration.ofSeconds(10)).build();
 
+	private static ArrayList<InformacionPokemonDTO> pokedexDatos = new ArrayList<>();
+
+	public static void cargarPokedex() {
+		System.out.println("--- Iniciando guardado de datos ---");
+		RespuestaDTO respuesta = obtenerLos151();
+		if (respuesta != null && respuesta.getListaResultados() != null) {
+			for (ReferenciaPokemonDTO ref : respuesta.getListaResultados()) {
+				InformacionPokemonDTO detalle = obtenerDetallePokemon(ref.getNombre());
+				if (detalle != null) {
+					pokedexDatos.add(detalle);
+				}
+			}
+		}
+		System.out.println("***Carga Completa: " + pokedexDatos.size() + " Pokémon almacenados***");
+	}
+
 	public static RespuestaDTO obtenerLos151() {
 		String url = "https://pokeapi.co/api/v2/pokemon?limit=151";
-		HttpRequest solicitud = HttpRequest.newBuilder().GET().uri(URI.create(url))
-				.setHeader("User-Agent", "Java HttpClient Bot").build();
-
+		HttpRequest solicitud = HttpRequest.newBuilder().GET().uri(URI.create(url)).setHeader("User-Agent", "Java Bot")
+				.build();
 		try {
 			HttpResponse<String> respuesta = HTTP_CLIENT.send(solicitud, HttpResponse.BodyHandlers.ofString());
-			Gson gson = new Gson();
-			return gson.fromJson(respuesta.body(), RespuestaDTO.class);
+			return new Gson().fromJson(respuesta.body(), RespuestaDTO.class);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
 
 	public static InformacionPokemonDTO obtenerDetallePokemon(String nombreOId) {
 		String url = "https://pokeapi.co/api/v2/pokemon/" + nombreOId.toLowerCase();
-		HttpRequest solicitud = HttpRequest.newBuilder().GET().uri(URI.create(url))
-				.setHeader("User-Agent", "Java HttpClient Bot").build();
-
+		HttpRequest solicitud = HttpRequest.newBuilder().GET().uri(URI.create(url)).setHeader("User-Agent", "Java Bot")
+				.build();
 		try {
 			HttpResponse<String> respuesta = HTTP_CLIENT.send(solicitud, HttpResponse.BodyHandlers.ofString());
-			Gson gson = new Gson();
-			return gson.fromJson(respuesta.body(), InformacionPokemonDTO.class);
+			return new Gson().fromJson(respuesta.body(), InformacionPokemonDTO.class);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
 		}
-	}
-
-	public static String obtenerGritoRojoFuego(String nombreOId) {
-		InformacionPokemonDTO info = obtenerDetallePokemon(nombreOId);
-		if (info != null && info.getSonidos() != null) {
-			return info.getSonidos().getGritoPokemon();
-		}
-		return null;
 	}
 
 	public static EspeciePokemonDTO obtenerEspeciePokemon(int id) {
 		String url = "https://pokeapi.co/api/v2/pokemon-species/" + id;
-		HttpRequest solicitud = HttpRequest.newBuilder().GET().uri(URI.create(url))
-				.setHeader("User-Agent", "Java HttpClient Bot").build();
+		HttpRequest solicitud = HttpRequest.newBuilder().GET().uri(URI.create(url)).setHeader("User-Agent", "Java Bot")
+				.build();
 		try {
 			HttpResponse<String> respuesta = HTTP_CLIENT.send(solicitud, HttpResponse.BodyHandlers.ofString());
 			return new Gson().fromJson(respuesta.body(), EspeciePokemonDTO.class);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
 
-	public static ItemDetalleDTO obtenerDetalleItem(String nombreItem) {
-		String url = "https://pokeapi.co/api/v2/item/" + nombreItem.toLowerCase().replace(" ", "-");
-		HttpRequest solicitud = HttpRequest.newBuilder().GET().uri(URI.create(url))
-				.setHeader("User-Agent", "Java HttpClient Bot").build();
+	public static String traducirTexto(String texto, String idiomaDestino) {
 		try {
+			String textoUrl = URLEncoder.encode(texto, StandardCharsets.UTF_8);
+
+			String url = "https://api.popcat.xyz/translate?to=" + idiomaDestino + "&text=" + textoUrl;
+
+			HttpRequest solicitud = HttpRequest.newBuilder().GET().uri(URI.create(url))
+					.setHeader("User-Agent", "Java Bot").build();
+
 			HttpResponse<String> respuesta = HTTP_CLIENT.send(solicitud, HttpResponse.BodyHandlers.ofString());
-			return new Gson().fromJson(respuesta.body(), ItemDetalleDTO.class);
+
+			TraduccionDTO resultado = new Gson().fromJson(respuesta.body(), TraduccionDTO.class);
+			return resultado.getTextoTraducido();
+
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			return texto;
 		}
 	}
 
-	public static String extraerTextoPorIdioma(List<DescripcionDTO> lista, String idiomaBuscado) {
-		if (lista == null || lista.isEmpty()) {
-			return "Sin descripción disponible.";
-		}
+	public static String extraerTextoPorIdioma(ArrayList<DescripcionDTO> lista, String idiomaBuscado) {
+		if (lista == null || lista.isEmpty())
+			return "Sin descripción.";
 		for (DescripcionDTO desc : lista) {
-			if (desc.getIdioma().getNombreIdioma().equals(idiomaBuscado) && desc.getTextoDescripcion() != null) {
+			if (desc.getIdioma().getNombreIdioma().equals(idiomaBuscado)) {
 				return desc.getTextoDescripcion().replace("\n", " ").replace("\f", " ");
 			}
 		}
-		return "Descripción no encontrada.";
+		return lista.get(0).getTextoDescripcion();
 	}
-	
-	public static DetalleMovimientoDTO obtenerDetalleMovimiento(String urlMovimiento) {
-	    HttpRequest solicitud = HttpRequest.newBuilder()
-	            .GET()
-	            .uri(URI.create(urlMovimiento))
-	            .setHeader("User-Agent", "Java HttpClient Bot")
-	            .build();
-	    try {
-	        HttpResponse<String> respuesta = HTTP_CLIENT.send(solicitud, HttpResponse.BodyHandlers.ofString());
-	        return new Gson().fromJson(respuesta.body(), DetalleMovimientoDTO.class);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return null;
-	    }
+
+	public static String obtenerUrlIconoTipo(TipoPokemonDTO tipo) {
+		if (tipo == null || tipo.getInformacionTipo() == null)
+			return "";
+		String nombreTipo = tipo.getInformacionTipo().getNombreTipo().toLowerCase();
+		return "https://raw.githubusercontent.com/duiker101/pokemon-type-svg-icons/master/icons/" + nombreTipo + ".svg";
+	}
+
+	public static ArrayList<InformacionPokemonDTO> getPokedexDatos() {
+		return pokedexDatos;
+	}
+
+	public static void setPokedexDatos(ArrayList<InformacionPokemonDTO> pokedexDatos) {
+		PokemonHTTPRequestHandler.pokedexDatos = pokedexDatos;
 	}
 
 	public static void main(String[] args) {
-		System.out.println("Procesando Pokedex (Datos de combate y descripción)...");
+		cargarPokedex();
 
-		RespuestaDTO catalogo = obtenerLos151();
-		if (catalogo == null || catalogo.getListaResultados() == null) return;
+		ArrayList<InformacionPokemonDTO> info = getPokedexDatos();
+		
+		System.out.println("--- PRUEBA DE TODO EL PROYECTO POKEMON ---\n");
 
-		for (int i = 0; i < catalogo.getListaResultados().size(); i++) {
-			String nombre = catalogo.getListaResultados().get(i).getNombre();
-			InformacionPokemonDTO info = obtenerDetallePokemon(nombre);
+		System.out.println("--- 1. Revisión almacenamiento de pokemon ---");
+		for (int i = 0; i < 10; i++) {
+			InformacionPokemonDTO p = info.get(i);
+			System.out.println("------------------------------------------");
+			System.out.println("Pokemon Numero " + p.getId() + ": " + p.getNombre().toUpperCase());
 
-			if (info != null) {
-				EspeciePokemonDTO especie = obtenerEspeciePokemon(info.getId());
+			System.out.print("Tipos del pokemon: ");
+			for (TipoPokemonDTO t : p.getListaTipos()) {
+				String nombreTipo = t.getInformacionTipo().getNombreTipo();
+				System.out.print("[" + nombreTipo.toUpperCase() + "] ");
+			}
+			System.out.println();
 
-				System.out.println("--------------------------------------------------");
-				System.out.println("POKÉMON #" + info.getId() + ": " + nombre.toUpperCase());
+			for (TipoPokemonDTO t : p.getListaTipos()) {
+				System.out
+						.println(" -> Link del Icono " + t.getInformacionTipo().getNombreTipo() + ": " + obtenerUrlIconoTipo(t));
+			}
 
-				if (info.getListaEstadisticas() != null) {
-					System.out.print("STATS: ");
-					info.getListaEstadisticas()
-							.forEach(s -> System.out.print("[" + s.getValorDeLaEstadistica() + "] "));
-					System.out.println();
-				}
-
-				if (especie != null) {
-					String desc = extraerTextoPorIdioma(especie.getListaDescripciones(), "es");
-					System.out.println("DESCRIPCIÓN: " + desc);
-				}
+			if (p.getListaAtaques() != null && !p.getListaAtaques().isEmpty()) {
+				System.out.println(
+						"Ataque que mas usa: " + p.getListaAtaques().get(0).getInformacionAtaque().getNombre());
 			}
 		}
-		System.out.println("--------------------------------------------------");
-		System.out.println("*** PROCESO FINALIZADO ***");
+
+		System.out.println("\n--- 2. Probando si filtra por idioma ---");
+		EspeciePokemonDTO pikachuEspecie = obtenerEspeciePokemon(25);
+		if (pikachuEspecie != null) {
+			ArrayList<DescripcionDTO> descripciones = (ArrayList<DescripcionDTO>) pikachuEspecie
+					.getListaDescripciones();
+			String historiaES = extraerTextoPorIdioma(descripciones, "es");
+			String historiaEN = extraerTextoPorIdioma(descripciones, "en");
+
+			System.out.println("Pikachu dice en Español: " + historiaES);
+			System.out.println("Pikachu says in English: " + historiaEN);
+		}
+
+		System.out.println("\n--- 3. Probando la API de traduccion (PopCat) ---");
+		String mensajeInterfaz = "¡Bienvenida Tatiana al laboratorio del Profesor Oak! Por favor, elige a tu compañero.";
+
+		System.out.println("Texto Original: " + mensajeInterfaz);
+
+		String traducidoPopCat = traducirTexto(mensajeInterfaz, "en");
+		System.out.println("Texto Traducido: " + traducidoPopCat);
+
+		System.out.println("*** ¡Finalizado!*** ");
 	}
 }

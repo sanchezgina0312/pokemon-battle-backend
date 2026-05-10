@@ -17,7 +17,7 @@ public class Usuario {
 	private String rol;
 	private String idiomaPreferido;
 	private int dinero;
-
+	
 	public Usuario() {
 
 	}
