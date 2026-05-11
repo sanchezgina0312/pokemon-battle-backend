@@ -1,16 +1,10 @@
-package co.edu.unbosque.pokemon.entity;
+package co.edu.unbosque.pokemon.dto;
 
 import java.util.Objects;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-@Entity
-public class Pokemon {
-
-	private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) long id;
+public class PokemonDTO {
+	
+	private long id;
 	private Integer pokeApiId;
 	private String apodo;
 	private int nivel;
@@ -21,15 +15,16 @@ public class Pokemon {
 	private String nombreAtaque3;
 	private String nombreAtaque4;
 	private Long idUsuarioPropietario;
-
-	public Pokemon() {
+	
+	public PokemonDTO() {
 
 	}
 
-	public Pokemon(Integer pokeApiId, String apodo, int nivel, int experienciaAcumulada, int saludActual,
+	public PokemonDTO(long id, Integer pokeApiId, String apodo, int nivel, int experienciaAcumulada, int saludActual,
 			String nombreAtaque1, String nombreAtaque2, String nombreAtaque3, String nombreAtaque4,
 			Long idUsuarioPropietario) {
 		super();
+		this.id = id;
 		this.pokeApiId = pokeApiId;
 		this.apodo = apodo;
 		this.nivel = nivel;
@@ -144,7 +139,7 @@ public class Pokemon {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Pokemon other = (Pokemon) obj;
+		PokemonDTO other = (PokemonDTO) obj;
 		return Objects.equals(apodo, other.apodo) && experienciaAcumulada == other.experienciaAcumulada
 				&& id == other.id && Objects.equals(idUsuarioPropietario, other.idUsuarioPropietario)
 				&& nivel == other.nivel && Objects.equals(nombreAtaque1, other.nombreAtaque1)
@@ -156,10 +151,10 @@ public class Pokemon {
 
 	@Override
 	public String toString() {
-		return "Pokemon [id=" + id + ", pokeApiId=" + pokeApiId + ", apodo=" + apodo + ", nivel=" + nivel
+		return "PokemonDTO [id=" + id + ", pokeApiId=" + pokeApiId + ", apodo=" + apodo + ", nivel=" + nivel
 				+ ", experienciaAcumulada=" + experienciaAcumulada + ", saludActual=" + saludActual + ", nombreAtaque1="
 				+ nombreAtaque1 + ", nombreAtaque2=" + nombreAtaque2 + ", nombreAtaque3=" + nombreAtaque3
 				+ ", nombreAtaque4=" + nombreAtaque4 + ", idUsuarioPropietario=" + idUsuarioPropietario + "]";
 	}
-
+	
 }

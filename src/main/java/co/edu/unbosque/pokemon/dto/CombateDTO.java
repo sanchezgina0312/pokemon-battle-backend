@@ -1,13 +1,11 @@
-package co.edu.unbosque.pokemon.entity;
+package co.edu.unbosque.pokemon.dto;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Entity
-public class Combate {
-
-	private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) long id;
+public class CombateDTO {
+	
+	private long id;
 	private long idUsuarioJugador;
 	private int idPokeApiAliado;
 	private int idPokeApiRival;
@@ -15,14 +13,15 @@ public class Combate {
 	private int saludFinalRival;
 	private String resultado;
 	private LocalDateTime fechaCombate;
+	
+	public CombateDTO() {
 
-	public Combate() {
-		this.fechaCombate = LocalDateTime.now();
 	}
 
-	public Combate(long idUsuarioJugador, int idPokeApiAliado, int idPokeApiRival, int saludFinalAliado,
+	public CombateDTO(long id, long idUsuarioJugador, int idPokeApiAliado, int idPokeApiRival, int saludFinalAliado,
 			int saludFinalRival, String resultado, LocalDateTime fechaCombate) {
 		super();
+		this.id = id;
 		this.idUsuarioJugador = idUsuarioJugador;
 		this.idPokeApiAliado = idPokeApiAliado;
 		this.idPokeApiRival = idPokeApiRival;
@@ -110,7 +109,7 @@ public class Combate {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Combate other = (Combate) obj;
+		CombateDTO other = (CombateDTO) obj;
 		return Objects.equals(fechaCombate, other.fechaCombate) && id == other.id
 				&& idPokeApiAliado == other.idPokeApiAliado && idPokeApiRival == other.idPokeApiRival
 				&& idUsuarioJugador == other.idUsuarioJugador && Objects.equals(resultado, other.resultado)
@@ -119,9 +118,10 @@ public class Combate {
 
 	@Override
 	public String toString() {
-		return "Combate [id=" + id + ", idUsuarioJugador=" + idUsuarioJugador + ", idPokeApiAliado=" + idPokeApiAliado
-				+ ", idPokeApiRival=" + idPokeApiRival + ", saludFinalAliado=" + saludFinalAliado + ", saludFinalRival="
-				+ saludFinalRival + ", resultado=" + resultado + ", fechaCombate=" + fechaCombate + "]";
+		return "CombateDTO [id=" + id + ", idUsuarioJugador=" + idUsuarioJugador + ", idPokeApiAliado="
+				+ idPokeApiAliado + ", idPokeApiRival=" + idPokeApiRival + ", saludFinalAliado=" + saludFinalAliado
+				+ ", saludFinalRival=" + saludFinalRival + ", resultado=" + resultado + ", fechaCombate=" + fechaCombate
+				+ "]";
 	}
-
+	
 }
