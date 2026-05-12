@@ -9,6 +9,7 @@ import co.edu.unbosque.pokemon.entity.Usuario;
 
 public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
 
-	public Optional<List<Usuario>> findByUsername(String username);
+	public List<Usuario> findAll();
+	public Optional<Usuario> findByUsername(String username);
 	public Optional<List<Usuario>> findByRol(String rol);
 }
