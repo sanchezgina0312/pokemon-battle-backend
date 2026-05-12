@@ -40,5 +40,14 @@ public class SpriteDTO {
 	public String toString() {
 		return "SpriteDTO [frente=" + frente + ", espalda=" + espalda + "]";
 	}
+	
+	// Agrega esto a SpriteDTO.java
+	public SpriteItemDTO getFrontDefault() {
+	    return new SpriteItemDTO(this.frente);
+	}
+
+	public SpriteItemDTO getBackDefault() {
+	    return new SpriteItemDTO(this.espalda);
+	}
 
 }

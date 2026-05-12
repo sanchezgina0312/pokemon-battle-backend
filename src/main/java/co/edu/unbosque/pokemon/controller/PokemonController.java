@@ -1,5 +1,6 @@
 package co.edu.unbosque.pokemon.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,14 +9,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import co.edu.unbosque.pokemon.dto.DescripcionDTO;
+import co.edu.unbosque.pokemon.dto.EspeciePokemonDTO;
+import co.edu.unbosque.pokemon.dto.GritoPokemonDTO;
+import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
 import co.edu.unbosque.pokemon.dto.PokemonDTO;
+import co.edu.unbosque.pokemon.dto.SpriteItemDTO;
 import co.edu.unbosque.pokemon.exception.IdInvalidoException;
+import co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler;
 import co.edu.unbosque.pokemon.service.PokemonService;
 
 /**
@@ -161,4 +169,81 @@ public class PokemonController {
 			return new ResponseEntity<>(lista, HttpStatus.NO_CONTENT);
 		}
 	}
+	
+	@GetMapping("/{id}/sprites/front")
+	public ResponseEntity<SpriteItemDTO> getSpriteFrente(@PathVariable Long id) {
+	    PokemonDTO pokemonLocal = obtenerPokemonLocal(id);
+	    if (pokemonLocal == null) return ResponseEntity.notFound().build();
+
+	    InformacionPokemonDTO detalleAPI = PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokemonLocal.getPokeApiId()));
+
+	    if (detalleAPI != null && detalleAPI.getImagenes() != null) {
+	        // Devuelve la URL de 'frente' envuelta en un SpriteItemDTO
+	        return ResponseEntity.ok(detalleAPI.getImagenes().getFrontDefault()); 
+	    }
+	    
+	    return ResponseEntity.noContent().build();
+	}
+	
+	@GetMapping("/{id}/sprites/back")
+	public ResponseEntity<SpriteItemDTO> getSpriteAtras(@PathVariable Long id) {
+	    PokemonDTO pokemonLocal = obtenerPokemonLocal(id);
+	    if (pokemonLocal == null) return ResponseEntity.notFound().build();
+
+	    InformacionPokemonDTO detalleAPI = PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokemonLocal.getPokeApiId()));
+
+	    if (detalleAPI != null && detalleAPI.getImagenes() != null) {
+	        // Devuelve la URL de 'espalda' envuelta en un SpriteItemDTO
+	        return ResponseEntity.ok(detalleAPI.getImagenes().getBackDefault()); 
+	    }
+	    
+	    return ResponseEntity.noContent().build();
+	}
+	
+
+    /**
+     * Endpoint 2: Obtener el grito del Pokémon.
+     * Basado en la lógica de URL de tu manejador.
+     */
+    @GetMapping("/{id}/grito")
+    public ResponseEntity<GritoPokemonDTO> getGrito(@PathVariable Long id) {
+        PokemonDTO pokemonLocal = obtenerPokemonLocal(id);
+        if (pokemonLocal == null) return ResponseEntity.notFound().build();
+
+        // Construimos el grito usando el PokeApiId almacenado localmente
+        GritoPokemonDTO grito = new GritoPokemonDTO();
+        grito.setGritoPokemon("https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/" 
+                               + pokemonLocal.getPokeApiId() + ".ogg");
+        
+        return ResponseEntity.ok(grito);
+    }
+
+    /**
+     * Endpoint Extra: Traducir información del Pokémon.
+     * Utiliza la API de PopCat integrada en tu manejador.
+     */
+    @GetMapping("/{id}/historia")
+    public ResponseEntity<String> obtenerHistoriaTraducida(@PathVariable Long id, @RequestParam String idioma) {
+        PokemonDTO pokemonLocal = obtenerPokemonLocal(id);
+        if (pokemonLocal == null) return ResponseEntity.notFound().build();
+
+        // 1. Obtener especie de la PokeAPI
+        EspeciePokemonDTO especie = PokemonHTTPRequestHandler.obtenerEspeciePokemon(pokemonLocal.getPokeApiId());
+        
+        // 2. Extraer texto base (por ejemplo en inglés)
+        String textoBase = PokemonHTTPRequestHandler.extraerTextoPorIdioma((ArrayList<DescripcionDTO>) especie.getListaDescripciones(), "en");
+        
+        // 3. Traducir usando tu método de PopCat
+        String textoTraducido = PokemonHTTPRequestHandler.traducirTexto(textoBase, idioma);
+        
+        return ResponseEntity.ok(textoTraducido);
+    }
+
+    // Método auxiliar interno para buscar en el service
+    private PokemonDTO obtenerPokemonLocal(Long id) {
+        return pokemonService.getAll().stream()
+                .filter(p -> p.getId() == id)
+                .findFirst()
+                .orElse(null);
+    }
 }
