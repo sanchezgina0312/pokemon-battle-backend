@@ -21,14 +21,11 @@ public class TiendaController {
 
 	@PostMapping("/comprar")
 	public ResponseEntity<String> comprar(@RequestParam long idUsuario, @RequestParam long idItem) {
-		int resultado = tiendaSer.realizarCompra(idUsuario, idItem);
-
-		if (resultado == 0) {
-			return new ResponseEntity<>("Compra realizada con éxito", HttpStatus.ACCEPTED);
-		} else if (resultado == 2) {
-			return new ResponseEntity<>("Fondos insuficientes", HttpStatus.PAYMENT_REQUIRED);
-		} else {
-			return new ResponseEntity<>("Error en la transacción", HttpStatus.BAD_REQUEST);
-		}
+		int res = tiendaSer.realizarCompra(idUsuario, idItem);
+		if (res == 0)
+			return new ResponseEntity<>("¡Compra exitosa!", HttpStatus.ACCEPTED);
+		if (res == 2)
+			return new ResponseEntity<>("No tienes suficiente dinero", HttpStatus.PAYMENT_REQUIRED);
+		return new ResponseEntity<>("Error al procesar", HttpStatus.BAD_REQUEST);
 	}
 }

@@ -1,23 +1,35 @@
 package co.edu.unbosque.pokemon.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import co.edu.unbosque.pokemon.entity.Pokemon;
+import co.edu.unbosque.pokemon.dto.CombateDTO;
+import co.edu.unbosque.pokemon.entity.Combate;
+import co.edu.unbosque.pokemon.repository.CombateRepository;
 
 @Service
 public class CombateService {
 
-	public int procesarTurno(Pokemon atacante, Pokemon defensor, int poderAtaque, double modificador) {
-		int atk = atacante.getNivel() * 2; 
-		int def = defensor.getNivel() * 2;
+	@Autowired
+	private CombateRepository combateRep;
 
-		double parte1 = ((2.0 * atacante.getNivel()) / 5.0) + 2.0;
-		double parte2 = (parte1 * poderAtaque * ((double) atk / def)) / 50.0;
-		
-		int danioFinal = (int) ((parte2 + 2.0) * modificador);
-		
-		defensor.setSaludActual(defensor.getSaludActual() - danioFinal);
-		if (defensor.getSaludActual() < 0) defensor.setSaludActual(0);
-		
-		return danioFinal;
+	@Autowired
+	private ModelMapper mapper;
+
+	public CombateDTO crearRegistro(CombateDTO data) {
+		Combate entidad = mapper.map(data, Combate.class);
+		return mapper.map(combateRep.save(entidad), CombateDTO.class);
+	}
+
+	public List<CombateDTO> historialPeleas(Long idUser) {
+		Optional<List<Combate>> encontrados = combateRep.findByIdUsuarioJugador(idUser);
+		List<CombateDTO> dtoList = new ArrayList<>();
+		if (encontrados.isPresent()) {
+			encontrados.get().forEach(ent -> dtoList.add(mapper.map(ent, CombateDTO.class)));
+		}
+		return dtoList;
 	}
 }

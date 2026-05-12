@@ -15,18 +15,12 @@ import co.edu.unbosque.pokemon.service.CentroPokemonService;
 @RequestMapping("/centropokemon")
 @CrossOrigin(origins = "*")
 public class CentroPokemonController {
-
 	@Autowired
 	private CentroPokemonService centroSer;
 
 	@PostMapping("/curar")
 	public ResponseEntity<String> curar(@RequestParam long idPokemon) {
-		int resultado = centroSer.curarPokemon(idPokemon);
-
-		if (resultado == 0) {
-			return new ResponseEntity<>("Pokémon curado completamente", HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>("No se pudo encontrar al Pokémon", HttpStatus.NOT_FOUND);
-		}
+		return (centroSer.curar(idPokemon) == 0) ? new ResponseEntity<>("Curado", HttpStatus.ACCEPTED)
+				: new ResponseEntity<>("No encontrado", HttpStatus.NOT_FOUND);
 	}
 }

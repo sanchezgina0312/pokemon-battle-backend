@@ -1,8 +1,12 @@
 package co.edu.unbosque.pokemon.entity;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
 public class Combate {
@@ -14,6 +18,7 @@ public class Combate {
 	private int saludFinalAliado;
 	private int saludFinalRival;
 	private String resultado;
+	private String modo;
 	private LocalDateTime fechaCombate;
 
 	public Combate() {
@@ -21,7 +26,7 @@ public class Combate {
 	}
 
 	public Combate(long idUsuarioJugador, int idPokeApiAliado, int idPokeApiRival, int saludFinalAliado,
-			int saludFinalRival, String resultado, LocalDateTime fechaCombate) {
+			int saludFinalRival, String resultado, String modo, LocalDateTime fechaCombate) {
 		super();
 		this.idUsuarioJugador = idUsuarioJugador;
 		this.idPokeApiAliado = idPokeApiAliado;
@@ -29,6 +34,7 @@ public class Combate {
 		this.saludFinalAliado = saludFinalAliado;
 		this.saludFinalRival = saludFinalRival;
 		this.resultado = resultado;
+		this.modo = modo;
 		this.fechaCombate = fechaCombate;
 	}
 
@@ -88,6 +94,14 @@ public class Combate {
 		this.resultado = resultado;
 	}
 
+	public String getModo() {
+		return modo;
+	}
+
+	public void setModo(String modo) {
+		this.modo = modo;
+	}
+
 	public LocalDateTime getFechaCombate() {
 		return fechaCombate;
 	}
@@ -98,7 +112,7 @@ public class Combate {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(fechaCombate, id, idPokeApiAliado, idPokeApiRival, idUsuarioJugador, resultado,
+		return Objects.hash(fechaCombate, id, idPokeApiAliado, idPokeApiRival, idUsuarioJugador, modo, resultado,
 				saludFinalAliado, saludFinalRival);
 	}
 
@@ -113,15 +127,17 @@ public class Combate {
 		Combate other = (Combate) obj;
 		return Objects.equals(fechaCombate, other.fechaCombate) && id == other.id
 				&& idPokeApiAliado == other.idPokeApiAliado && idPokeApiRival == other.idPokeApiRival
-				&& idUsuarioJugador == other.idUsuarioJugador && Objects.equals(resultado, other.resultado)
-				&& saludFinalAliado == other.saludFinalAliado && saludFinalRival == other.saludFinalRival;
+				&& idUsuarioJugador == other.idUsuarioJugador && Objects.equals(modo, other.modo)
+				&& Objects.equals(resultado, other.resultado) && saludFinalAliado == other.saludFinalAliado
+				&& saludFinalRival == other.saludFinalRival;
 	}
 
 	@Override
 	public String toString() {
 		return "Combate [id=" + id + ", idUsuarioJugador=" + idUsuarioJugador + ", idPokeApiAliado=" + idPokeApiAliado
 				+ ", idPokeApiRival=" + idPokeApiRival + ", saludFinalAliado=" + saludFinalAliado + ", saludFinalRival="
-				+ saludFinalRival + ", resultado=" + resultado + ", fechaCombate=" + fechaCombate + "]";
+				+ saludFinalRival + ", resultado=" + resultado + ", modo=" + modo + ", fechaCombate=" + fechaCombate
+				+ "]";
 	}
 
 }
