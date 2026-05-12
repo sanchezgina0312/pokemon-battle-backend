@@ -2,9 +2,10 @@ package co.edu.unbosque.pokemon.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
 import co.edu.unbosque.pokemon.entity.Pokemon;
 import co.edu.unbosque.pokemon.repository.PokemonRepository;
-import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
 
 @Service
 public class PokemonService {
@@ -13,6 +14,7 @@ public class PokemonService {
 	private PokemonRepository pokemonRep;
 
 	public Pokemon crearPokemon(int apiId, long idDuenio, boolean esInicial) {
+
 		InformacionPokemonDTO info = null;
 		for (InformacionPokemonDTO p : PokemonHTTPRequestHandler.getPokedexDatos()) {
 			if (p.getId() == apiId) {
@@ -24,11 +26,20 @@ public class PokemonService {
 		Pokemon nuevo = new Pokemon();
 		nuevo.setPokeApiId(apiId);
 		nuevo.setApodo(info.getNombre().toUpperCase());
-		nuevo.setNivel(esInicial ? 5 : 2);
+
+		int nivelAsignado = esInicial ? 5 : 2;
+		nuevo.setNivel(nivelAsignado);
 		nuevo.setExperienciaAcumulada(0);
 		nuevo.setIdUsuarioPropietario(idDuenio);
 
-		nuevo.setNombreAtaque1(info.getListaAtaques().get(0).getInformacionAtaque().getNombre());
+		int vidaCalculada = 50 + (nivelAsignado * 10);
+
+		nuevo.setSaludMaxima(vidaCalculada);
+		nuevo.setSaludActual(vidaCalculada);
+
+		if (info.getListaAtaques() != null && !info.getListaAtaques().isEmpty()) {
+			nuevo.setNombreAtaque1(info.getListaAtaques().get(0).getInformacionAtaque().getNombre());
+		}
 
 		return pokemonRep.save(nuevo);
 	}

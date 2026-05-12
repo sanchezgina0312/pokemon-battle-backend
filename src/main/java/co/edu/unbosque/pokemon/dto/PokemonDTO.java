@@ -3,33 +3,34 @@ package co.edu.unbosque.pokemon.dto;
 import java.util.Objects;
 
 public class PokemonDTO {
-	
+
 	private long id;
 	private Integer pokeApiId;
 	private String apodo;
 	private int nivel;
 	private int experienciaAcumulada;
 	private int saludActual;
+	private int saludMaxima;
 	private String nombreAtaque1;
 	private String nombreAtaque2;
 	private String nombreAtaque3;
 	private String nombreAtaque4;
 	private Long idUsuarioPropietario;
-	
+
 	public PokemonDTO() {
 
 	}
 
-	public PokemonDTO(long id, Integer pokeApiId, String apodo, int nivel, int experienciaAcumulada, int saludActual,
-			String nombreAtaque1, String nombreAtaque2, String nombreAtaque3, String nombreAtaque4,
+	public PokemonDTO(Integer pokeApiId, String apodo, int nivel, int experienciaAcumulada, int saludActual,
+			int saludMaxima, String nombreAtaque1, String nombreAtaque2, String nombreAtaque3, String nombreAtaque4,
 			Long idUsuarioPropietario) {
 		super();
-		this.id = id;
 		this.pokeApiId = pokeApiId;
 		this.apodo = apodo;
 		this.nivel = nivel;
 		this.experienciaAcumulada = experienciaAcumulada;
 		this.saludActual = saludActual;
+		this.saludMaxima = saludMaxima;
 		this.nombreAtaque1 = nombreAtaque1;
 		this.nombreAtaque2 = nombreAtaque2;
 		this.nombreAtaque3 = nombreAtaque3;
@@ -85,6 +86,14 @@ public class PokemonDTO {
 		this.saludActual = saludActual;
 	}
 
+	public int getSaludMaxima() {
+		return saludMaxima;
+	}
+
+	public void setSaludMaxima(int saludMaxima) {
+		this.saludMaxima = saludMaxima;
+	}
+
 	public String getNombreAtaque1() {
 		return nombreAtaque1;
 	}
@@ -128,7 +137,7 @@ public class PokemonDTO {
 	@Override
 	public int hashCode() {
 		return Objects.hash(apodo, experienciaAcumulada, id, idUsuarioPropietario, nivel, nombreAtaque1, nombreAtaque2,
-				nombreAtaque3, nombreAtaque4, pokeApiId, saludActual);
+				nombreAtaque3, nombreAtaque4, pokeApiId, saludActual, saludMaxima);
 	}
 
 	@Override
@@ -146,15 +155,16 @@ public class PokemonDTO {
 				&& Objects.equals(nombreAtaque2, other.nombreAtaque2)
 				&& Objects.equals(nombreAtaque3, other.nombreAtaque3)
 				&& Objects.equals(nombreAtaque4, other.nombreAtaque4) && Objects.equals(pokeApiId, other.pokeApiId)
-				&& saludActual == other.saludActual;
+				&& saludActual == other.saludActual && saludMaxima == other.saludMaxima;
 	}
 
 	@Override
 	public String toString() {
 		return "PokemonDTO [id=" + id + ", pokeApiId=" + pokeApiId + ", apodo=" + apodo + ", nivel=" + nivel
-				+ ", experienciaAcumulada=" + experienciaAcumulada + ", saludActual=" + saludActual + ", nombreAtaque1="
-				+ nombreAtaque1 + ", nombreAtaque2=" + nombreAtaque2 + ", nombreAtaque3=" + nombreAtaque3
-				+ ", nombreAtaque4=" + nombreAtaque4 + ", idUsuarioPropietario=" + idUsuarioPropietario + "]";
+				+ ", experienciaAcumulada=" + experienciaAcumulada + ", saludActual=" + saludActual + ", saludMaxima="
+				+ saludMaxima + ", nombreAtaque1=" + nombreAtaque1 + ", nombreAtaque2=" + nombreAtaque2
+				+ ", nombreAtaque3=" + nombreAtaque3 + ", nombreAtaque4=" + nombreAtaque4 + ", idUsuarioPropietario="
+				+ idUsuarioPropietario + "]";
 	}
-	
+
 }

@@ -3,10 +3,12 @@ package co.edu.unbosque.pokemon.entity;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+@Entity
 public class Captura {
 
 	private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) long id;

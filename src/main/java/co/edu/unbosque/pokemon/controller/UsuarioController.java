@@ -1,5 +1,6 @@
 package co.edu.unbosque.pokemon.controller;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,29 +10,30 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.List;
-
-import co.edu.unbosque.pokemon.dto.CombateDTO;
-import co.edu.unbosque.pokemon.service.CombateService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import co.edu.unbosque.pokemon.dto.UsuarioDTO;
+import co.edu.unbosque.pokemon.service.UsuarioService;
 
 @RestController
-@RequestMapping("/combate")
+@RequestMapping("/usuario")
 @CrossOrigin(origins = "*")
-public class CombateController {
+public class UsuarioController {
 
 	@Autowired
-	private CombateService combateSer;
+	private UsuarioService usuarioSer;
 
-	@PostMapping("/registrar")
-	public ResponseEntity<CombateDTO> guardar(@RequestBody CombateDTO data) {
-		CombateDTO respuesta = combateSer.crearRegistro(data);
-		return new ResponseEntity<>(respuesta, HttpStatus.CREATED);
+	@PostMapping("/login")
+	public ResponseEntity<UsuarioDTO> login(@RequestParam String u, @RequestParam String p) {
+		UsuarioDTO user = usuarioSer.login(u, p);
+		if (user != null) {
+			return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
+		} else {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
 	}
 
-	@GetMapping("/historial")
-	public ResponseEntity<List<CombateDTO>> verHistorial(@RequestParam Long idUser) {
-		List<CombateDTO> lista = combateSer.historialPeleas(idUser);
+	@GetMapping("/jugadores")
+	public ResponseEntity<List<UsuarioDTO>> listarJugadores() {
+		List<UsuarioDTO> lista = usuarioSer.obtenerJugadores();
 		if (!lista.isEmpty()) {
 			return new ResponseEntity<>(lista, HttpStatus.OK);
 		} else {

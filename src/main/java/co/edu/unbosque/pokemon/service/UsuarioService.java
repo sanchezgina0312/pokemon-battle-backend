@@ -1,13 +1,14 @@
 package co.edu.unbosque.pokemon.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import co.edu.unbosque.pokemon.entity.*;
-import co.edu.unbosque.pokemon.repository.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import co.edu.unbosque.pokemon.dto.UsuarioDTO;
+import co.edu.unbosque.pokemon.entity.Usuario;
+import co.edu.unbosque.pokemon.repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
@@ -16,33 +17,25 @@ public class UsuarioService {
 	private UsuarioRepository userRep;
 
 	@Autowired
-	private PokemonRepository pokeRep;
+	private ModelMapper mapper;
 
-	public Usuario login(String username, String password) {
-		Optional<Usuario> usuarioEncontrado = userRep.findByUsername(username);
-
-		if (usuarioEncontrado.isPresent()) {
-			Usuario u = usuarioEncontrado.get();
-
-			if (u.getContrasenia().equals(password)) {
-				return u;
+	public UsuarioDTO login(String u, String p) {
+		Optional<Usuario> encontrado = userRep.findByUsername(u);
+		if (encontrado.isPresent()) {
+			Usuario ent = encontrado.get();
+			if (ent.getContrasenia().equals(p)) {
+				return mapper.map(ent, UsuarioDTO.class);
 			}
 		}
-
 		return null;
 	}
 
-	public List<Usuario> obtenerTodosLosJugadores() {
+	public List<UsuarioDTO> obtenerJugadores() {
 		Optional<List<Usuario>> encontrados = userRep.findByRol("JUGADOR");
-
-		if (encontrados.isPresent() && !encontrados.get().isEmpty()) {
-			return encontrados.get();
-		} else {
-			return new ArrayList<Usuario>();
+		List<UsuarioDTO> dtoList = new ArrayList<>();
+		if (encontrados.isPresent()) {
+			encontrados.get().forEach(ent -> dtoList.add(mapper.map(ent, UsuarioDTO.class)));
 		}
-	}
-
-	public List<Pokemon> obtenerTodosLosPokemonesDelMundo() {
-		return pokeRep.findAll();
+		return dtoList;
 	}
 }

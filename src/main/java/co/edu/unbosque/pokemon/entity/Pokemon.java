@@ -16,6 +16,7 @@ public class Pokemon {
 	private int nivel;
 	private int experienciaAcumulada;
 	private int saludActual;
+	private int saludMaxima;
 	private String nombreAtaque1;
 	private String nombreAtaque2;
 	private String nombreAtaque3;
@@ -27,7 +28,7 @@ public class Pokemon {
 	}
 
 	public Pokemon(Integer pokeApiId, String apodo, int nivel, int experienciaAcumulada, int saludActual,
-			String nombreAtaque1, String nombreAtaque2, String nombreAtaque3, String nombreAtaque4,
+			int saludMaxima, String nombreAtaque1, String nombreAtaque2, String nombreAtaque3, String nombreAtaque4,
 			Long idUsuarioPropietario) {
 		super();
 		this.pokeApiId = pokeApiId;
@@ -35,6 +36,7 @@ public class Pokemon {
 		this.nivel = nivel;
 		this.experienciaAcumulada = experienciaAcumulada;
 		this.saludActual = saludActual;
+		this.saludMaxima = saludMaxima;
 		this.nombreAtaque1 = nombreAtaque1;
 		this.nombreAtaque2 = nombreAtaque2;
 		this.nombreAtaque3 = nombreAtaque3;
@@ -90,6 +92,14 @@ public class Pokemon {
 		this.saludActual = saludActual;
 	}
 
+	public int getSaludMaxima() {
+		return saludMaxima;
+	}
+
+	public void setSaludMaxima(int saludMaxima) {
+		this.saludMaxima = saludMaxima;
+	}
+
 	public String getNombreAtaque1() {
 		return nombreAtaque1;
 	}
@@ -133,7 +143,7 @@ public class Pokemon {
 	@Override
 	public int hashCode() {
 		return Objects.hash(apodo, experienciaAcumulada, id, idUsuarioPropietario, nivel, nombreAtaque1, nombreAtaque2,
-				nombreAtaque3, nombreAtaque4, pokeApiId, saludActual);
+				nombreAtaque3, nombreAtaque4, pokeApiId, saludActual, saludMaxima);
 	}
 
 	@Override
@@ -151,15 +161,16 @@ public class Pokemon {
 				&& Objects.equals(nombreAtaque2, other.nombreAtaque2)
 				&& Objects.equals(nombreAtaque3, other.nombreAtaque3)
 				&& Objects.equals(nombreAtaque4, other.nombreAtaque4) && Objects.equals(pokeApiId, other.pokeApiId)
-				&& saludActual == other.saludActual;
+				&& saludActual == other.saludActual && saludMaxima == other.saludMaxima;
 	}
 
 	@Override
 	public String toString() {
 		return "Pokemon [id=" + id + ", pokeApiId=" + pokeApiId + ", apodo=" + apodo + ", nivel=" + nivel
-				+ ", experienciaAcumulada=" + experienciaAcumulada + ", saludActual=" + saludActual + ", nombreAtaque1="
-				+ nombreAtaque1 + ", nombreAtaque2=" + nombreAtaque2 + ", nombreAtaque3=" + nombreAtaque3
-				+ ", nombreAtaque4=" + nombreAtaque4 + ", idUsuarioPropietario=" + idUsuarioPropietario + "]";
+				+ ", experienciaAcumulada=" + experienciaAcumulada + ", saludActual=" + saludActual + ", saludMaxima="
+				+ saludMaxima + ", nombreAtaque1=" + nombreAtaque1 + ", nombreAtaque2=" + nombreAtaque2
+				+ ", nombreAtaque3=" + nombreAtaque3 + ", nombreAtaque4=" + nombreAtaque4 + ", idUsuarioPropietario="
+				+ idUsuarioPropietario + "]";
 	}
 
 }
