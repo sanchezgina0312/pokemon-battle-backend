@@ -4,20 +4,19 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class CapturaDTO {
-	
+
 	private long id;
 	private long idUsuario;
 	private int pokeApiId;
 	private String nombrePokemon;
 	private LocalDateTime fechaCaptura;
-	
+
 	public CapturaDTO() {
 
 	}
 
-	public CapturaDTO(long id, long idUsuario, int pokeApiId, String nombrePokemon, LocalDateTime fechaCaptura) {
+	public CapturaDTO(long idUsuario, int pokeApiId, String nombrePokemon, LocalDateTime fechaCaptura) {
 		super();
-		this.id = id;
 		this.idUsuario = idUsuario;
 		this.pokeApiId = pokeApiId;
 		this.nombrePokemon = nombrePokemon;
@@ -87,5 +86,5 @@ public class CapturaDTO {
 		return "CapturaDTO [id=" + id + ", idUsuario=" + idUsuario + ", pokeApiId=" + pokeApiId + ", nombrePokemon="
 				+ nombrePokemon + ", fechaCaptura=" + fechaCaptura + "]";
 	}
-	
+
 }

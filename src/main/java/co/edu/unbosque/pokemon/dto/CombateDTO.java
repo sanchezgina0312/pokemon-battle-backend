@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class CombateDTO {
-	
+
 	private long id;
 	private long idUsuarioJugador;
 	private int idPokeApiAliado;
@@ -13,15 +13,14 @@ public class CombateDTO {
 	private int saludFinalRival;
 	private String resultado;
 	private LocalDateTime fechaCombate;
-	
+
 	public CombateDTO() {
 
 	}
 
-	public CombateDTO(long id, long idUsuarioJugador, int idPokeApiAliado, int idPokeApiRival, int saludFinalAliado,
+	public CombateDTO(long idUsuarioJugador, int idPokeApiAliado, int idPokeApiRival, int saludFinalAliado,
 			int saludFinalRival, String resultado, LocalDateTime fechaCombate) {
 		super();
-		this.id = id;
 		this.idUsuarioJugador = idUsuarioJugador;
 		this.idPokeApiAliado = idPokeApiAliado;
 		this.idPokeApiRival = idPokeApiRival;
@@ -123,5 +122,5 @@ public class CombateDTO {
 				+ ", saludFinalRival=" + saludFinalRival + ", resultado=" + resultado + ", fechaCombate=" + fechaCombate
 				+ "]";
 	}
-	
+
 }

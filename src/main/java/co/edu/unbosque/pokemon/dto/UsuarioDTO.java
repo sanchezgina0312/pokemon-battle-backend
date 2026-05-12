@@ -5,22 +5,21 @@ import java.util.Objects;
 public class UsuarioDTO {
 
 	private long id;
-	private String username;
+	private String nombre;
 	private String contrasenia;
 	private String correo;
 	private String rol;
 	private String idiomaPreferido;
 	private int dinero;
-	
+
 	public UsuarioDTO() {
 
 	}
 
-	public UsuarioDTO(long id, String username, String contrasenia, String correo, String rol, String idiomaPreferido,
+	public UsuarioDTO(String nombre, String contrasenia, String correo, String rol, String idiomaPreferido,
 			int dinero) {
 		super();
-		this.id = id;
-		this.username = username;
+		this.nombre = nombre;
 		this.contrasenia = contrasenia;
 		this.correo = correo;
 		this.rol = rol;
@@ -36,12 +35,12 @@ public class UsuarioDTO {
 		this.id = id;
 	}
 
-	public String getUsername() {
-		return username;
+	public String getNombre() {
+		return nombre;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
 	}
 
 	public String getContrasenia() {
@@ -86,7 +85,7 @@ public class UsuarioDTO {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(contrasenia, correo, dinero, id, idiomaPreferido, rol, username);
+		return Objects.hash(contrasenia, correo, dinero, id, idiomaPreferido, nombre, rol);
 	}
 
 	@Override
@@ -100,13 +99,13 @@ public class UsuarioDTO {
 		UsuarioDTO other = (UsuarioDTO) obj;
 		return Objects.equals(contrasenia, other.contrasenia) && Objects.equals(correo, other.correo)
 				&& dinero == other.dinero && id == other.id && Objects.equals(idiomaPreferido, other.idiomaPreferido)
-				&& Objects.equals(rol, other.rol) && Objects.equals(username, other.username);
+				&& Objects.equals(nombre, other.nombre) && Objects.equals(rol, other.rol);
 	}
 
 	@Override
 	public String toString() {
-		return "UsuarioDTO [id=" + id + ", username=" + username + ", contrasenia=" + contrasenia + ", correo=" + correo
+		return "UsuarioDTO [id=" + id + ", nombre=" + nombre + ", contrasenia=" + contrasenia + ", correo=" + correo
 				+ ", rol=" + rol + ", idiomaPreferido=" + idiomaPreferido + ", dinero=" + dinero + "]";
 	}
-	
+
 }

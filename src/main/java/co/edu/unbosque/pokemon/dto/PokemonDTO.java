@@ -16,6 +16,7 @@ public class PokemonDTO {
 	private String nombreAtaque3;
 	private String nombreAtaque4;
 	private Long idUsuarioPropietario;
+	private String estado;
 
 	public PokemonDTO() {
 
@@ -23,7 +24,7 @@ public class PokemonDTO {
 
 	public PokemonDTO(Integer pokeApiId, String apodo, int nivel, int experienciaAcumulada, int saludActual,
 			int saludMaxima, String nombreAtaque1, String nombreAtaque2, String nombreAtaque3, String nombreAtaque4,
-			Long idUsuarioPropietario) {
+			Long idUsuarioPropietario, String estado) {
 		super();
 		this.pokeApiId = pokeApiId;
 		this.apodo = apodo;
@@ -36,6 +37,7 @@ public class PokemonDTO {
 		this.nombreAtaque3 = nombreAtaque3;
 		this.nombreAtaque4 = nombreAtaque4;
 		this.idUsuarioPropietario = idUsuarioPropietario;
+		this.estado = estado;
 	}
 
 	public long getId() {
@@ -134,10 +136,18 @@ public class PokemonDTO {
 		this.idUsuarioPropietario = idUsuarioPropietario;
 	}
 
+	public String getEstado() {
+		return estado;
+	}
+
+	public void setEstado(String estado) {
+		this.estado = estado;
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(apodo, experienciaAcumulada, id, idUsuarioPropietario, nivel, nombreAtaque1, nombreAtaque2,
-				nombreAtaque3, nombreAtaque4, pokeApiId, saludActual, saludMaxima);
+		return Objects.hash(apodo, estado, experienciaAcumulada, id, idUsuarioPropietario, nivel, nombreAtaque1,
+				nombreAtaque2, nombreAtaque3, nombreAtaque4, pokeApiId, saludActual, saludMaxima);
 	}
 
 	@Override
@@ -149,9 +159,10 @@ public class PokemonDTO {
 		if (getClass() != obj.getClass())
 			return false;
 		PokemonDTO other = (PokemonDTO) obj;
-		return Objects.equals(apodo, other.apodo) && experienciaAcumulada == other.experienciaAcumulada
-				&& id == other.id && Objects.equals(idUsuarioPropietario, other.idUsuarioPropietario)
-				&& nivel == other.nivel && Objects.equals(nombreAtaque1, other.nombreAtaque1)
+		return Objects.equals(apodo, other.apodo) && Objects.equals(estado, other.estado)
+				&& experienciaAcumulada == other.experienciaAcumulada && id == other.id
+				&& Objects.equals(idUsuarioPropietario, other.idUsuarioPropietario) && nivel == other.nivel
+				&& Objects.equals(nombreAtaque1, other.nombreAtaque1)
 				&& Objects.equals(nombreAtaque2, other.nombreAtaque2)
 				&& Objects.equals(nombreAtaque3, other.nombreAtaque3)
 				&& Objects.equals(nombreAtaque4, other.nombreAtaque4) && Objects.equals(pokeApiId, other.pokeApiId)
@@ -164,7 +175,7 @@ public class PokemonDTO {
 				+ ", experienciaAcumulada=" + experienciaAcumulada + ", saludActual=" + saludActual + ", saludMaxima="
 				+ saludMaxima + ", nombreAtaque1=" + nombreAtaque1 + ", nombreAtaque2=" + nombreAtaque2
 				+ ", nombreAtaque3=" + nombreAtaque3 + ", nombreAtaque4=" + nombreAtaque4 + ", idUsuarioPropietario="
-				+ idUsuarioPropietario + "]";
+				+ idUsuarioPropietario + ", estado=" + estado + "]";
 	}
 
 }
