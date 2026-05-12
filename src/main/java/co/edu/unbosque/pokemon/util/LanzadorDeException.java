@@ -13,12 +13,14 @@ import co.edu.unbosque.pokemon.exception.IdInvalidoException;
 import co.edu.unbosque.pokemon.exception.MetodoDePagoInvalidoException;
 import co.edu.unbosque.pokemon.exception.NombreInvalidoException;
 import co.edu.unbosque.pokemon.exception.PlacaInvalidaException;
+import co.edu.unbosque.pokemon.exception.RolInvalidoException;
 import co.edu.unbosque.pokemon.exception.TamanioInvalidoException;
 import co.edu.unbosque.pokemon.exception.TelefonoInvalidoException;
 import co.edu.unbosque.pokemon.exception.TipoDeAlimentoInvalidoException;
 import co.edu.unbosque.pokemon.exception.TipoDeCartaInvalidaException;
 import co.edu.unbosque.pokemon.exception.TipoManipuladorInvalidoException;
 import co.edu.unbosque.pokemon.exception.TurnoInvalidoException;
+import co.edu.unbosque.pokemon.exception.UsuarioInvalidoException;
 
 /**
  * Clase utilitaria que centraliza la validación de datos del dominio del
@@ -292,5 +294,34 @@ public class LanzadorDeException {
 		if (!contrasena.matches("^(?=.*[A-Z])(?=.*[0-9]).+$")) {
 			throw new ContraseniaInvalidaException("La contraseña debe contener al menos una mayúscula y un número");
 		}
+	}
+	
+	/**
+	 * Verifica que el nombre de usuario (username) no esté vacío y tenga una longitud válida.
+	 * @param username El nombre de usuario a validar.
+	 */
+	public static void verificarUsername(String username) {
+		if (username == null || username.trim().isEmpty()) {
+			throw new UsuarioInvalidoException("El username no puede estar vacío o ser nulo.");
+		}
+		if (username.length() < 3 || username.length() > 20) {
+			throw new UsuarioInvalidoException("El username debe tener entre 3 y 20 caracteres.");
+		}
+	}
+
+	/**
+	 * Verifica que el rol del usuario sea válido.
+	 * @param rol El rol a validar.
+	 */
+	public static void verificarRol(String rol) {
+		if (rol == null || rol.trim().isEmpty()) {
+			throw new RolInvalidoException("El rol no puede estar vacío o ser nulo.");
+		}
+		// Opcional: Si en tu juego solo hay ciertos roles, puedes descomentar esto:
+		/*
+		if (!rol.equalsIgnoreCase("Administrador") && !rol.equalsIgnoreCase("Jugador")) {
+			throw new IllegalArgumentException("El rol debe ser 'Administrador' o 'Jugador'.");
+		}
+		*/
 	}
 }

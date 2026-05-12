@@ -7,20 +7,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 public class ItemDTO {
-	
-	private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) long id;
+
+	private long id;
 	private String nombre;
 	private String descripcion;
 	private int costo;
 	private int efectoCurativo;
-	
+
 	public ItemDTO() {
 
 	}
 
-	public ItemDTO(long id, String nombre, String descripcion, int costo, int efectoCurativo) {
+	public ItemDTO(String nombre, String descripcion, int costo, int efectoCurativo) {
 		super();
-		this.id = id;
 		this.nombre = nombre;
 		this.descripcion = descripcion;
 		this.costo = costo;
@@ -90,5 +89,5 @@ public class ItemDTO {
 		return "ItemDTO [id=" + id + ", nombre=" + nombre + ", descripcion=" + descripcion + ", costo=" + costo
 				+ ", efectoCurativo=" + efectoCurativo + "]";
 	}
-	
+
 }
