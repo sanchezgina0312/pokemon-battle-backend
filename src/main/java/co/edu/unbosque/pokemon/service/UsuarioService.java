@@ -49,7 +49,7 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	 */
 	public UsuarioDTO validarLogin(String username, String contrasenia) {
 
-		Optional<List<Usuario>> encontrados = usuarioRep.findByUsername(username);
+		Optional<List<Usuario>> encontrados = usuarioRep.findByNombre(username);
 
 		if (encontrados.isPresent() && !encontrados.get().isEmpty()) {
 			Usuario usuario = encontrados.get().get(0);
@@ -73,12 +73,12 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		LanzadorDeException.verificarCorreoElectronico(data.getCorreo());
 		LanzadorDeException.verificarRol(data.getRol());
 		
-		LanzadorDeException.verificarDuplicado(usuarioRep.existsByUsername(data.getNombre()),
+		LanzadorDeException.verificarDuplicado(usuarioRep.existsByNombre(data.getNombre()),
 				"El nombre de usuario " + data.getNombre() + " ya se encuentra registrado.");
 
 		Usuario entity = mapper.map(data, Usuario.class);
 
-		if (usuarioRep.existsByUsername(data.getNombre())) {
+		if (usuarioRep.existsByNombre(data.getNombre())) {
 			return 1;
 		} else {
 			usuarioRep.save(entity);
@@ -138,10 +138,10 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 			Usuario temp = encontrado.get();
 
 			if (!temp.getNombre().equals(data.getNombre())) {
-				LanzadorDeException.verificarDuplicado(usuarioRep.existsByUsername(data.getNombre()),
+				LanzadorDeException.verificarDuplicado(usuarioRep.existsByNombre(data.getNombre()),
 						"No se puede actualizar: el username " + data.getNombre() + " ya pertenece a otro usuario.");
 
-				if (usuarioRep.existsByUsername(data.getNombre())) {
+				if (usuarioRep.existsByNombre(data.getNombre())) {
 					return 1;
 				}
 			}
@@ -185,7 +185,7 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	 */
 	public List<UsuarioDTO> findByUsername(String username) {
 		LanzadorDeException.verificarUsername(username);
-		Optional<List<Usuario>> encontrados = usuarioRep.findByUsername(username);
+		Optional<List<Usuario>> encontrados = usuarioRep.findByNombre(username);
 		List<UsuarioDTO> dtoList = new ArrayList<>();
 
 		if (encontrados.isPresent() && !encontrados.get().isEmpty()) {
@@ -245,17 +245,14 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	 * @return Lista de UsuarioDTO.
 	 */
 	public List<UsuarioDTO> findByNombre(String nombre) {
-	    // 1. Buscamos en la base de datos a través del repositorio
-	    List<Usuario> listaEntidades = usuarioRep.findByNombre(nombre);
-	    
-	    // 2. Creamos la lista donde guardaremos los DTOs
-	    List<UsuarioDTO> listaDTO = new ArrayList<>();
-	    
-	    // 3. Convertimos cada entidad a DTO (usando ModelMapper)
-	    for (Usuario u : listaEntidades) {
-	        listaDTO.add(mapper.map(u, UsuarioDTO.class));
-	    }
-	    
-	    return listaDTO;
+		
+		Optional<List<Usuario>> encontrados = usuarioRep.findByNombre(nombre);
+		List<UsuarioDTO> listaDTO = new ArrayList<>();
+
+		if (encontrados.isPresent()) {
+		    encontrados.get().forEach(entity -> listaDTO.add(mapper.map(entity, UsuarioDTO.class)));
+		}
+
+		return listaDTO;
 	}
 }
