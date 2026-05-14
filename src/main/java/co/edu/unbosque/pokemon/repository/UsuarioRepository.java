@@ -24,7 +24,7 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
 	 * @param username El nombre de usuario a buscar.
 	 * * @return Un Optional con la lista de usuarios encontrados.
 	 */
-	public Optional<List<Usuario>> findByUsername(String username);
+	public Optional<List<Usuario>> findByNombre(String nombre);
 
 	/**
 	 * Busca usuarios asociados a un correo electrónico específico.
@@ -46,8 +46,5 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
 	 * @param username El nombre de usuario a comprobar.
 	 * * @return true si el registro existe, false en caso contrario.
 	 */
-	public boolean existsByUsername(String username);
-	
-	// Spring generará automáticamente: SELECT * FROM usuario WHERE nombre = ?
-    List<Usuario> findByNombre(String nombre);
+	public boolean existsByNombre(String nombre);
 }
