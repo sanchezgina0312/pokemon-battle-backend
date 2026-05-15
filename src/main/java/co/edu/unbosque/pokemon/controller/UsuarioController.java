@@ -20,6 +20,7 @@ import co.edu.unbosque.pokemon.exception.CorreoInvalidoException;
 import co.edu.unbosque.pokemon.exception.IdInvalidoException;
 import co.edu.unbosque.pokemon.exception.NombreInvalidoException;
 import co.edu.unbosque.pokemon.service.UsuarioService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * Controlador REST que expone los endpoints para la gestión de Usuarios
@@ -34,8 +35,9 @@ import co.edu.unbosque.pokemon.service.UsuarioService;
  * @version 1.0
  */
 @RestController
-@RequestMapping("/usuario")
-@CrossOrigin(origins = { "http://localhost:8080", "*" })
+@RequestMapping("/pokemon/usuarios")
+@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:8081"})
+@Tag(name = "Usuario", description = "Controlador para la gestión completa de usuarios de pokemon")
 public class UsuarioController {
 
 	/**
