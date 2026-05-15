@@ -14,18 +14,18 @@ import co.edu.unbosque.pokemon.repository.UsuarioRepository;
 import co.edu.unbosque.pokemon.util.LanzadorDeException;
 
 /**
- * Servicio encargado de gestionar las operaciones CRUD de la entidad
- * Usuario.
+ * Servicio encargado de gestionar las operaciones CRUD de la entidad Usuario.
  * <p>
- * Permite crear, consultar, actualizar y eliminar usuarios, así
- * como realizar búsquedas por diferentes atributos como username, correo y rol.
+ * Permite crear, consultar, actualizar y eliminar usuarios, así como realizar
+ * búsquedas por diferentes atributos como username, correo y rol.
  * </p>
- * * <p>
- * Utiliza UsuarioRepository para la persistencia, ModelMapper para
- * la conversión entre entidades y DTOs, y LanzadorDeException para la
- * validación de datos.
+ * *
+ * <p>
+ * Utiliza UsuarioRepository para la persistencia, ModelMapper para la
+ * conversión entre entidades y DTOs, y LanzadorDeException para la validación
+ * de datos.
  * </p>
- * */
+ */
 @Service
 public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 
@@ -39,31 +39,31 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	 * Constructor vacío.
 	 */
 	public UsuarioService() {
+
 	}
 
 	/**
-	 * Valida las credenciales para el inicio de sesión. 
-	 * * @param username Nombre de usuario ingresado.
-	 * @param contrasenia Contraseña ingresada.
-	 * @return UsuarioDTO si es válido, null en caso contrario.
+	 * Cuenta los usuarios registrados. * @return cantidad total
 	 */
-	public UsuarioDTO validarLogin(String username, String contrasenia) {
-
-		Optional<List<Usuario>> encontrados = usuarioRep.findByNombre(username);
-
-		if (encontrados.isPresent() && !encontrados.get().isEmpty()) {
-			Usuario usuario = encontrados.get().get(0);
-
-			if (usuario.getContrasenia().equals(contrasenia)) {
-				return mapper.map(usuario, UsuarioDTO.class);
-			}
-		}
-		return null;
+	@Override
+	public long count() {
+		return usuarioRep.count();
 	}
 
 	/**
-	 * Crea un nuevo usuario.
-	 * * @param data datos del usuario
+	 * Verifica si existe un usuario por ID. * @param id identificador
+	 * 
+	 * @return true si existe, false si no
+	 */
+	@Override
+	public boolean exist(Long id) {
+		LanzadorDeException.verificarId(id);
+		return usuarioRep.existsById(id);
+	}
+
+	/**
+	 * Crea un nuevo usuario. * @param data datos del usuario
+	 * 
 	 * @return 0 si se creó correctamente, 1 si ya existe
 	 */
 	@Override
@@ -72,9 +72,19 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		LanzadorDeException.verificarContrasena(data.getContrasenia());
 		LanzadorDeException.verificarCorreoElectronico(data.getCorreo());
 		LanzadorDeException.verificarRol(data.getRol());
-		
+
 		LanzadorDeException.verificarDuplicado(usuarioRep.existsByNombre(data.getNombre()),
 				"El nombre de usuario " + data.getNombre() + " ya se encuentra registrado.");
+
+		if (data.getNombre() == null || data.getNombre().isBlank()) {
+			return 1;
+		}
+		if (data.getCorreo() == null || data.getCorreo().isBlank()) {
+			return 1;
+		}
+		if (data.getContrasenia() == null || data.getContrasenia().isBlank()) {
+			return 1;
+		}
 
 		Usuario entity = mapper.map(data, Usuario.class);
 
@@ -87,8 +97,7 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	}
 
 	/**
-	 * Obtiene todos los usuarios.
-	 * * @return lista de usuarios
+	 * Obtiene todos los usuarios. * @return lista de usuarios
 	 */
 	@Override
 	public List<UsuarioDTO> getAll() {
@@ -101,8 +110,8 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	}
 
 	/**
-	 * Elimina un usuario por ID.
-	 * * @param id identificador
+	 * Elimina un usuario por ID. * @param id identificador
+	 * 
 	 * @return 0 si se eliminó, 1 si no existe
 	 */
 	@Override
@@ -119,8 +128,8 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	}
 
 	/**
-	 * Actualiza un usuario existente.
-	 * * @param id   identificador
+	 * Actualiza un usuario existente. * @param id identificador
+	 * 
 	 * @param data nuevos datos
 	 * @return 0 si se actualizó, 1 si hay error
 	 */
@@ -158,26 +167,6 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		} else {
 			return 1;
 		}
-	}
-
-	/**
-	 * Cuenta los usuarios registrados.
-	 * * @return cantidad total
-	 */
-	@Override
-	public long count() {
-		return usuarioRep.count();
-	}
-
-	/**
-	 * Verifica si existe un usuario por ID.
-	 * * @param id identificador
-	 * @return true si existe, false si no
-	 */
-	@Override
-	public boolean exist(Long id) {
-		LanzadorDeException.verificarId(id);
-		return usuarioRep.existsById(id);
 	}
 
 	/**
@@ -238,19 +227,20 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	public void setMapper(ModelMapper mapper) {
 		this.mapper = mapper;
 	}
-	
+
 	/**
-	 * Busca usuarios por su nombre y devuelve una lista de DTOs.
-	 * * @param nombre El nombre a buscar.
+	 * Busca usuarios por su nombre y devuelve una lista de DTOs. * @param nombre El
+	 * nombre a buscar.
+	 * 
 	 * @return Lista de UsuarioDTO.
 	 */
 	public List<UsuarioDTO> findByNombre(String nombre) {
-		
+
 		Optional<List<Usuario>> encontrados = usuarioRep.findByNombre(nombre);
 		List<UsuarioDTO> listaDTO = new ArrayList<>();
 
 		if (encontrados.isPresent()) {
-		    encontrados.get().forEach(entity -> listaDTO.add(mapper.map(entity, UsuarioDTO.class)));
+			encontrados.get().forEach(entity -> listaDTO.add(mapper.map(entity, UsuarioDTO.class)));
 		}
 
 		return listaDTO;
