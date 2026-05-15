@@ -100,5 +100,11 @@ public class LanzadorDeException {
 		}
 	}
 	
+	public static void verificarCorreoDuplicado(boolean duplicado) {
+		if(duplicado) {
+			throw new CorreoInvalidoException("El nombre ya se encuentra registrado");
+		}
+	}
+	
 	
 }
