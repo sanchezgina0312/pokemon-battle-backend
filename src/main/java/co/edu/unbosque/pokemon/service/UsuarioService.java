@@ -80,7 +80,7 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
         LanzadorDeException.verificarContrasena(data.getContrasenia());
         LanzadorDeException.verificarCorreoElectronico(data.getCorreo());
 
-        LanzadorDeException.verificarCorreoDuplicado(usuarioRep.existsByNombre(data.getNombre()));
+        LanzadorDeException.verificarNombreDuplicado(usuarioRep.existsByNombre(data.getNombre()));
 
         if (data.getNombre() == null || data.getNombre().isBlank()) {
             return 1;
@@ -162,7 +162,7 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 
             if (!temp.getNombre().equals(data.getNombre())) {
 
-            	 LanzadorDeException.verificarCorreoDuplicado(usuarioRep.existsByNombre(data.getNombre()));
+            	 LanzadorDeException.verificarNombreDuplicado(usuarioRep.existsByNombre(data.getNombre()));
                 if (usuarioRep.existsByNombre(data.getNombre())) {
                     return 1;
                 }
