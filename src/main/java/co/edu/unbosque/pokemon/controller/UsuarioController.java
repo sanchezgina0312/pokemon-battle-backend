@@ -115,19 +115,5 @@ public class UsuarioController {
         }
     }
 
-    @Operation(summary = "Inicio de sesión", description = "Valida las credenciales de un entrenador.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Login exitoso"),
-            @ApiResponse(responseCode = "401", description = "Credenciales inválidas") })
-    @PostMapping("/login")
-    public ResponseEntity<String> login(
-            @RequestParam String nombre,
-            @RequestParam String contrasenia) {
-        int resultado = usuarioService.validateCredentials(nombre, contrasenia);
-        if (resultado == 0) {
-            return new ResponseEntity<>("Login exitoso", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Credenciales inválidas", HttpStatus.UNAUTHORIZED);
-        }
-    }
+   
 }
