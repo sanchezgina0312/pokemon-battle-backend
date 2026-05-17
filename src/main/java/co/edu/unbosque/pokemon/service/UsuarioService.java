@@ -33,57 +33,29 @@ import co.edu.unbosque.pokemon.util.LanzadorDeException;
 @Service
 public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 
-	/**
-	 * Repositorio inyectado para realizar operaciones de persistencia en la base de
-	 * datos.
-	 */
 	@Autowired
 	private UsuarioRepository usuarioRep;
 
-	/**
-	 * Convertidor inyectado para mapear objetos de DTO a Entidad y viceversa.
-	 */
 	@Autowired
 	private ModelMapper mapper;
 
-	/**
-	 * Codificador inyectado para cifrar de forma segura las contraseñas de los
-	 * usuarios.
-	 */
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
-	/**
-	 * Constructor vacío de la clase.
-	 */
 	public UsuarioService() {
-
 	}
 
-	/**
-	 * Cuenta los usuarios registrados. * @return cantidad total
-	 */
 	@Override
 	public long count() {
 		return usuarioRep.count();
 	}
 
-	/**
-	 * Verifica si existe un usuario por ID. * @param id identificador
-	 * 
-	 * @return true si existe, false si no
-	 */
 	@Override
 	public boolean exist(Long id) {
 		LanzadorDeException.verificarId(id);
 		return usuarioRep.existsById(id);
 	}
 
-	/**
-	 * Crea un nuevo usuario. * @param data datos del usuario
-	 * 
-	 * @return 0 si se creó correctamente, 1 si ya existe
-	 */
 	@Override
 	public int create(UsuarioDTO data) {
 		LanzadorDeException.verificarNombre(data.getNombre());
@@ -115,9 +87,6 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		}
 	}
 
-	/**
-	 * Obtiene todos los usuarios. * @return lista de usuarios
-	 */
 	@Override
 	public List<UsuarioDTO> getAll() {
 		Iterable<Usuario> entityList = usuarioRep.findAll();
@@ -131,11 +100,6 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		return dtoList;
 	}
 
-	/**
-	 * Elimina un usuario por ID. * @param id identificador
-	 * 
-	 * @return 0 si se eliminó, 1 si no existe
-	 */
 	@Override
 	public int deleteById(Long id) {
 		LanzadorDeException.verificarId(id);
@@ -148,12 +112,6 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		return 1;
 	}
 
-	/**
-	 * Actualiza un usuario existente. * @param id identificador
-	 * 
-	 * @param data nuevos datos
-	 * @return 0 si se actualizó, 1 si hay error
-	 */
 	@Override
 	public int updateById(Long id, UsuarioDTO data) {
 		LanzadorDeException.verificarId(id);
@@ -192,45 +150,11 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		}
 	}
 
-	/**
-	 * Valida las credenciales de un usuario.
-	 *
-	 * @param nombre      Nombre de usuario
-	 * @param contrasenia Contraseña sin encriptar
-	 * @return 0 si las credenciales son válidas, 1 si son inválidas
-	 */
-	public int validateCredentials(String nombre, String contrasenia) {
-		// Buscar usuario por nombre de usuario
-		Optional<Usuario> userOpt = usuarioRep.findByNombre(nombre);
-
-		if (userOpt.isPresent()) {
-			Usuario usuario = userOpt.get();
-			if (passwordEncoder.matches(contrasenia, usuario.getPassword())) {
-				return 0;
-			}
-		}
-
-		return 1;
-	}
-
-	/**
-	 * Verifica si un nombre de usuario ya está en uso.
-	 *
-	 * @param nombre Nombre de usuario a verificar
-	 * @return true si el nombre de usuario ya está en uso, false en caso contrario
-	 */
 	public boolean findUsernameAlreadyTaken(String nombre) {
 		Optional<Usuario> encontrado = usuarioRep.findByNombre(nombre);
 		return encontrado.isPresent();
 	}
 
-	/**
-	 * Busca usuarios filtrando por su nombre exacto. * @param nombre el nombre del
-	 * usuario a buscar
-	 * 
-	 * @return una lista que contiene el UsuarioDTO mapeado, o vacía si no hay
-	 *         coincidencias
-	 */
 	public List<UsuarioDTO> findByNombre(String nombre) {
 		LanzadorDeException.verificarNombre(nombre);
 
@@ -242,13 +166,6 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		return dtoList;
 	}
 
-	/**
-	 * Busca un usuario filtrando por su correo electrónico. * @param correo el
-	 * correo electrónico del usuario a buscar
-	 * 
-	 * @return una lista que contiene el UsuarioDTO mapeado, o vacía si no hay
-	 *         coincidencias
-	 */
 	public List<UsuarioDTO> findByCorreo(String correo) {
 		LanzadorDeException.verificarCorreoElectronico(correo);
 
@@ -260,12 +177,6 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		return dtoList;
 	}
 
-	/**
-	 * Busca usuarios filtrando por su rol específico. * @param rol el nombre del
-	 * rol a buscar (ej. "Jugador", "Admin")
-	 * 
-	 * @return una lista con los UsuarioDTO que correspondan al rol especificado
-	 */
 	public List<UsuarioDTO> findByRol(String rol) {
 		Optional<Usuario> encontrado = usuarioRep.findByRol(rol);
 		List<UsuarioDTO> dtoList = new ArrayList<>();
@@ -275,50 +186,57 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		return dtoList;
 	}
 
+	// ── NUEVO ──────────────────────────────────────────────────────────────────
 	/**
-	 * Obtiene el repositorio de usuarios activo. * @return el objeto
-	 * UsuarioRepository
+	 * Valida las credenciales de un usuario por correo electrónico.
+	 * Usa PasswordEncoder para comparar la contraseña ingresada con el hash.
+	 *
+	 * @param correo      Correo electrónico del usuario
+	 * @param contrasenia Contraseña sin encriptar
+	 * @return 0 si las credenciales son válidas,
+	 *         1 si la contraseña es incorrecta,
+	 *         2 si el usuario no existe
 	 */
+	public int login(String correo, String contrasenia) {
+		LanzadorDeException.verificarCorreoElectronico(correo);
+
+		Optional<Usuario> encontrado = usuarioRep.findByCorreo(correo);
+
+		if (encontrado.isEmpty()) {
+			return 2;
+		}
+
+		Usuario usuario = encontrado.get();
+
+		if (passwordEncoder.matches(contrasenia, usuario.getContrasenia())) {
+			return 0;
+		}
+
+		return 1;
+	}
+	// ──────────────────────────────────────────────────────────────────────────
+
 	public UsuarioRepository getUsuarioRep() {
 		return usuarioRep;
 	}
 
-	/**
-	 * Configura el repositorio de usuarios. * @param usuarioRep el nuevo objeto
-	 * UsuarioRepository
-	 */
 	public void setUsuarioRep(UsuarioRepository usuarioRep) {
 		this.usuarioRep = usuarioRep;
 	}
 
-	/**
-	 * Obtiene el mapeador de modelos activo. * @return el objeto ModelMapper
-	 */
 	public ModelMapper getMapper() {
 		return mapper;
 	}
 
-	/**
-	 * Configura el mapeador de modelos. * @param mapper el nuevo objeto ModelMapper
-	 */
 	public void setMapper(ModelMapper mapper) {
 		this.mapper = mapper;
 	}
 
-	/**
-	 * Obtiene el encriptador de contraseñas activo. * @return el objeto
-	 * PasswordEncoder
-	 */
 	public PasswordEncoder getPasswordEncoder() {
 		return passwordEncoder;
 	}
 
-	/**
-	 * Configura el encriptador de contraseñas. * @param passwordEncoder el nuevo
-	 * objeto PasswordEncoder
-	 */
 	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
 		this.passwordEncoder = passwordEncoder;
 	}
-
 }
