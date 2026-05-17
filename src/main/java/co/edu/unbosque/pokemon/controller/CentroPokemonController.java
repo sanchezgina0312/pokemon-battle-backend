@@ -11,13 +11,41 @@ import org.springframework.web.bind.annotation.RestController;
 
 import co.edu.unbosque.pokemon.service.CentroPokemonService;
 
+/**
+ * Controlador REST que gestiona las operaciones del Centro Pokémon.
+ * <p>
+ * Proporciona endpoints para interactuar con los servicios de salud y recuperación
+ * de los Pokémon en el sistema. Permite peticiones CORS desde los orígenes locales 
+ * en los puertos 8080 y 8081.
+ * </p>
+ * 
+ * @author Integrantes del Proyecto
+ * @version 1.0
+ */
 @RestController
 @RequestMapping("/centropokemon")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {"http://localhost:8080/", "http://localhost:8081"})
 public class CentroPokemonController {
+
+	/**
+	 * Servicio que contiene la lógica de negocio para las operaciones del Centro Pokémon.
+	 */
 	@Autowired
 	private CentroPokemonService centroSer;
 
+	/**
+	 * Restaura la salud de un Pokémon específico en el sistema utilizando su identificador.
+	 * <p>
+	 * El método evalúa el resultado de la operación realizada por el servicio:
+	 * Si retorna {@code 0}, la curación fue exitosa y se responde con un estado HTTP 202 (Accepted).
+	 * Cualquier otro valor indica que el Pokémon no fue hallado, respondiendo un estado HTTP 404 (Not Found).
+	 * </p>
+	 * 
+	 * @param idPokemon El identificador único del Pokémon que se desea curar.
+	 * @return Un {@link ResponseEntity} con el mensaje "Curado" y estado {@link HttpStatus#ACCEPTED} (202) 
+	 *          si el proceso fue exitoso; de lo contrario, un mensaje "No encontrado" junto con el 
+	 *          estado {@link HttpStatus#NOT_FOUND} (404).
+	 */
 	@PostMapping("/curar")
 	public ResponseEntity<String> curar(@RequestParam long idPokemon) {
 		return (centroSer.curar(idPokemon) == 0) ? new ResponseEntity<>("Curado", HttpStatus.ACCEPTED)
