@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;  // ← Spring, NO Swagger
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -75,7 +75,7 @@ public class UsuarioController {
             @ApiResponse(responseCode = "400", description = "Error en los datos o validación fallida") })
     @PostMapping("/crear")
     public ResponseEntity<String> crearUsuario(
-            @RequestBody UsuarioDTO usuarioDTO) {  // ← @RequestBody de Spring
+            @RequestBody UsuarioDTO usuarioDTO) {
         try {
             usuarioService.create(usuarioDTO);
             return new ResponseEntity<>("Usuario creado con éxito", HttpStatus.CREATED);
@@ -90,7 +90,7 @@ public class UsuarioController {
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado") })
     @PutMapping("/actualizar")
     public ResponseEntity<String> actualizarUsuario(
-            @RequestBody UsuarioDTO usuarioDTO) {  // ← @RequestBody de Spring
+            @RequestBody UsuarioDTO usuarioDTO) {
         int status = usuarioService.updateById(usuarioDTO.getId(), usuarioDTO);
         if (status == 0) {
             return new ResponseEntity<>("Usuario actualizado exitosamente", HttpStatus.ACCEPTED);
@@ -115,5 +115,26 @@ public class UsuarioController {
         }
     }
 
-   
+    // ── NUEVO ──────────────────────────────────────────────────────────────────
+    @Operation(summary = "Login de usuario", description = "Valida correo y contraseña usando BCrypt.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login exitoso"),
+            @ApiResponse(responseCode = "401", description = "Contraseña incorrecta"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado") })
+    @PostMapping("/login")
+    public ResponseEntity<String> login(
+            @Parameter(description = "Correo del usuario", required = true, example = "ash@paleta.com")
+            @RequestParam String correo,
+            @Parameter(description = "Contraseña sin encriptar", required = true)
+            @RequestParam String contrasenia) {
+
+        int resultado = usuarioService.login(correo, contrasenia);
+
+        return switch (resultado) {
+            case 0  -> new ResponseEntity<>("Login exitoso", HttpStatus.OK);
+            case 2  -> new ResponseEntity<>("Usuario no encontrado", HttpStatus.NOT_FOUND);
+            default -> new ResponseEntity<>("Correo o contraseña incorrectos", HttpStatus.UNAUTHORIZED);
+        };
+    }
+    // ──────────────────────────────────────────────────────────────────────────
 }
