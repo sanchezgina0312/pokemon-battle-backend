@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,49 +20,82 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-	private final JwtAuthenticationFilter jwtAuthFilter;
-	private final UserDetailsService userDetailsService;
+    private final JwtAuthenticationFilter jwtAuthFilter;
+    private final UserDetailsService userDetailsService;
 
-	public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, UserDetailsService userDetailsService) {
-		this.jwtAuthFilter = jwtAuthFilter;
-		this.userDetailsService = userDetailsService;
-	}
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, UserDetailsService userDetailsService) {
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.userDetailsService = userDetailsService;
+    }
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth
-				.requestMatchers("/pokemon/auth/**", "/usuario/login", "/usuario/crear", "/swagger-ui/**",
-						"/v3/api-docs/**")
-				.permitAll()
-				.requestMatchers("/ataque/banear", "/pokemon/cargar", "/pokemon/cargarbd", "/usuario/mostrartodo",
-						"/usuario/buscarpornombre", "/usuario/buscarporcorreo", "/usuario/actualizar",
-						"/usuario/eliminar")
-				.hasRole("ADMINISTRADOR")
-				.requestMatchers("/captura/**", "/combate/**", "/centropokemon/**", "/tienda/**", "/inventario/**", "/item/**", "/pokemon/**").hasAnyRole("USUARIO", "ADMINISTRADOR")
-				.anyRequest().authenticated())
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/pokemon/auth/**",
+                    "/usuario/login",
+                    "/usuario/crear",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**"
+                ).permitAll()
+                .anyRequest().access((authentication, context) -> {
+                    var authObj = authentication.get();
 
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authenticationProvider(authenticationProvider())
-				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                    // ADMINISTRADOR tiene acceso a absolutamente todo
+                    boolean isAdmin = authObj.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR"));
+                    if (isAdmin) return new AuthorizationDecision(true);
 
-		return http.build();
-	}
+                    // Si no está autenticado, denegar
+                    if (!authObj.isAuthenticated()) return new AuthorizationDecision(false);
 
-	@Bean
-	public AuthenticationProvider authenticationProvider() {
-		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-		authProvider.setPasswordEncoder(passwordEncoder());
+                    String path = context.getRequest().getServletPath();
 
-		return authProvider;
-	}
+                    // Endpoints exclusivos del ADMINISTRADOR — denegar a USUARIO
+                    boolean isAdminOnly = path.equals("/ataque/banear")
+                        || path.equals("/pokemon/cargar")
+                        || path.equals("/pokemon/cargarbd")
+                        || path.equals("/usuario/mostrartodo")
+                        || path.equals("/usuario/buscarpornombre")
+                        || path.equals("/usuario/buscarporcorreo")
+                        || path.equals("/usuario/actualizar")
+                        || path.equals("/usuario/eliminar");
 
-	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-		return config.getAuthenticationManager();
-	}
+                    if (isAdminOnly) return new AuthorizationDecision(false);
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+                    // Endpoints permitidos para USUARIO y ADMINISTRADOR
+                    boolean isUsuarioAllowed = path.startsWith("/captura/")
+                        || path.startsWith("/combate/")
+                        || path.startsWith("/centropokemon/")
+                        || path.startsWith("/tienda/")
+                        || path.startsWith("/inventario/")
+                        || path.startsWith("/item/")
+                        || path.startsWith("/pokemon/");
+
+                    return new AuthorizationDecision(isUsuarioAllowed);
+                }))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }
