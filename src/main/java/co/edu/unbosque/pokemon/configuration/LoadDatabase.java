@@ -27,12 +27,12 @@ public class LoadDatabase {
 
 			admin.setNombre("AdministradorPokedes");
 			admin.setCorreo("administrador@gmail.com");
-			admin.setContrasenia(passwordEncoder.encode("User2026*/s"));
+			admin.setContrasenia(passwordEncoder.encode(defaultPassword));
 			admin.setRol(Role.ADMINISTRADOR);
 			admin.setActivado(true);
 
 			userRepo.save(admin);
-			log.info("ADMINISTRADOR listo. Login: nombre='admin', clave='User2026*/'");
+			log.info("ADMINISTRADOR listo.");
 		};
 	}
 }

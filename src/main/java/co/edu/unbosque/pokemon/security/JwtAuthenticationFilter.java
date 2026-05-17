@@ -1,4 +1,4 @@
-package co.edu.unbosque.security;
+package co.edu.unbosque.pokemon.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

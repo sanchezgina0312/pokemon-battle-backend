@@ -2,10 +2,6 @@ package co.edu.unbosque.pokemon.dto;
 
 import java.util.Objects;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
 public class ItemDTO {
 
 	private long id;

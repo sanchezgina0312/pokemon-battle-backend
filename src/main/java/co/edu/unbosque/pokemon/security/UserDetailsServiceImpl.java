@@ -1,4 +1,4 @@
-package co.edu.unbosque.security;
+package co.edu.unbosque.pokemon.security;
 
 import co.edu.unbosque.pokemon.repository.UsuarioRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,6 +40,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String nombre) throws UsernameNotFoundException {
 	    return userRepository.findByNombre(nombre)
-	        .orElseThrow(() -> new UsernameNotFoundException("No se encontró el correo: " + nombre));
+	        .orElseThrow(() -> new UsernameNotFoundException("No se encontró el nombre: " + nombre));
 	}
 }
