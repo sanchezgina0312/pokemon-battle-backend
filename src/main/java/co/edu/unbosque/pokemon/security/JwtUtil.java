@@ -1,4 +1,4 @@
-package co.edu.unbosque.security;
+package co.edu.unbosque.pokemon.security;
 
 import co.edu.unbosque.pokemon.entity.Usuario;
 import io.jsonwebtoken.Claims;

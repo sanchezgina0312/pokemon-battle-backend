@@ -1,14 +1,7 @@
 package co.edu.unbosque.pokemon.dto;
 
 import java.util.ArrayList;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-
 import com.google.gson.annotations.SerializedName;
-
-import co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler;
 
 public class InformacionPokemonDTO {
 

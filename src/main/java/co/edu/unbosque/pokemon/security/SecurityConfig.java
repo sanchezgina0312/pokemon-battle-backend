@@ -1,4 +1,4 @@
-package co.edu.unbosque.security;
+package co.edu.unbosque.pokemon.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +30,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth
-				.requestMatchers("/revista/auth/**", "/usuario/login", "/usuario/crear", "/swagger-ui/**",
+				.requestMatchers("/pokemon/auth/**", "/usuario/login", "/usuario/crear", "/swagger-ui/**",
 						"/v3/api-docs/**")
 				.permitAll()
 				.requestMatchers("/ataque/banear", "/pokemon/cargar", "/pokemon/cargarbd", "/usuario/mostrartodo",
