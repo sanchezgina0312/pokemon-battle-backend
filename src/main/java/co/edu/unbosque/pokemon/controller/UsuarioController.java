@@ -1,7 +1,16 @@
-package co.edu.unbosque.pokemon.controller; // Ajusta el paquete según tu proyecto
+package co.edu.unbosque.pokemon.controller;
 
+import co.edu.unbosque.pokemon.dto.UsuarioDTO;
+import co.edu.unbosque.pokemon.service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,203 +23,56 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import co.edu.unbosque.pokemon.dto.UsuarioDTO; // Asegúrate de que el DTO exista
-import co.edu.unbosque.pokemon.exception.ContraseniaInvalidaException;
-import co.edu.unbosque.pokemon.exception.CorreoInvalidoException;
-import co.edu.unbosque.pokemon.exception.IdInvalidoException;
-import co.edu.unbosque.pokemon.exception.NombreInvalidoException;
-import co.edu.unbosque.pokemon.service.UsuarioService;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
 /**
- * Controlador REST que expone los endpoints para la gestión de Usuarios
- * dentro del sistema (jugadores y administradores).
- *
+ * Controlador REST encargado de exponer los endpoints para la gestión de
+ * usuarios.
  * <p>
- * Provee operaciones CRUD completas y búsquedas por diferentes criterios. Las
- * respuestas se retornan en formato JSON y los errores son gestionados mediante
- * excepciones personalizadas.
+ * Proporciona operaciones para listar, buscar, crear, actualizar, eliminar y
+ * autenticar a los entrenadores y administradores del juego utilizando
+ * estructuras basadas en DTOs.
  * </p>
- *
+ * * @author Gina Sánchez
+ * 
  * @version 1.0
  */
 @RestController
-@RequestMapping("/pokemon/usuarios")
-@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:8081"})
-@Tag(name = "Usuario", description = "Controlador para la gestión completa de usuarios de pokemon")
+@RequestMapping("/usuario")
+@CrossOrigin(origins = { "http://localhost:8080", "http://localhost:8081" })
+@Tag(name = "Usuario", description = "Controlador para la gestión de entrenadores y administradores del juego utilizando DTOs")
 public class UsuarioController {
 
 	/**
-	 * Servicio de lógica de negocio para la gestión de usuarios.
+	 * Servicio encargado de la lógica de negocio de la entidad Usuario.
 	 */
 	@Autowired
 	private UsuarioService usuarioService;
 
 	/**
-	 * Constructor por defecto.
-	 */
-	public UsuarioController() {
-	}
-
-	/**
-	 * Valida las credenciales del usuario para iniciar sesión.
-	 * Se utiliza el correo electrónico como identificador único.
+	 * Obtiene la lista completa de todos los usuarios registrados en el sistema.
 	 *
-	 * @param correo      Correo del usuario.
-	 * @param contrasenia Contraseña del usuario.
-	 * @return El objeto UsuarioDTO si es válido, o un error de autorización.
+	 * @return un objeto ResponseEntity que contiene la lista de UsuarioDTO y el
+	 *         estado HTTP ACCEPTED
 	 */
-	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestParam String correo, @RequestParam String contrasenia) {
-		List<UsuarioDTO> lista = usuarioService.findByCorreo(correo);
-
-		if (lista.isEmpty()) {
-			return new ResponseEntity<>("Usuario no encontrado", HttpStatus.NOT_FOUND);
-		}
-
-		UsuarioDTO usuario = lista.get(0);
-
-		if (usuario.getContrasenia().equals(contrasenia)) {
-			return new ResponseEntity<>(usuario, HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>("Contraseña incorrecta", HttpStatus.UNAUTHORIZED);
-		}
-	}
-
-	/**
-	 * Crea un nuevo usuario en el sistema.
-	 *
-	 * <p>
-	 * Endpoint: {@code POST /usuario/crear}
-	 * </p>
-	 *
-	 * @param nombre          Nombre o nickname del usuario.
-	 * @param contrasenia     Clave de seguridad para el acceso.
-	 * @param correo          Dirección de correo electrónico.
-	 * @param rol             Rol en el sistema (ej. Administrador, Jugador).
-	 * @param idiomaPreferido Idioma seleccionado por el usuario.
-	 * @param dinero          Cantidad inicial de dinero (monedas del juego).
-	 * @return {@link ResponseEntity} con el estado de la operación.
-	 */
-	@PostMapping("/crear")
-	public ResponseEntity<String> crearUsuario(@RequestParam String nombre, @RequestParam String contrasenia,
-			@RequestParam String correo, @RequestParam String rol, @RequestParam String idiomaPreferido,
-			@RequestParam int dinero) {
-
-		try {
-			UsuarioDTO nuevoUsuario = new UsuarioDTO();
-			nuevoUsuario.setNombre(nombre);
-			nuevoUsuario.setContrasenia(contrasenia);
-			nuevoUsuario.setCorreo(correo);
-			nuevoUsuario.setRol(rol);
-			nuevoUsuario.setIdiomaPreferido(idiomaPreferido);
-			nuevoUsuario.setDinero(dinero);
-
-			int status = usuarioService.create(nuevoUsuario);
-
-			if (status == 0) {
-				return new ResponseEntity<>("Usuario creado con éxito", HttpStatus.CREATED);
-			} else if (status == 1) {
-				return new ResponseEntity<>("El correo ya se encuentra registrado", HttpStatus.CONFLICT);
-			} else {
-				return new ResponseEntity<>("Error al crear el Usuario", HttpStatus.BAD_REQUEST);
-			}
-		} catch (NombreInvalidoException e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		} catch (CorreoInvalidoException e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		} catch (ContraseniaInvalidaException e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		} catch (Exception e) {
-			return new ResponseEntity<>("Error interno del servidor", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	/**
-	 * Retorna la lista completa de usuarios registrados.
-	 *
-	 * @return Lista de {@link UsuarioDTO} con estado HTTP.
-	 */
+	@Operation(summary = "Obtener todos los usuarios", description = "Retorna la lista completa de usuarios registrados en el sistema.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "202", description = "Lista de usuarios aceptada y retornada") })
 	@GetMapping("/mostrartodo")
 	public ResponseEntity<List<UsuarioDTO>> mostrarTodo() {
-		List<UsuarioDTO> usuarios = usuarioService.getAll();
-		if (!usuarios.isEmpty()) {
-			return new ResponseEntity<>(usuarios, HttpStatus.ACCEPTED);
-		} else {
-			return new ResponseEntity<>(usuarios, HttpStatus.NO_CONTENT); // Cambiado a NO_CONTENT para listas vacías
-		}
+		List<UsuarioDTO> lista = usuarioService.getAll();
+		return new ResponseEntity<>(lista, HttpStatus.ACCEPTED);
 	}
 
 	/**
-	 * Elimina un usuario según su ID.
+	 * Busca usuarios filtrando por su nombre o nickname.
 	 *
-	 * @param id Identificador único del usuario.
-	 * @return Mensaje descriptivo con el estado de la eliminación.
+	 * @param nombre el nombre o nickname del usuario a buscar
+	 * @return un objeto ResponseEntity con la lista de coincidencias y estado HTTP
+	 *         ACCEPTED, o estado NO_CONTENT si la lista está vacía
 	 */
-	@DeleteMapping("/eliminar")
-	public ResponseEntity<String> eliminarUsuario(@RequestParam Long id) {
-		try {
-			int status = usuarioService.deleteById(id);
-			if (status == 0) {
-				return new ResponseEntity<>("Usuario eliminado correctamente.", HttpStatus.ACCEPTED);
-			} else {
-				return new ResponseEntity<>("No se encontró el usuario con el ID ingresado: " + id,
-						HttpStatus.NOT_FOUND);
-			}
-		} catch (IdInvalidoException e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		} catch (Exception e) {
-			return new ResponseEntity<>("Error al procesar la solicitud", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	/**
-	 * Actualiza los datos de un usuario identificado por su ID.
-	 *
-	 * @param id              Identificador del usuario a actualizar.
-	 * @param nombre          Nuevo nombre.
-	 * @param contrasenia     Nueva contraseña.
-	 * @param correo          Nuevo correo electrónico.
-	 * @param rol             Nuevo rol en el sistema.
-	 * @param idiomaPreferido Nuevo idioma.
-	 * @param dinero          Saldo actual.
-	 * @return Respuesta con el estado de la actualización.
-	 */
-	@PutMapping("/actualizar")
-	public ResponseEntity<String> actualizarUsuario(@RequestParam Long id, @RequestParam String nombre,
-			@RequestParam String contrasenia, @RequestParam String correo, @RequestParam String rol,
-			@RequestParam String idiomaPreferido, @RequestParam int dinero) {
-		try {
-			UsuarioDTO usuarioActualizado = new UsuarioDTO();
-			usuarioActualizado.setNombre(nombre);
-			usuarioActualizado.setContrasenia(contrasenia);
-			usuarioActualizado.setCorreo(correo);
-			usuarioActualizado.setRol(rol);
-			usuarioActualizado.setIdiomaPreferido(idiomaPreferido);
-			usuarioActualizado.setDinero(dinero);
-
-			int status = usuarioService.updateById(id, usuarioActualizado);
-
-			if (status == 0) {
-				return new ResponseEntity<>("Usuario actualizado correctamente.", HttpStatus.ACCEPTED);
-			} else {
-				return new ResponseEntity<>("Error al actualizar el usuario.", HttpStatus.BAD_REQUEST);
-			}
-		} catch (NombreInvalidoException | CorreoInvalidoException | ContraseniaInvalidaException | IdInvalidoException e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		} catch (Exception e) {
-			return new ResponseEntity<>("Error inesperado", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	/**
-	 * Busca usuarios por nombre o nickname.
-	 *
-	 * @param nombre Nombre a buscar.
-	 * @return Lista de coincidencias encontradas.
-	 */
+	@Operation(summary = "Buscar usuario por nombre", description = "Filtra y retorna los usuarios cuyo nombre coincida con el parámetro.")
 	@GetMapping("/buscarpornombre")
-	public ResponseEntity<List<UsuarioDTO>> buscarPorNombre(@RequestParam String nombre) {
+	public ResponseEntity<List<UsuarioDTO>> buscarPorNombre(
+			@Parameter(description = "Nombre o nickname del usuario", required = true, example = "AshKetchum") @RequestParam String nombre) {
 		List<UsuarioDTO> lista = usuarioService.findByNombre(nombre);
 		if (!lista.isEmpty()) {
 			return new ResponseEntity<>(lista, HttpStatus.ACCEPTED);
@@ -220,13 +82,16 @@ public class UsuarioController {
 	}
 
 	/**
-	 * Busca un usuario por su correo electrónico.
+	 * Busca un usuario en el sistema mediante su dirección de correo electrónico.
 	 *
-	 * @param correo Correo a buscar.
-	 * @return Lista con el usuario encontrado o vacío.
+	 * @param correo la dirección de correo electrónico del usuario a buscar
+	 * @return un objeto ResponseEntity con el usuario encontrado y estado HTTP
+	 *         ACCEPTED, o estado NO_CONTENT si no existe
 	 */
+	@Operation(summary = "Buscar usuario por correo", description = "Retorna el usuario asociado al correo electrónico ingresado.")
 	@GetMapping("/buscarporcorreo")
-	public ResponseEntity<List<UsuarioDTO>> buscarPorCorreo(@RequestParam String correo) {
+	public ResponseEntity<List<UsuarioDTO>> buscarPorCorreo(
+			@Parameter(description = "Correo electrónico del usuario", required = true, example = "ash@paleta.com") @RequestParam String correo) {
 		List<UsuarioDTO> lista = usuarioService.findByCorreo(correo);
 		if (!lista.isEmpty()) {
 			return new ResponseEntity<>(lista, HttpStatus.ACCEPTED);
@@ -236,18 +101,92 @@ public class UsuarioController {
 	}
 
 	/**
-	 * Busca usuarios filtrando por su rol (Ej. "Jugador", "Admin").
+	 * Registra un nuevo entrenador o administrador a partir de un DTO enviado en el
+	 * cuerpo de la petición.
 	 *
-	 * @param rol Rol a buscar.
-	 * @return Lista de coincidencias.
+	 * @param usuarioDTO el objeto que contiene toda la información del nuevo
+	 *                   usuario
+	 * @return un objeto ResponseEntity con el mensaje de éxito y estado CREATED, o
+	 *         un mensaje de error con estado BAD_REQUEST si falla la validación
 	 */
-	@GetMapping("/buscarporrol")
-	public ResponseEntity<List<UsuarioDTO>> buscarPorRol(@RequestParam String rol) {
-		List<UsuarioDTO> lista = usuarioService.findByRol(rol);
-		if (!lista.isEmpty()) {
-			return new ResponseEntity<>(lista, HttpStatus.ACCEPTED);
+	@Operation(summary = "Crear nuevo usuario", description = "Registra un nuevo entrenador o administrador pasando un objeto UsuarioDTO estructurado en el cuerpo de la petición.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "201", description = "Usuario creado exitosamente", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "Usuario creado con éxito"))),
+			@ApiResponse(responseCode = "400", description = "Error en los datos estructurados recibidos o validación fallida") })
+	@PostMapping("/crear")
+	public ResponseEntity<String> crearUsuario(@RequestBody UsuarioDTO usuarioDTO) {
+		try {
+			usuarioService.create(usuarioDTO);
+			return new ResponseEntity<>("Usuario creado con éxito", HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<>("Error al crear usuario: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	/**
+	 * Actualiza los datos de un usuario existente mediante el envío del DTO
+	 * estructurado en el cuerpo de la petición.
+	 *
+	 * @param usuarioDTO el objeto que contiene las modificaciones y el
+	 *                   identificador único del usuario
+	 * @return un objeto ResponseEntity con mensaje de éxito y estado ACCEPTED, o
+	 *         mensaje de error con estado NOT_FOUND si el usuario no existe
+	 */
+	@Operation(summary = "Actualizar usuario existente", description = "Modifica los datos de un usuario enviando el DTO completo con los datos modificados en el cuerpo de la petición.")
+	@ApiResponses(value = { @ApiResponse(responseCode = "202", description = "Usuario actualizado correctamente"),
+			@ApiResponse(responseCode = "404", description = "Usuario no encontrado o error en los identificadores") })
+	@PutMapping("/actualizar")
+	public ResponseEntity<String> actualizarUsuario(@RequestBody UsuarioDTO usuarioDTO) {
+		int status = usuarioService.updateById(usuarioDTO.getId(), usuarioDTO);
+		if (status == 0) {
+			return new ResponseEntity<>("Usuario actualizado exitosamente", HttpStatus.ACCEPTED);
 		} else {
-			return new ResponseEntity<>(lista, HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>("Usuario no encontrado o error al actualizar", HttpStatus.NOT_FOUND);
+		}
+	}
+
+	/**
+	 * Elimina de manera permanente un usuario del sistema utilizando su
+	 * identificador único.
+	 *
+	 * @param id el identificador único del usuario a eliminar
+	 * @return un objeto ResponseEntity con mensaje de éxito y estado ACCEPTED, o
+	 *         mensaje de error con estado NOT_FOUND si no existe el identificador
+	 */
+	@Operation(summary = "Eliminar usuario por ID", description = "Borra permanentemente un usuario de la base de datos usando su ID único pasado como parámetro.")
+	@ApiResponses(value = { @ApiResponse(responseCode = "202", description = "Usuario eliminado correctamente"),
+			@ApiResponse(responseCode = "404", description = "Usuario no encontrado") })
+	@DeleteMapping("/eliminar")
+	public ResponseEntity<String> eliminarUsuario(
+			@Parameter(description = "ID único del usuario a eliminar", required = true, example = "1") @RequestParam Long id) {
+		int status = usuarioService.deleteById(id);
+		if (status == 0) {
+			return new ResponseEntity<>("Usuario eliminado exitosamente", HttpStatus.ACCEPTED);
+		} else {
+			return new ResponseEntity<>("Error al eliminar, usuario no encontrado", HttpStatus.NOT_FOUND);
+		}
+	}
+
+	/**
+	 * Procesa el inicio de sesión validando el nombre de usuario y la contraseña
+	 * provistos.
+	 *
+	 * @param nombre      el nombre de usuario o nickname del entrenador
+	 * @param contrasenia la contraseña sin encriptar provista en el formulario de
+	 *                    login
+	 * @return un objeto ResponseEntity con mensaje de éxito y estado OK, o mensaje
+	 *         de error con estado UNAUTHORIZED si las credenciales son incorrectas
+	 */
+	@Operation(summary = "Inicio de sesión", description = "Valida las credenciales de un entrenador mediante su nombre de usuario y contraseña.")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Login exitoso"),
+			@ApiResponse(responseCode = "401", description = "Credenciales inválidas") })
+	@PostMapping("/login")
+	public ResponseEntity<String> login(@RequestParam String nombre, @RequestParam String contrasenia) {
+		int resultado = usuarioService.validateCredentials(nombre, contrasenia);
+		if (resultado == 0) {
+			return new ResponseEntity<>("Login exitoso", HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>("Credenciales inválidas", HttpStatus.UNAUTHORIZED);
 		}
 	}
 }

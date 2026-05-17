@@ -25,7 +25,7 @@ public class LoadDatabase {
 		return args -> {
 			Usuario admin = userRepo.findByCorreo("administrador@gmail.com").orElse(new Usuario());
 
-			admin.setNombre("admin");
+			admin.setNombre("AdministradorPokedes");
 			admin.setCorreo("administrador@gmail.com");
 			admin.setContrasenia(passwordEncoder.encode("User2026*/s"));
 			admin.setRol(Role.ADMINISTRADOR);
