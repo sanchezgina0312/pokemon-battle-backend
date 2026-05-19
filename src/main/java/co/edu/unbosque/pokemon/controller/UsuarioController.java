@@ -1,6 +1,7 @@
 package co.edu.unbosque.pokemon.controller;
 
 import co.edu.unbosque.pokemon.dto.UsuarioDTO;
+import co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler;
 import co.edu.unbosque.pokemon.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -115,7 +116,6 @@ public class UsuarioController {
         }
     }
 
-    // ── NUEVO ──────────────────────────────────────────────────────────────────
     @Operation(summary = "Login de usuario", description = "Valida correo y contraseña usando BCrypt.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Login exitoso"),
@@ -136,5 +136,10 @@ public class UsuarioController {
             default -> new ResponseEntity<>("Correo o contraseña incorrectos", HttpStatus.UNAUTHORIZED);
         };
     }
-    // ──────────────────────────────────────────────────────────────────────────
+    
+    @GetMapping("/traducir")
+    public ResponseEntity<String> traducirTexto( @RequestParam String texto, @RequestParam String idioma) {
+        String resultado = PokemonHTTPRequestHandler.traducirTexto(texto, idioma);
+        return new ResponseEntity<>(resultado, HttpStatus.OK);
+    }
 }
