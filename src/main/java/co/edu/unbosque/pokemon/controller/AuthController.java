@@ -3,6 +3,7 @@ package co.edu.unbosque.pokemon.controller;
 import co.edu.unbosque.pokemon.dto.UsuarioDTO;
 import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.security.JwtUtil;
+import co.edu.unbosque.pokemon.service.EmailService;
 import co.edu.unbosque.pokemon.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,6 +33,8 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UsuarioService userService;
+    @Autowired
+    private EmailService emailService;
 
     public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UsuarioService userService) {
         this.authenticationManager = authenticationManager;
@@ -37,9 +42,6 @@ public class AuthController {
         this.userService = userService;
     }
 
-    /**
-     * Login usando CORREO y contraseña — el correo es el username en Spring Security.
-     */
     @Operation(summary = "Iniciar sesión", description = "Envía correo y contraseña para recibir un Token JWT.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Exitoso", content = @Content(schema = @Schema(implementation = AuthResponse.class))),
@@ -50,10 +52,9 @@ public class AuthController {
                 examples = @ExampleObject(value = "{\"correo\": \"administrador@gmail.com\", \"contrasenia\": \"User2026*/\"}"))
             @RequestBody LoginRequest loginRequest) {
         try {
-            // Autenticar con CORREO (getUsername() retorna correo en la entidad Usuario)
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginRequest.getCorreo(),      // ← correo como username
+                            loginRequest.getCorreo(),
                             loginRequest.getContrasenia()
                     ));
 
@@ -87,11 +88,23 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se pudo completar el registro.");
         }
     }
-
-    // ─── DTOs internos ────────────────────────────────────────────────────────
+    
+    @PostMapping("/enviar-codigo")
+    public ResponseEntity<String> enviarCodigoVerificacion(
+            @RequestParam String correo, 
+            @RequestParam String nombre) {
+        try {
+            String codigo = emailService.generarCodigoVerificacion();
+            emailService.enviarCorreoCodigo(correo, codigo, nombre);
+            // Devolvemos el código a Angular para que él valide
+            return new ResponseEntity<>(codigo, org.springframework.http.HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error al enviar el correo", org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     public static class LoginRequest {
-        private String correo;       // ← cambiado de nombre a correo
+        private String correo;
         private String contrasenia;
 
         public String getCorreo() { return correo; }

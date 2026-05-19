@@ -37,7 +37,9 @@ public class SecurityConfig {
                     "/usuario/login",
                     "/usuario/crear",
                     "/swagger-ui/**",
-                    "/v3/api-docs/**"
+                    "/v3/api-docs/**",
+                    "/usuario/traducir",
+                    "/pokemon/auth/enviar-codigo"
                 ).permitAll()
                 .anyRequest().access((authentication, context) -> {
                     var authObj = authentication.get();
