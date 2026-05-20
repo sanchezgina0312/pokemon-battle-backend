@@ -33,6 +33,7 @@ public class Usuario implements UserDetails {
 	private boolean cuentaBloqueada;
 	private boolean credencialExpirada;
 	private boolean activado;
+	private String genero;
 
 	public Usuario() {
 		this.cuentaExpirada = false;
@@ -206,6 +207,16 @@ public class Usuario implements UserDetails {
 	@Override
 	public boolean isEnabled() {
 		return activado;
+	}
+	
+	
+
+	public String getGenero() {
+		return genero;
+	}
+
+	public void setGenero(String genero) {
+		this.genero = genero;
 	}
 
 	@Override
