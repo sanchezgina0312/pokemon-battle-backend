@@ -1,6 +1,7 @@
 package co.edu.unbosque.pokemon.controller;
 
 import co.edu.unbosque.pokemon.dto.UsuarioDTO;
+import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler;
 import co.edu.unbosque.pokemon.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -142,4 +144,21 @@ public class UsuarioController {
         String resultado = PokemonHTTPRequestHandler.traducirTexto(texto, idioma);
         return new ResponseEntity<>(resultado, HttpStatus.OK);
     }
+    
+    @PutMapping("/genero")
+    public ResponseEntity<String> actualizarGenero(
+            @RequestParam String genero,
+            Authentication authentication) {
+ 
+        Usuario usuarioAutenticado = (Usuario) authentication.getPrincipal();
+        Long idSeguro = usuarioAutenticado.getId();
+        int status = usuarioService.actualizarGenero(idSeguro, genero);
+        
+        if (status == 0) {
+            return new ResponseEntity<>("Personaje guardado exitosamente", HttpStatus.ACCEPTED);
+        } else {
+            return new ResponseEntity<>("Error al guardar personaje", HttpStatus.NOT_FOUND);
+        }
+    }
+    
 }

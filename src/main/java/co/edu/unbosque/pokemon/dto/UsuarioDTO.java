@@ -49,11 +49,17 @@ public class UsuarioDTO {
 	 * Cantidad de saldo o fondos económicos digitales que posee el usuario para realizar compras en la tienda.
 	 */
 	private int dinero;
+	
+	/**
+	 * Identificador de personaje para el usuario
+	 */
+	private String genero;
 
 	/**
 	 * Constructor por defecto de la clase.
 	 * Crea una nueva instancia vacía de {@code UsuarioDTO}.
 	 */
+
 	public UsuarioDTO() {
 
 	}
@@ -204,6 +210,27 @@ public class UsuarioDTO {
 	 */
 	public void setDinero(int dinero) {
 		this.dinero = dinero;
+	}
+	
+	
+
+	/**
+	 * Obtiene el personaje elegido por el usuario.
+	 *
+	 * @return Un string con el genero seleccionado.
+	 */
+	public String getGenero() {
+		return genero;
+	}
+
+	/**
+	 * Obtiene el personaje elegido por el usuario.
+	 *
+	 * @param genero El genero a asignar.
+	 */
+
+	public void setGenero(String genero) {
+		this.genero = genero;
 	}
 
 	/**

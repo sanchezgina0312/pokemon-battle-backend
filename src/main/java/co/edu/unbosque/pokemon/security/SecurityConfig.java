@@ -80,15 +80,16 @@ public class SecurityConfig {
 
                     if (isAdminOnly) return new AuthorizationDecision(false);
 
-                    // Endpoints permitidos para USUARIO común
+                 // Endpoints permitidos para USUARIO común
                     boolean isUsuarioAllowed = path.startsWith("/captura/")
                         || path.startsWith("/combate/")
                         || path.startsWith("/centropokemon/")
                         || path.startsWith("/tienda/")
                         || path.startsWith("/inventario/")
                         || path.startsWith("/item/")
-                        || path.startsWith("/pokemon/");
-
+                        || path.startsWith("/pokemon/")
+                        || path.startsWith("/usuario/genero");
+          
                     return new AuthorizationDecision(isUsuarioAllowed);
                 }))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

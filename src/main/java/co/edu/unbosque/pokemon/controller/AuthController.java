@@ -63,10 +63,8 @@ public class AuthController {
 
             if (userDetails instanceof Usuario) {
                 Usuario user = (Usuario) userDetails;
-                return ResponseEntity.ok(new AuthResponse(jwt, user.getRol().name(), user.getId(), user.getNombre()));
-            }
-
-            return ResponseEntity.ok(new AuthResponse(jwt, null, null, null));
+                return ResponseEntity.ok(new AuthResponse(jwt, user.getRol().name(), user.getId(), user.getNombre(), user.getGenero()));  }
+        return ResponseEntity.ok(new AuthResponse(jwt, null, null, null, null));
 
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -119,13 +117,15 @@ public class AuthController {
         private String role;
         private Long id;
         private String nombre;
+        private String genero;
 
-        public AuthResponse(String token, String role, Long id, String nombre) {
+        public AuthResponse(String token, String role, Long id, String nombre, String genero) {
             this.token = token;
             this.role = role;
             this.id = id;
             this.nombre = nombre;
-        }
+            this.genero=genero;
+            }
 
         public String getToken() { return token; }
         public void setToken(String token) { this.token = token; }
@@ -136,6 +136,9 @@ public class AuthController {
         public Long getId() { return id; }
         public void setId(Long id) { this.id = id; }
 
+        public String getGenero() { return genero; }
+        public void setGenero(String genero) { this.genero = genero; }
+        
         public String getNombre() { return nombre; }
         public void setNombre(String nombre) { this.nombre = nombre; }
     }

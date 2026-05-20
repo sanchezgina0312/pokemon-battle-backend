@@ -216,6 +216,17 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	}
 	// ──────────────────────────────────────────────────────────────────────────
 
+	public int actualizarGenero(Long id, String genero) {
+	    Optional<Usuario> encontrado = usuarioRep.findById(id);
+	    if (encontrado.isPresent()) {
+	        Usuario temp = encontrado.get();
+	        temp.setGenero(genero);
+	        usuarioRep.save(temp);
+	        return 0; 
+	    }
+	    return 1; 
+	}
+		
 	public UsuarioRepository getUsuarioRep() {
 		return usuarioRep;
 	}
