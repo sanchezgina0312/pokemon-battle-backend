@@ -51,5 +51,7 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
 	 */
 	public boolean existsByNombre(String nombre);
 
+	public boolean existsByCorreo(String correo);
+
 	public void deleteByNombre(String nombre);
 }
