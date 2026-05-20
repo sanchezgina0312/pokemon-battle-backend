@@ -23,28 +23,37 @@ import co.edu.unbosque.pokemon.exception.NombreInvalidoException;
  */
 public class LanzadorDeException {
 
+	
 	/**
 	 * Verifica que el nombre proporcionado sea válido según las reglas del sistema.
-	 * * @param nombre el nombre completo a validar.
+	 * 
+	 * @param nombre el nombre a validar.
 	 * 
 	 * @throws NombreInvalidoException si el nombre contiene espacios dobles,
-	 *                                 caracteres no permitidos o tiene menos de dos
-	 *                                 palabras.
+	 *                                 caracteres no permitidos o no cumple
+	 *                                 con la cantidad permitida de palabras.
 	 */
 	public static void verificarNombre(String nombre) {
-		if (nombre == null || nombre.trim().isEmpty()) {
-			throw new NombreInvalidoException("El nombre no puede estar vacío");
-		}
-		if (nombre.contains("  ")) {
-			throw new NombreInvalidoException("El nombre no puede contener espacios dobles");
-		}
-		if (!nombre.matches("^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$")) {
-			throw new NombreInvalidoException("El nombre solo debe contener letras y espacios");
-		}
-		String[] palabras = nombre.trim().split("\\s+");
-		if (palabras.length < 2) {
-			throw new NombreInvalidoException("El nombre debe tener al menos dos palabras");
-		}
+
+	    if (nombre == null || nombre.trim().isEmpty()) {
+	        throw new NombreInvalidoException("El nombre no puede estar vacío");
+	    }
+
+	    if (nombre.contains("  ")) {
+	        throw new NombreInvalidoException("El nombre no puede contener espacios dobles");
+	    }
+
+	    if (!nombre.matches("^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$")) {
+	        throw new NombreInvalidoException("El nombre solo debe contener letras y espacios");
+	    }
+
+	    String[] palabras = nombre.trim().split("\\s+");
+
+	    if (palabras.length < 1 || palabras.length > 2) {
+	        throw new NombreInvalidoException(
+	            "El nombre debe tener mínimo una palabra y máximo dos"
+	        );
+	    }
 	}
 
 	/**
