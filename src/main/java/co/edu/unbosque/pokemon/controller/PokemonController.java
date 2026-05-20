@@ -40,7 +40,7 @@ import co.edu.unbosque.pokemon.service.PokemonService;
  */
 @RestController
 @RequestMapping("/pokemon")
-@CrossOrigin(origins = {"http://localhost:8080/", "http://localhost:8081"})
+@CrossOrigin(origins = {"http://localhost:8080/", "http://localhost:8081", "http://localhost:4200"})
 public class PokemonController {
 
 	/**
@@ -119,16 +119,44 @@ public class PokemonController {
 	 * @return Un {@link ResponseEntity} con la lista de {@link PokemonDTO} y estado {@link HttpStatus#ACCEPTED} (202)
 	 *          si contiene registros; de lo contrario, una lista vacía con estado {@link HttpStatus#NO_CONTENT} (204).
 	 */
-	@GetMapping("/mostrartodo")
-	public ResponseEntity<List<PokemonDTO>> mostrarTodo() {
-		List<PokemonDTO> lista = pokemonService.getAll();
-		if (!lista.isEmpty()) {
-			return new ResponseEntity<>(lista, HttpStatus.ACCEPTED);
-		} else {
-			return new ResponseEntity<>(lista, HttpStatus.NO_CONTENT);
-		}
-	}
+	 
+		@GetMapping("/mostrartodo")
+		public ResponseEntity<List<PokemonDTO>> mostrarTodo() {
+		    // 1. Intentamos traer lo que haya en la base de datos local (capturados)
+		    List<PokemonDTO> listaLocal = pokemonService.getAll();
+		    
+		    // 2. Si la base de datos está vacía (Modo Administrador), cargamos los datos de la API
+		    if (listaLocal.isEmpty()) {
+		        List<PokemonDTO> listaAdmin = new ArrayList<>();
+		        
+		        // Ejecutamos la carga de datos de tu Handler (los 151 pokémon)
+		        if (PokemonHTTPRequestHandler.getPokedexDatos().isEmpty()) {
+		            PokemonHTTPRequestHandler.cargarPokedex();
+		        }
 
+		        for (InformacionPokemonDTO info : PokemonHTTPRequestHandler.getPokedexDatos()) {
+		            PokemonDTO dto = new PokemonDTO();
+		            dto.setPokeApiId(info.getId());
+		            dto.setApodo(info.getNombre()); 
+		            
+		            // Extraemos el primer tipo del Pokémon (veneno, fuego, agua, etc.)
+		            if (info.getListaTipos() != null && !info.getListaTipos().isEmpty()) {
+		                String tipo = info.getListaTipos().get(0).getInformacionTipo().getNombreTipo();
+		                dto.setEstado(tipo); // Guardamos el TIPO en el campo estado para Angular
+		            }
+		            
+		            listaAdmin.add(dto);
+		        }
+		        // DEVOLVEMOS LA LISTA DE LA API
+		        return new ResponseEntity<>(listaAdmin, HttpStatus.OK);
+		    }
+		    
+		    // 3. SI HAY DATOS LOCALES, DEVOLVEMOS LOS LOCALES
+		    return new ResponseEntity<>(listaLocal, HttpStatus.OK);
+		}
+		/**
+		 * Actualiza las estadísticas de un Pokémon (usado tras una batalla o nivel subido).
+		 */
 	/**
 	 * Actualiza las estadísticas, ataques o el estado de un Pokémon existente por su ID.
 	 * <p>

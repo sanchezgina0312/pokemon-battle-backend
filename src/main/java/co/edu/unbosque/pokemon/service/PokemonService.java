@@ -17,7 +17,8 @@ import co.edu.unbosque.pokemon.util.LanzadorDeException;
  * Servicio encargado de gestionar las operaciones CRUD de la entidad Pokemon.
  * <p>
  * Permite crear (capturar), consultar, actualizar y eliminar (liberar) pokemones,
- * gestionando atributos de combate como salud, nivel y dueño.
+ * gestionando atributos de combate como salud, nivel y dueño, e integrando los
+ * tipos oficiales consumidos de forma interna en el Backend desde la PokéAPI.
  * </p>
  */
 @Service
@@ -43,7 +44,6 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
 	@Override
 	public int create(PokemonDTO data) {
 		LanzadorDeException.verificarNombre(data.getApodo());
-		// Asumimos que LanzadorDeException ya tiene validaciones para estos tipos
 		LanzadorDeException.verificarId(data.getIdUsuarioPropietario()); 
 
 		Pokemon entity = mapper.map(data, Pokemon.class);
@@ -57,7 +57,7 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
 	}
 
 	/**
-	 * Obtiene todos los pokemones registrados en el sistema.
+	 * Obtiene todos los pokemones registrados en el sistema enriquecidos con sus tipos de la PokéAPI.
 	 * @return lista de PokemonDTO
 	 */
 	@Override
@@ -65,7 +65,11 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
 		List<Pokemon> entityList = (List<Pokemon>) pokemonRep.findAll();
 		List<PokemonDTO> dtoList = new ArrayList<>();
 
-		entityList.forEach(entity -> dtoList.add(mapper.map(entity, PokemonDTO.class)));
+		entityList.forEach(entity -> {
+			PokemonDTO dto = mapper.map(entity, PokemonDTO.class);
+			enriquecerConTipos(dto);
+			dtoList.add(dto);
+		});
 
 		return dtoList;
 	}
@@ -126,7 +130,7 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
 	}
 
 	/**
-	 * Busca pokemones por su apodo.
+	 * Busca pokemones por su apodo enriquecidos con sus tipos correspondientes.
 	 */
 	public List<PokemonDTO> findByApodo(String apodo) {
 		LanzadorDeException.verificarNombre(apodo);
@@ -134,14 +138,18 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
 		List<PokemonDTO> dtoList = new ArrayList<>();
 
 		if (encontrados.isPresent() && !encontrados.get().isEmpty()) {
-			encontrados.get().forEach(entity -> dtoList.add(mapper.map(entity, PokemonDTO.class)));
+			encontrados.get().forEach(entity -> {
+				PokemonDTO dto = mapper.map(entity, PokemonDTO.class);
+				enriquecerConTipos(dto);
+				dtoList.add(dto);
+			});
 		}
 
 		return dtoList;
 	}
 
 	/**
-	 * MÉTODO IMPORTANTE: Busca todos los pokemones que pertenecen a un usuario.
+	 * Busca todos los pokemones que pertenecen a un usuario enriquecidos con sus tipos correspondientes.
 	 * @param idUsuario ID del entrenador propietario
 	 */
 	public List<PokemonDTO> findByPropietario(Long idUsuario) {
@@ -150,10 +158,37 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
 		List<PokemonDTO> dtoList = new ArrayList<>();
 
 		if (encontrados.isPresent()) {
-			encontrados.get().forEach(entity -> dtoList.add(mapper.map(entity, PokemonDTO.class)));
+			encontrados.get().forEach(entity -> {
+				PokemonDTO dto = mapper.map(entity, PokemonDTO.class);
+				enriquecerConTipos(dto);
+				dtoList.add(dto);
+			});
 		}
 
 		return dtoList;
+	}
+
+	/**
+	 * Método auxiliar interno privado para orquestar la llamada centralizada a la PokeAPI
+	 * a través de tu manejador HTTP sin repetir código.
+	 * * @param dto Instancia del DTO local a enriquecer con los tipos externos.
+	 */
+	private void enriquecerConTipos(PokemonDTO dto) {
+		if (dto.getPokeApiId() != null && dto.getPokeApiId() > 0) {
+			List<String> listaNombresTipos = new ArrayList<>();
+			
+			co.edu.unbosque.pokemon.dto.InformacionPokemonDTO detalleApi = 
+					PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(dto.getPokeApiId()));
+			
+			if (detalleApi != null && detalleApi.getListaTipos() != null) {
+				for (co.edu.unbosque.pokemon.dto.TipoPokemonDTO t : detalleApi.getListaTipos()) {
+					if (t.getInformacionTipo() != null && t.getInformacionTipo().getNombreTipo() != null) {
+						listaNombresTipos.add(t.getInformacionTipo().getNombreTipo().toUpperCase());
+					}
+				}
+			}
+			dto.setTipos(listaNombresTipos);
+		}
 	}
 
 	@Override

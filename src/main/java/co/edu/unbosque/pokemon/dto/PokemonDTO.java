@@ -1,5 +1,6 @@
 package co.edu.unbosque.pokemon.dto;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -10,8 +11,7 @@ import java.util.Objects;
  * incluyendo sus estadísticas de combate activas, su nivel, experiencia, los movimientos asignados 
  * y su condición actual.
  * </p>
- * 
- * @author Integrantes del Proyecto
+ * * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class PokemonDTO {
@@ -82,6 +82,12 @@ public class PokemonDTO {
 	 * Estado vital o condición alterada actual del Pokémon (ej. "ACTIVO", "DEBILITADO", "EN_EQUIPO").
 	 */
 	private String estado;
+
+	/**
+	 * Lista con los nombres de los tipos elementales del Pokémon (ej. ["GRASS", "POISON"]).
+	 * Se llena dinámicamente consultando la PokéAPI en la capa de servicio.
+	 */
+	private List<String> tipos;
 
 	/**
 	 * Constructor por defecto de la clase.
@@ -361,6 +367,24 @@ public class PokemonDTO {
 	}
 
 	/**
+	 * Obtiene la lista de tipos elementales asignados a esta criatura.
+	 *
+	 * @return Una lista de cadenas con los nombres de los tipos.
+	 */
+	public List<String> getTipos() {
+		return tipos;
+	}
+
+	/**
+	 * Establece la lista de tipos elementales obtenidos desde la API externa.
+	 *
+	 * @param tipos La nueva lista de nombres de tipos a asignar.
+	 */
+	public void setTipos(List<String> tipos) {
+		this.tipos = tipos;
+	}
+
+	/**
 	 * Genera un código hash único para la instancia actual basado en todos sus campos.
 	 *
 	 * @return El código hash calculado para este objeto.
@@ -368,15 +392,11 @@ public class PokemonDTO {
 	@Override
 	public int hashCode() {
 		return Objects.hash(apodo, estado, experienciaAcumulada, id, idUsuarioPropietario, nivel, nombreAtaque1,
-				nombreAtaque2, nombreAtaque3, nombreAtaque4, pokeApiId, saludActual, saludMaxima);
+				nombreAtaque2, nombreAtaque3, nombreAtaque4, pokeApiId, saludActual, saludMaxima, tipos);
 	}
 
 	/**
 	 * Compara de forma estructural la igualdad de este objeto frente a otro.
-	 * <p>
-	 * Dos instancias se evalúan como idénticas si y solo si todos sus atributos analógicos 
-	 * (identificadores, niveles, nombres de ataques, salud y estado) coinciden en su totalidad.
-	 * </p>
 	 *
 	 * @param obj El objeto con el cual realizar la comparación.
 	 * @return {@code true} si los objetos son estructuralmente equivalentes; {@code false} en caso contrario.
@@ -397,7 +417,8 @@ public class PokemonDTO {
 				&& Objects.equals(nombreAtaque2, other.nombreAtaque2)
 				&& Objects.equals(nombreAtaque3, other.nombreAtaque3)
 				&& Objects.equals(nombreAtaque4, other.nombreAtaque4) && Objects.equals(pokeApiId, other.pokeApiId)
-				&& saludActual == other.saludActual && saludMaxima == other.saludMaxima;
+				&& saludActual == other.saludActual && saludMaxima == other.saludMaxima
+				&& Objects.equals(tipos, other.tipos);
 	}
 
 	/**
@@ -411,7 +432,7 @@ public class PokemonDTO {
 				+ ", experienciaAcumulada=" + experienciaAcumulada + ", saludActual=" + saludActual + ", saludMaxima="
 				+ saludMaxima + ", nombreAtaque1=" + nombreAtaque1 + ", nombreAtaque2=" + nombreAtaque2
 				+ ", nombreAtaque3=" + nombreAtaque3 + ", nombreAtaque4=" + nombreAtaque4 + ", idUsuarioPropietario="
-				+ idUsuarioPropietario + ", estado=" + estado + "]";
+				+ idUsuarioPropietario + ", estado=" + estado + ", tipos=" + tipos + "]";
 	}
 
 }
