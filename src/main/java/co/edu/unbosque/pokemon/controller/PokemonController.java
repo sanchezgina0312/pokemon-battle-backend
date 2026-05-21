@@ -232,6 +232,19 @@ public class PokemonController {
         }
     }
     
+    // NUEVO: Endpoint específico para consultar el catálogo basado en la Pokédex
+    @GetMapping("/pokedex/{pokeApiId}")
+    public ResponseEntity<PokemonDTO> obtenerPorPokedex(@PathVariable Integer pokeApiId) {
+        System.out.println("DEBUG: Petición recibida para buscar especie por Pokédex ID: " + pokeApiId);
+        PokemonDTO p = pokemonService.obtenerEspeciePorPokeApiId(pokeApiId);
+        
+        if (p != null) {
+            return new ResponseEntity<>(p, HttpStatus.OK);
+        } else {
+            System.out.println("DEBUG: No se encontró en la BD local la especie con Pokédex ID: " + pokeApiId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
     
     @PostMapping("/starter")
     public ResponseEntity<String> elegirStarter(
@@ -273,6 +286,7 @@ public class PokemonController {
         pokemonService.create(starter);
         return new ResponseEntity<>("Starter asignado", HttpStatus.CREATED);
     }
+    
     @GetMapping("/admin/todos")
     public ResponseEntity<List<PokemonDTO>> mostrarTodoAdmin() {
             if (PokemonHTTPRequestHandler.getPokedexDatos().isEmpty()) {

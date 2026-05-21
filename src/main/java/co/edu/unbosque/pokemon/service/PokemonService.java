@@ -168,10 +168,26 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
 		return dtoList;
 	}
 
+	// NUEVO: Método para obtener la especie utilizando el ID de la Pokédex (pokeApiId)
+	/**
+	 * Busca la primera especie registrada que coincida con el ID de la Pokédex.
+	 * @param pokeApiId ID de la PokéAPI.
+	 * @return El DTO del Pokémon o null si no se encuentra.
+	 */
+	public PokemonDTO obtenerEspeciePorPokeApiId(Integer pokeApiId) {
+		Optional<Pokemon> encontrado = pokemonRep.findFirstByPokeApiId(pokeApiId);
+		if (encontrado.isPresent()) {
+			PokemonDTO dto = mapper.map(encontrado.get(), PokemonDTO.class);
+			enriquecerConTipos(dto);
+			return dto;
+		}
+		return null;
+	}
+
 	/**
 	 * Método auxiliar interno privado para orquestar la llamada centralizada a la PokeAPI
 	 * a través de tu manejador HTTP sin repetir código.
-	 * * @param dto Instancia del DTO local a enriquecer con los tipos externos.
+	 * @param dto Instancia del DTO local a enriquecer con los tipos externos.
 	 */
 	private void enriquecerConTipos(PokemonDTO dto) {
 		if (dto.getPokeApiId() != null && dto.getPokeApiId() > 0) {

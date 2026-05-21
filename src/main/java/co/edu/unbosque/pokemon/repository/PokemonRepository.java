@@ -48,5 +48,13 @@ public interface PokemonRepository extends CrudRepository<Pokemon, Long> {
 	 * @return true si existe, false en caso contrario.
 	 */
 	public boolean existsByPokeApiId(Integer pokeApiId);
+
+	// NUEVO: Método para buscar por el número oficial de la Pokédex
+	/**
+	 * Busca el primer registro de un pokemon según su ID de la PokeAPI.
+	 * @param pokeApiId ID proveniente de la API externa.
+	 * @return Un Optional con el pokemon encontrado.
+	 */
+	public Optional<Pokemon> findFirstByPokeApiId(Integer pokeApiId);
 	
 }
