@@ -62,12 +62,14 @@ public class TiendaService {
 	private int calcularPrecio(Item item) {
 		String nombre = item.getNombre().toUpperCase();
 		return switch (nombre) {
-			case "POCION", "POKEBOLA", "ANTIPARALIZ" -> 200;
+			case "ANTIPARALIZ", "POKÉ BALL" -> 200;
 			case "SUPERBOLA", "CURA TOTAL" -> 600;
 			case "ULTRABOLA" -> 1200;
 			case "REVIVIR" -> 1500;
-			case "ANTIDOTO" -> 100;
-			case "ANTIQUEMAR", "DESHIELO", "DESPERTAR" -> 250;
+			case "ANTÍDOTO" -> 100;
+			case "ANTIQUEMAR", "ANTIHIELO", "DESPERTAR" -> 250;
+			case "SUPERPOSICIÓN" -> 700;
+			case "REPELENTE" -> 300;
 			default -> item.getCosto();
 		};
 	}
