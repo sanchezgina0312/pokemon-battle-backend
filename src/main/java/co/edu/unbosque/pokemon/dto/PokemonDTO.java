@@ -88,6 +88,11 @@ public class PokemonDTO {
 	 * Se llena dinámicamente consultando la PokéAPI en la capa de servicio.
 	 */
 	private List<String> tipos;
+	
+	private int ataque;
+	private int defensa;
+	private int velocidad;
+	private String estadoAlterado;
 
 	/**
 	 * Constructor por defecto de la clase.
@@ -116,7 +121,8 @@ public class PokemonDTO {
 	 */
 	public PokemonDTO(Integer pokeApiId, String apodo, int nivel, int experienciaAcumulada, int saludActual,
 			int saludMaxima, String nombreAtaque1, String nombreAtaque2, String nombreAtaque3, String nombreAtaque4,
-			Long idUsuarioPropietario, String estado) {
+			Long idUsuarioPropietario, String estado, List<String> tipos, int ataque, int defensa, int velocidad,
+			String estadoAlterado) {
 		super();
 		this.pokeApiId = pokeApiId;
 		this.apodo = apodo;
@@ -130,6 +136,11 @@ public class PokemonDTO {
 		this.nombreAtaque4 = nombreAtaque4;
 		this.idUsuarioPropietario = idUsuarioPropietario;
 		this.estado = estado;
+		this.tipos = tipos;
+		this.ataque = ataque;
+		this.defensa = defensa;
+		this.velocidad = velocidad;
+		this.estadoAlterado = estadoAlterado;
 	}
 
 	/**
@@ -383,24 +394,54 @@ public class PokemonDTO {
 	public void setTipos(List<String> tipos) {
 		this.tipos = tipos;
 	}
+	
+
+	public int getAtaque() {
+		return ataque;
+	}
+
+	public void setAtaque(int ataque) {
+		this.ataque = ataque;
+	}
+
+	public int getDefensa() {
+		return defensa;
+	}
+
+	public void setDefensa(int defensa) {
+		this.defensa = defensa;
+	}
+
+	public int getVelocidad() {
+		return velocidad;
+	}
+
+	public void setVelocidad(int velocidad) {
+		this.velocidad = velocidad;
+	}
+
+	public String getEstadoAlterado() {
+		return estadoAlterado;
+	}
+
+	public void setEstadoAlterado(String estadoAlterado) {
+		this.estadoAlterado = estadoAlterado;
+	}
 
 	/**
 	 * Genera un código hash único para la instancia actual basado en todos sus campos.
 	 *
 	 * @return El código hash calculado para este objeto.
 	 */
+	
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(apodo, estado, experienciaAcumulada, id, idUsuarioPropietario, nivel, nombreAtaque1,
-				nombreAtaque2, nombreAtaque3, nombreAtaque4, pokeApiId, saludActual, saludMaxima, tipos);
+		return Objects.hash(apodo, ataque, defensa, estado, estadoAlterado, experienciaAcumulada, id,
+				idUsuarioPropietario, nivel, nombreAtaque1, nombreAtaque2, nombreAtaque3, nombreAtaque4, pokeApiId,
+				saludActual, saludMaxima, tipos, velocidad);
 	}
 
-	/**
-	 * Compara de forma estructural la igualdad de este objeto frente a otro.
-	 *
-	 * @param obj El objeto con el cual realizar la comparación.
-	 * @return {@code true} si los objetos son estructuralmente equivalentes; {@code false} en caso contrario.
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -410,7 +451,8 @@ public class PokemonDTO {
 		if (getClass() != obj.getClass())
 			return false;
 		PokemonDTO other = (PokemonDTO) obj;
-		return Objects.equals(apodo, other.apodo) && Objects.equals(estado, other.estado)
+		return Objects.equals(apodo, other.apodo) && ataque == other.ataque && defensa == other.defensa
+				&& Objects.equals(estado, other.estado) && Objects.equals(estadoAlterado, other.estadoAlterado)
 				&& experienciaAcumulada == other.experienciaAcumulada && id == other.id
 				&& Objects.equals(idUsuarioPropietario, other.idUsuarioPropietario) && nivel == other.nivel
 				&& Objects.equals(nombreAtaque1, other.nombreAtaque1)
@@ -418,7 +460,7 @@ public class PokemonDTO {
 				&& Objects.equals(nombreAtaque3, other.nombreAtaque3)
 				&& Objects.equals(nombreAtaque4, other.nombreAtaque4) && Objects.equals(pokeApiId, other.pokeApiId)
 				&& saludActual == other.saludActual && saludMaxima == other.saludMaxima
-				&& Objects.equals(tipos, other.tipos);
+				&& Objects.equals(tipos, other.tipos) && velocidad == other.velocidad;
 	}
 
 	/**
@@ -432,7 +474,9 @@ public class PokemonDTO {
 				+ ", experienciaAcumulada=" + experienciaAcumulada + ", saludActual=" + saludActual + ", saludMaxima="
 				+ saludMaxima + ", nombreAtaque1=" + nombreAtaque1 + ", nombreAtaque2=" + nombreAtaque2
 				+ ", nombreAtaque3=" + nombreAtaque3 + ", nombreAtaque4=" + nombreAtaque4 + ", idUsuarioPropietario="
-				+ idUsuarioPropietario + ", estado=" + estado + ", tipos=" + tipos + "]";
+				+ idUsuarioPropietario + ", estado=" + estado + ", tipos=" + tipos + ", ataque=" + ataque + ", defensa="
+				+ defensa + ", velocidad=" + velocidad + ", estadoAlterado=" + estadoAlterado + "]";
 	}
+
 
 }
