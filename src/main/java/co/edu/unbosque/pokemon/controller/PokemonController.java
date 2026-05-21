@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ import co.edu.unbosque.pokemon.dto.GritoPokemonDTO;
 import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
 import co.edu.unbosque.pokemon.dto.PokemonDTO;
 import co.edu.unbosque.pokemon.dto.SpriteItemDTO;
+import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.exception.IdInvalidoException;
 import co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler;
 import co.edu.unbosque.pokemon.service.PokemonService;
@@ -228,5 +230,47 @@ public class PokemonController {
             System.out.println("DEBUG: No se encontró el Pokémon con ID: " + id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+    
+    
+    @PostMapping("/starter")
+    public ResponseEntity<String> elegirStarter(
+            @RequestParam String tipo,
+            Authentication authentication) {
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+        Long idUsuario = usuario.getId();
+        PokemonDTO starter = new PokemonDTO();
+        switch(tipo.toLowerCase()) {
+
+            case "planta":
+                starter.setPokeApiId(1);
+                starter.setApodo("Bulbasaur");
+                break;
+
+            case "fuego":
+                starter.setPokeApiId(4);
+                starter.setApodo("Charmander");
+                break;
+
+            case "agua":
+                starter.setPokeApiId(7);
+                starter.setApodo("Squirtle");
+                break;
+            default:
+                return new ResponseEntity<>("Starter inválido", HttpStatus.BAD_REQUEST);
+        }
+
+        starter.setNivel(5);
+        starter.setExperienciaAcumulada(0);
+        starter.setSaludActual(100);
+        starter.setSaludMaxima(100);
+        starter.setNombreAtaque1("Placaje");
+        starter.setNombreAtaque2("Gruñido");
+        starter.setNombreAtaque3("");
+        starter.setNombreAtaque4("");
+        starter.setEstado("OK");
+        starter.setIdUsuarioPropietario(idUsuario);
+        pokemonService.create(starter);
+        return new ResponseEntity<>("Starter asignado", HttpStatus.CREATED);
     }
 }
