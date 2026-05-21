@@ -62,7 +62,7 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		LanzadorDeException.verificarContrasena(data.getContrasenia());
 		LanzadorDeException.verificarCorreoElectronico(data.getCorreo());
 
-		LanzadorDeException.verificarCorreoDuplicado(usuarioRep.existsByNombre(data.getNombre()));
+		LanzadorDeException.verificarCorreoDuplicado(usuarioRep.existsByCorreo(data.getCorreo()));
 
 		if (data.getNombre() == null || data.getNombre().isBlank()) {
 			return 1;
@@ -186,7 +186,6 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		return dtoList;
 	}
 
-	// ── NUEVO ──────────────────────────────────────────────────────────────────
 	/**
 	 * Valida las credenciales de un usuario por correo electrónico.
 	 * Usa PasswordEncoder para comparar la contraseña ingresada con el hash.
@@ -214,8 +213,18 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 
 		return 1;
 	}
-	// ──────────────────────────────────────────────────────────────────────────
 
+	public int actualizarGenero(Long id, String genero) {
+	    Optional<Usuario> encontrado = usuarioRep.findById(id);
+	    if (encontrado.isPresent()) {
+	        Usuario temp = encontrado.get();
+	        temp.setGenero(genero);
+	        usuarioRep.save(temp);
+	        return 0; 
+	    }
+	    return 1; 
+	}
+		
 	public UsuarioRepository getUsuarioRep() {
 		return usuarioRep;
 	}

@@ -45,7 +45,9 @@ public class SecurityConfig {
                     "/usuario/login",
                     "/usuario/crear",
                     "/swagger-ui/**",
-                    "/v3/api-docs/**"
+                    "/v3/api-docs/**",
+                    "/usuario/traducir",
+                    "/pokemon/auth/enviar-codigo"
                 ).permitAll()
                 .anyRequest().access((authentication, context) -> {
                     var authObj = authentication.get();
@@ -78,15 +80,16 @@ public class SecurityConfig {
 
                     if (isAdminOnly) return new AuthorizationDecision(false);
 
-                    // Endpoints permitidos para USUARIO común
+                 // Endpoints permitidos para USUARIO común
                     boolean isUsuarioAllowed = path.startsWith("/captura/")
                         || path.startsWith("/combate/")
                         || path.startsWith("/centropokemon/")
                         || path.startsWith("/tienda/")
                         || path.startsWith("/inventario/")
                         || path.startsWith("/item/")
-                        || path.startsWith("/pokemon/");
-
+                        || path.startsWith("/pokemon/")
+                        || path.startsWith("/usuario/genero");
+          
                     return new AuthorizationDecision(isUsuarioAllowed);
                 }))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
