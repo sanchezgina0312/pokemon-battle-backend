@@ -23,6 +23,10 @@ public class Pokemon {
 	private String nombreAtaque4;
 	private Long idUsuarioPropietario;
 	private String estado;
+	private int ataque;
+	private int defensa;
+	private int velocidad;
+	private String estadoAlterado;
 
 	public Pokemon() {
 
@@ -30,7 +34,7 @@ public class Pokemon {
 
 	public Pokemon(Integer pokeApiId, String apodo, int nivel, int experienciaAcumulada, int saludActual,
 			int saludMaxima, String nombreAtaque1, String nombreAtaque2, String nombreAtaque3, String nombreAtaque4,
-			Long idUsuarioPropietario, String estado) {
+			Long idUsuarioPropietario, String estado, int ataque, int defensa, int velocidad, String estadoAlterado) {
 		super();
 		this.pokeApiId = pokeApiId;
 		this.apodo = apodo;
@@ -44,6 +48,42 @@ public class Pokemon {
 		this.nombreAtaque4 = nombreAtaque4;
 		this.idUsuarioPropietario = idUsuarioPropietario;
 		this.estado = estado;
+		this.ataque = ataque;
+		this.defensa = defensa;
+		this.velocidad = velocidad;
+		this.estadoAlterado = estadoAlterado;
+	}
+
+	public int getAtaque() {
+		return ataque;
+	}
+
+	public void setAtaque(int ataque) {
+		this.ataque = ataque;
+	}
+
+	public int getDefensa() {
+		return defensa;
+	}
+
+	public void setDefensa(int defensa) {
+		this.defensa = defensa;
+	}
+
+	public int getVelocidad() {
+		return velocidad;
+	}
+
+	public void setVelocidad(int velocidad) {
+		this.velocidad = velocidad;
+	}
+
+	public String getEstadoAlterado() {
+		return estadoAlterado;
+	}
+
+	public void setEstadoAlterado(String estadoAlterado) {
+		this.estadoAlterado = estadoAlterado;
 	}
 
 	public long getId() {
@@ -152,8 +192,9 @@ public class Pokemon {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(apodo, estado, experienciaAcumulada, id, idUsuarioPropietario, nivel, nombreAtaque1,
-				nombreAtaque2, nombreAtaque3, nombreAtaque4, pokeApiId, saludActual, saludMaxima);
+		return Objects.hash(apodo, ataque, defensa, estado, estadoAlterado, experienciaAcumulada, id,
+				idUsuarioPropietario, nivel, nombreAtaque1, nombreAtaque2, nombreAtaque3, nombreAtaque4, pokeApiId,
+				saludActual, saludMaxima, velocidad);
 	}
 
 	@Override
@@ -165,14 +206,15 @@ public class Pokemon {
 		if (getClass() != obj.getClass())
 			return false;
 		Pokemon other = (Pokemon) obj;
-		return Objects.equals(apodo, other.apodo) && Objects.equals(estado, other.estado)
+		return Objects.equals(apodo, other.apodo) && ataque == other.ataque && defensa == other.defensa
+				&& Objects.equals(estado, other.estado) && Objects.equals(estadoAlterado, other.estadoAlterado)
 				&& experienciaAcumulada == other.experienciaAcumulada && id == other.id
 				&& Objects.equals(idUsuarioPropietario, other.idUsuarioPropietario) && nivel == other.nivel
 				&& Objects.equals(nombreAtaque1, other.nombreAtaque1)
 				&& Objects.equals(nombreAtaque2, other.nombreAtaque2)
 				&& Objects.equals(nombreAtaque3, other.nombreAtaque3)
 				&& Objects.equals(nombreAtaque4, other.nombreAtaque4) && Objects.equals(pokeApiId, other.pokeApiId)
-				&& saludActual == other.saludActual && saludMaxima == other.saludMaxima;
+				&& saludActual == other.saludActual && saludMaxima == other.saludMaxima && velocidad == other.velocidad;
 	}
 
 	@Override
@@ -181,7 +223,10 @@ public class Pokemon {
 				+ ", experienciaAcumulada=" + experienciaAcumulada + ", saludActual=" + saludActual + ", saludMaxima="
 				+ saludMaxima + ", nombreAtaque1=" + nombreAtaque1 + ", nombreAtaque2=" + nombreAtaque2
 				+ ", nombreAtaque3=" + nombreAtaque3 + ", nombreAtaque4=" + nombreAtaque4 + ", idUsuarioPropietario="
-				+ idUsuarioPropietario + ", estado=" + estado + "]";
+				+ idUsuarioPropietario + ", estado=" + estado + ", ataque=" + ataque + ", defensa=" + defensa
+				+ ", velocidad=" + velocidad + ", estadoAlterado=" + estadoAlterado + "]";
 	}
+
+	
 
 }
