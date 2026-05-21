@@ -40,26 +40,14 @@ public class PokemonController {
     }
 
     @PostMapping("/capturar")
-    public ResponseEntity<String> crearPokemon(
-            @RequestParam Integer pokeApiId,
-            @RequestParam String apodo,
-            @RequestParam int nivel,
-            @RequestParam int experienciaAcumulada,
-            @RequestParam int saludActual,
-            @RequestParam int saludMaxima,
-            @RequestParam String nombreAtaque1,
-            @RequestParam String nombreAtaque2,
-            @RequestParam String nombreAtaque3,
-            @RequestParam String nombreAtaque4,
-            @RequestParam String estado,
-            Authentication authentication) {
+    public ResponseEntity<String> crearPokemon(@RequestParam Integer pokeApiId, @RequestParam String apodo,
+            @RequestParam int nivel, @RequestParam int experienciaAcumulada, @RequestParam int saludActual,
+            @RequestParam int saludMaxima, @RequestParam String nombreAtaque1, @RequestParam String nombreAtaque2,
+            @RequestParam String nombreAtaque3, @RequestParam String nombreAtaque4,
+            @RequestParam Long idUsuarioPropietario, @RequestParam String estado) {
 
         try {
-
-            Usuario usuario = (Usuario) authentication.getPrincipal();
-
             PokemonDTO nuevoPokemon = new PokemonDTO();
-
             nuevoPokemon.setPokeApiId(pokeApiId);
             nuevoPokemon.setApodo(apodo);
             nuevoPokemon.setNivel(nivel);
@@ -70,10 +58,7 @@ public class PokemonController {
             nuevoPokemon.setNombreAtaque2(nombreAtaque2);
             nuevoPokemon.setNombreAtaque3(nombreAtaque3);
             nuevoPokemon.setNombreAtaque4(nombreAtaque4);
-
-
-            nuevoPokemon.setIdUsuarioPropietario(usuario.getId());
-
+            nuevoPokemon.setIdUsuarioPropietario(idUsuarioPropietario);
             nuevoPokemon.setEstado(estado);
 
             int status = pokemonService.create(nuevoPokemon);
@@ -83,7 +68,6 @@ public class PokemonController {
             } else {
                 return new ResponseEntity<>("Error al registrar el Pokémon", HttpStatus.BAD_REQUEST);
             }
-
         } catch (Exception e) {
             return new ResponseEntity<>("Error interno al capturar", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -289,14 +273,29 @@ public class PokemonController {
         pokemonService.create(starter);
         return new ResponseEntity<>("Starter asignado", HttpStatus.CREATED);
     }
-    
-    @GetMapping("/salvaje/{id}")
-    public ResponseEntity<InformacionPokemonDTO> obtenerPokemonSalvaje(@PathVariable String id) {
-        InformacionPokemonDTO detalle = PokemonHTTPRequestHandler.obtenerDetallePokemon(id);
-        if (detalle != null) {
-            return new ResponseEntity<>(detalle, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @GetMapping("/admin/todos")
+    public ResponseEntity<List<PokemonDTO>> mostrarTodoAdmin() {
+            if (PokemonHTTPRequestHandler.getPokedexDatos().isEmpty()) {
+            PokemonHTTPRequestHandler.cargarPokedex();
         }
+
+        List<PokemonDTO> listaAdmin = new ArrayList<>();
+
+        for (InformacionPokemonDTO info : PokemonHTTPRequestHandler.getPokedexDatos()) {
+            PokemonDTO dto = new PokemonDTO();
+            dto.setPokeApiId(info.getId());
+            
+            dto.setApodo(info.getNombre().toUpperCase()); 
+            
+            if (info.getListaTipos() != null && !info.getListaTipos().isEmpty()) {
+                String tipo = info.getListaTipos().get(0).getInformacionTipo().getNombreTipo();
+                dto.setEstado(tipo); 
+            } else {
+                dto.setEstado("NORMAL");
+            }
+            
+            listaAdmin.add(dto);
+        }
+        return new ResponseEntity<>(listaAdmin, HttpStatus.OK);
     }
 }
