@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ import co.edu.unbosque.pokemon.dto.GritoPokemonDTO;
 import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
 import co.edu.unbosque.pokemon.dto.PokemonDTO;
 import co.edu.unbosque.pokemon.dto.SpriteItemDTO;
+import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.exception.IdInvalidoException;
 import co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler;
 import co.edu.unbosque.pokemon.service.PokemonService;
@@ -238,4 +240,98 @@ public class PokemonController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    private List<PokemonDTO> listaAdminBase() {
+        System.out.println("Iniciando carga de listaAdminBase...");
+        List<PokemonDTO> listaAdmin = new ArrayList<>();
+        
+        var datosMemoria = co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.getPokedexDatos();
+        
+        if (datosMemoria == null || datosMemoria.isEmpty()) {
+            System.out.println("Datos en memoria vacíos. Forzando carga de Pokedex...");
+            co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.cargarPokedex();
+            datosMemoria = co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.getPokedexDatos();
+        }
+        
+        if (datosMemoria != null && !datosMemoria.isEmpty()) {
+            System.out.println("DEBUG: Se encontraron " + datosMemoria.size() + " especies. Procesando...");
+            
+            for (var info : datosMemoria) {
+                PokemonDTO dto = new PokemonDTO();
+                dto.setPokeApiId(info.getId());
+                dto.setApodo(info.getNombre().toUpperCase());
+                
+                // 1. Mapeo de Tipos
+                List<String> tipos = new ArrayList<>();
+                if (info.getListaTipos() != null) {
+                    for (var t : info.getListaTipos()) {
+                        if (t.getInformacionTipo() != null) {
+                            tipos.add(t.getInformacionTipo().getNombreTipo().toUpperCase());
+                        }
+                    }
+                }
+                dto.setTipos(tipos);
+                
+                List<String> ataques = PokemonHTTPRequestHandler.extraerCuatroPrimerosAtaques(info.getListaAtaques());
+                
+                dto.setNombreAtaque1(ataques.size() > 0 ? ataques.get(0) : "---");
+                dto.setNombreAtaque2(ataques.size() > 1 ? ataques.get(1) : "---");
+                dto.setNombreAtaque3(ataques.size() > 2 ? ataques.get(2) : "---");
+                dto.setNombreAtaque4(ataques.size() > 3 ? ataques.get(3) : "---");
+                
+                dto.setSaludMaxima(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "hp"));
+                dto.setAtaque(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "attack"));
+                dto.setDefensa(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "defense"));
+                dto.setVelocidad(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "speed"));
+                System.out.println("DEBUG: Procesando " + dto.getApodo() + " - Atk: " + dto.getAtaque() + " Def: " + dto.getDefensa());
+                listaAdmin.add(dto);
+            }
+        } else {
+            System.out.println("ERROR CRÍTICO: La lista de datosMemoria sigue vacía después de cargar.");
+        }
+        
+        System.out.println("Se ha generado una lista con " + listaAdmin.size() + " elementos.");
+        return listaAdmin;
+    }
+   @GetMapping("/admin/todos")
+   public ResponseEntity<List<PokemonDTO>> mostrarTodoAdmin() {
+       return new ResponseEntity<>(listaAdminBase(), HttpStatus.OK);
+   }
+
+   @GetMapping("/admin/especie/{pokeApiId}")
+   public ResponseEntity<PokemonDTO> obtenerEspecieAdmin(@PathVariable Integer pokeApiId) {
+       PokemonDTO dto = pokemonService.obtenerEspecieParaAdmin(pokeApiId);
+       return (dto != null) ? new ResponseEntity<>(dto, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+   }
+
+   // Métodos admin para detalles sin necesidad de búsqueda en BD local
+   @GetMapping("/admin/especie/{pokeApiId}/sprites/front")
+   public ResponseEntity<SpriteItemDTO> getSpriteFrenteAdmin(@PathVariable Integer pokeApiId) {
+       InformacionPokemonDTO detalle = PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokeApiId));
+       return (detalle != null && detalle.getImagenes() != null) ? ResponseEntity.ok(detalle.getImagenes().getFrontDefault()) : ResponseEntity.notFound().build();
+   }
+
+   @GetMapping("/admin/especie/{pokeApiId}/grito")
+   public ResponseEntity<GritoPokemonDTO> getGritoAdmin(@PathVariable Integer pokeApiId) {
+       GritoPokemonDTO grito = new GritoPokemonDTO();
+       grito.setGritoPokemon("https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/" + pokeApiId + ".ogg");
+       return ResponseEntity.ok(grito);
+   }
+
+   @PostMapping("/starter")
+   public ResponseEntity<String> elegirStarter(@RequestParam String tipo, Authentication authentication) {
+       Usuario usuario = (Usuario) authentication.getPrincipal();
+       PokemonDTO starter = new PokemonDTO();
+       starter.setPokeApiId(tipo.equalsIgnoreCase("planta") ? 1 : tipo.equalsIgnoreCase("fuego") ? 4 : 7);
+       starter.setApodo(tipo.equalsIgnoreCase("planta") ? "Bulbasaur" : tipo.equalsIgnoreCase("fuego") ? "Charmander" : "Squirtle");
+       starter.setNivel(5);
+       starter.setSaludActual(100);
+       starter.setSaludMaxima(100);
+       starter.setIdUsuarioPropietario(usuario.getId());
+       pokemonService.create(starter);
+       return new ResponseEntity<>("Starter asignado", HttpStatus.CREATED);
+   }
+
+  
 }
+
