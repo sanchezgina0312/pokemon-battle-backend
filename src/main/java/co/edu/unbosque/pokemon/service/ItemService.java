@@ -12,15 +12,20 @@ import co.edu.unbosque.pokemon.repository.ItemRepository;
 
 @Service
 public class ItemService {
-	@Autowired
-	private ItemRepository itemRep;
 
-	@Autowired
-	private ModelMapper mapper;
+    @Autowired
+    private ItemRepository itemRep;
 
-	public List<ItemDTO> listarTodos() {
-		List<ItemDTO> dtos = new ArrayList<>();
-		itemRep.findAll().forEach(e -> dtos.add(mapper.map(e, ItemDTO.class)));
-		return dtos;
-	}
+    @Autowired
+    private ModelMapper mapper;
+
+    @Autowired
+    private AuditoriaService auditoriaService;
+
+    public List<ItemDTO> listarTodos() {
+        List<ItemDTO> dtos = new ArrayList<>();
+        itemRep.findAll().forEach(e -> dtos.add(mapper.map(e, ItemDTO.class)));
+        auditoriaService.registrar("CONSULTAR_TODO", "Item");
+        return dtos;
+    }
 }
