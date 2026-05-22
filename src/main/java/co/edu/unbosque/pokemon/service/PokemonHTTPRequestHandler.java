@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 
 import co.edu.unbosque.pokemon.dto.DescripcionDTO;
 import co.edu.unbosque.pokemon.dto.EspeciePokemonDTO;
+import co.edu.unbosque.pokemon.dto.EstadisticaPokemonDTO;
 import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
 import co.edu.unbosque.pokemon.dto.ReferenciaPokemonDTO;
 import co.edu.unbosque.pokemon.dto.RespuestaDTO;
@@ -28,19 +29,32 @@ public class PokemonHTTPRequestHandler {
 	private static ArrayList<InformacionPokemonDTO> pokedexDatos = new ArrayList<>();
 
 	public static void cargarPokedex() {
-		System.out.println("--- Iniciando guardado de datos ---");
-		RespuestaDTO respuesta = obtenerLos151();
-		if (respuesta != null && respuesta.getListaResultados() != null) {
-			for (ReferenciaPokemonDTO ref : respuesta.getListaResultados()) {
-				InformacionPokemonDTO detalle = obtenerDetallePokemon(ref.getNombre());
-				if (detalle != null) {
-					pokedexDatos.add(detalle);
-				}
-			}
-		}
-		System.out.println("***Carga Completa: " + pokedexDatos.size() + " Pokémon almacenados***");
+	    System.out.println("--- Iniciando carga de 151 datos de la PokeAPI ---");
+	    pokedexDatos.clear(); 
+	    RespuestaDTO respuesta = obtenerLos151();
+	    
+	    if (respuesta != null && respuesta.getListaResultados() != null) {
+	        int contador = 0;
+	        for (ReferenciaPokemonDTO ref : respuesta.getListaResultados()) {
+	            InformacionPokemonDTO detalle = obtenerDetallePokemon(ref.getNombre());
+	            
+	            if (detalle != null) {
+	                pokedexDatos.add(detalle);
+	                contador++;
+	            } else {
+	                System.out.println("DEBUG: Error al cargar detalles de: " + ref.getNombre());
+	            }
+	           
+	            if (contador % 20 == 0) {
+	                System.out.println("DEBUG: Llevamos cargados " + contador + " Pokémon...");
+	            }
+	        }
+	    } else {
+	        System.out.println("ERROR CRÍTICO: No se pudo conectar con la API para obtener la lista inicial.");
+	    }
+	    
+	    System.out.println("*** Carga Completa: " + pokedexDatos.size() + " Pokémon almacenados exitosamente ***");
 	}
-
 	public static RespuestaDTO obtenerLos151() {
 		String url = "https://pokeapi.co/api/v2/pokemon?limit=151";
 		HttpRequest solicitud = HttpRequest.newBuilder().GET().uri(URI.create(url)).setHeader("User-Agent", "Java Bot")
@@ -138,7 +152,15 @@ public class PokemonHTTPRequestHandler {
 			}
 			return nombres;
 		}
-		
+		public static int extraerStat(List<EstadisticaPokemonDTO> stats, String nombreStat) {
+		    if (stats == null) return 0;
+		    for (EstadisticaPokemonDTO s : stats) {
+		        if (s.getStat() != null && s.getStat().getName().equals(nombreStat)) {
+		            return s.getValorDeLaEstadistica();
+		        }
+		    }
+		    return 0;
+		}
 	public static void main(String[] args) {
 		cargarPokedex();
 

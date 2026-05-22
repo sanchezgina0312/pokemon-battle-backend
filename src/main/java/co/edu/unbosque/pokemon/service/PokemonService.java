@@ -135,16 +135,14 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
             dto.setPokeApiId(pokeApiId);
             dto.setApodo(info.getNombre().toUpperCase());
             
-            // --- NUEVA LÓGICA DE ATAQUES INTEGRADA AQUÍ ---
-            // Usamos el método que creamos en el RequestHandler para sacar los 4 movimientos
+   
             List<String> ataques = PokemonHTTPRequestHandler.extraerCuatroPrimerosAtaques(info.getListaAtaques());
             dto.setNombreAtaque1(ataques.get(0));
             dto.setNombreAtaque2(ataques.get(1));
             dto.setNombreAtaque3(ataques.get(2));
             dto.setNombreAtaque4(ataques.get(3));
-            // ----------------------------------------------
             
-            // Enriquecer manual con los tipos
+  
             List<String> tipos = new ArrayList<>();
             if (info.getListaTipos() != null) {
                 for (TipoPokemonDTO t : info.getListaTipos()) {
@@ -154,6 +152,13 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
                 }
             }
             dto.setTipos(tipos);
+
+            dto.setSaludMaxima(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "hp"));
+            dto.setAtaque(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "attack"));
+            dto.setDefensa(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "defense"));
+            dto.setVelocidad(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "speed"));
+      
+            
             return dto;
         }
         return null;
