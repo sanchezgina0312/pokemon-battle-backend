@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import co.edu.unbosque.pokemon.dto.PokemonDTO;
+import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
+import co.edu.unbosque.pokemon.dto.TipoPokemonDTO;
 import co.edu.unbosque.pokemon.entity.Pokemon;
 import co.edu.unbosque.pokemon.repository.PokemonRepository;
 import co.edu.unbosque.pokemon.util.LanzadorDeException;
