@@ -6,6 +6,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gson.Gson;
 import java.net.URLEncoder;
@@ -120,7 +121,24 @@ public class PokemonHTTPRequestHandler {
 	public static void setPokedexDatos(ArrayList<InformacionPokemonDTO> pokedexDatos) {
 		PokemonHTTPRequestHandler.pokedexDatos = pokedexDatos;
 	}
-
+		public static List<String> extraerCuatroPrimerosAtaques(List<co.edu.unbosque.pokemon.dto.AtaquePokemonDTO> listaAtaques) {
+			List<String> nombres = new ArrayList<>();
+			if (listaAtaques == null) {
+				for (int i = 0; i < 4; i++) nombres.add("---");
+				return nombres;
+			}
+			
+			for (int i = 0; i < 4; i++) {
+				if (i < listaAtaques.size()) {
+					
+					nombres.add(listaAtaques.get(i).getInformacionAtaque().getNombre().toUpperCase());
+				} else {
+					nombres.add("---");
+				}
+			}
+			return nombres;
+		}
+		
 	public static void main(String[] args) {
 		cargarPokedex();
 
