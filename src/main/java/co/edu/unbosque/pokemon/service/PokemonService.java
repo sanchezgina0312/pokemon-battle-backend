@@ -153,11 +153,16 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
             }
             dto.setTipos(tipos);
 
+            dto.setTipos(tipos);
+
             dto.setSaludMaxima(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "hp"));
+            
             dto.setAtaque(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "attack"));
+            
             dto.setDefensa(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "defense"));
+            
             dto.setVelocidad(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "speed"));
-      
+    
             
             return dto;
         }
