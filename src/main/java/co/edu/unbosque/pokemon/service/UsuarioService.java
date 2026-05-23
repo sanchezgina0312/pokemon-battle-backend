@@ -13,6 +13,7 @@ import co.edu.unbosque.pokemon.dto.UsuarioDTO;
 import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.repository.UsuarioRepository;
 import co.edu.unbosque.pokemon.util.LanzadorDeException;
+import jakarta.transaction.Transactional;
 
 /**
  * Servicio encargado de gestionar las operaciones CRUD de la entidad Usuario.
@@ -265,4 +266,6 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
 		this.passwordEncoder = passwordEncoder;
 	}
+	
+
 }
