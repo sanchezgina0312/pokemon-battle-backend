@@ -9,7 +9,6 @@ import java.util.Objects;
  * de la aplicación, incluyendo detalles sobre su penalización (baneo) y modificaciones de poder.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class AtaqueDTO {

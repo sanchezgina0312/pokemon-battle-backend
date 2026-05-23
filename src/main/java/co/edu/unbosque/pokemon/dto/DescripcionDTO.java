@@ -9,7 +9,6 @@ import com.google.gson.annotations.SerializedName;
  * obtenidas desde la API externa, vinculando el contenido del texto con su respectivo idioma de origen.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class DescripcionDTO {

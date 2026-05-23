@@ -9,7 +9,6 @@ import com.google.gson.annotations.SerializedName;
  * estándar de los ítems de la tienda o como envoltura adaptada para los recursos visuales de los Pokémon.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class SpriteItemDTO {

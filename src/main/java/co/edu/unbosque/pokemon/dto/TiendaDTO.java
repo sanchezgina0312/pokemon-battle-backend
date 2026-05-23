@@ -11,7 +11,6 @@ import java.util.Objects;
  * de tiempo exacta en la que se efectuó la operación.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class TiendaDTO {

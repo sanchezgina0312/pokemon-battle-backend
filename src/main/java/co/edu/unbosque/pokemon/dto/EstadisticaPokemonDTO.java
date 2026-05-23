@@ -9,7 +9,6 @@ import com.google.gson.annotations.SerializedName;
  * individuales del arreglo de estadísticas (como puntos de salud, ataque, defensa, entre otros) provenientes de la PokeAPI.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class EstadisticaPokemonDTO {

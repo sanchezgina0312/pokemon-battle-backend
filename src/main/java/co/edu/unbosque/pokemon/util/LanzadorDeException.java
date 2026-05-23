@@ -18,7 +18,6 @@ import co.edu.unbosque.pokemon.exception.NombreInvalidoException;
  * necesario instanciar la clase.
  * </p>
  *
- * @author Angie Villarreal
  * @version 1.0
  */
 public class LanzadorDeException {
@@ -109,8 +108,19 @@ public class LanzadorDeException {
 		}
 	}
 	
+	/**
+	 * Verifica si un correo ya se encuentra registrado en el sistema.
+	 * <p>
+	 * Si el valor recibido es {@code true}, se lanza una excepción
+	 * {@link CorreoInvalidoException} indicando que el correo ya existe.
+	 * </p>
+	 *
+	 * @param duplicado {@code true} si el correo ya está registrado,
+	 *                   {@code false} en caso contrario.
+	 * @throws CorreoInvalidoException si el correo ya se encuentra registrado.
+	 */
 	public static void verificarCorreoDuplicado(boolean duplicado) {
-		if(duplicado) {
+		if (duplicado) {
 			throw new CorreoInvalidoException("El nombre ya se encuentra registrado");
 		}
 	}
