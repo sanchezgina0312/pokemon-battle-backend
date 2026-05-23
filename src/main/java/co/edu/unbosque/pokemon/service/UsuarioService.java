@@ -116,7 +116,10 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	public int updateById(Long id, UsuarioDTO data) {
 		LanzadorDeException.verificarId(id);
 		LanzadorDeException.verificarNombre(data.getNombre());
-		LanzadorDeException.verificarContrasena(data.getContrasenia());
+		// La contraseña es opcional en edición: solo se valida si viene con valor
+		if (data.getContrasenia() != null && !data.getContrasenia().isBlank()) {
+			LanzadorDeException.verificarContrasena(data.getContrasenia());
+		}
 		LanzadorDeException.verificarCorreoElectronico(data.getCorreo());
 
 		Optional<Usuario> encontrado = usuarioRep.findById(id);
