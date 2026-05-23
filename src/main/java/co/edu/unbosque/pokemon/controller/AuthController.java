@@ -94,7 +94,6 @@ public class AuthController {
         try {
             String codigo = emailService.generarCodigoVerificacion();
             emailService.enviarCorreoCodigo(correo, codigo, nombre);
-            // Devolvemos el código a Angular para que él valide
             return new ResponseEntity<>(codigo, org.springframework.http.HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Error al enviar el correo", org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);

@@ -84,7 +84,6 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
         return 1;
     }
 
-    // ─── Búsquedas ────────────────────────────────────────────────────────────────
 
     public List<PokemonDTO> findByApodo(String apodo) {
         LanzadorDeException.verificarNombre(apodo);
@@ -170,7 +169,6 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
         return null;
     }
 
-    // ─── Admin: configuración de especie ─────────────────────────────────────────
 
     /**
      * Guarda o actualiza la configuración personalizada (apodo, nivel, estado)
@@ -206,7 +204,6 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
         return null;
     }
 
-    // ─── Combate ──────────────────────────────────────────────────────────────────
 
     /**
      * Incrementa la experiencia de un Pokémon específico en la base de datos.
@@ -232,7 +229,6 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
         }
     }
 
-    // ─── Helper privado ───────────────────────────────────────────────────────────
 
     private void enriquecerConTipos(PokemonDTO dto) {
         if (dto.getPokeApiId() != null && dto.getPokeApiId() > 0) {
@@ -251,7 +247,6 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
         }
     }
 
-    // ─── Utilidades de repositorio ────────────────────────────────────────────────
 
     @Override
     public long count() { return pokemonRep.count(); }

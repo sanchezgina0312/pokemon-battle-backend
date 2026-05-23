@@ -40,9 +40,6 @@ public class PokemonController {
     public PokemonController() {
     }
 
-    // ─── Capturar ────────────────────────────────────────────────────────────────
-    // Se usa @RequestBody (main_copy) para que el frontend envíe el objeto completo
-    // sin tener que serializar cada campo como query param.
     @PostMapping("/capturar")
     public ResponseEntity<String> crearPokemon(@RequestBody PokemonDTO nuevoPokemon) {
         try {
@@ -58,7 +55,6 @@ public class PokemonController {
         }
     }
 
-    // ─── Mostrar todo ─────────────────────────────────────────────────────────────
     @GetMapping("/mostrartodo")
     public ResponseEntity<List<PokemonDTO>> mostrarTodo() {
         List<PokemonDTO> listaLocal = pokemonService.getAll();
@@ -85,7 +81,6 @@ public class PokemonController {
         return new ResponseEntity<>(listaLocal, HttpStatus.OK);
     }
 
-    // ─── Actualizar ───────────────────────────────────────────────────────────────
     @PutMapping("/actualizar")
     public ResponseEntity<String> actualizarPokemon(@RequestParam Long id, @RequestParam String apodo,
             @RequestParam int nivel, @RequestParam int experienciaAcumulada, @RequestParam int saludActual,
@@ -118,8 +113,6 @@ public class PokemonController {
         }
     }
 
-    // Preservado de Nata: endpoint para actualizar solo configuración de especie
-    // (apodo, nivel, estado) sin tocar stats de combate.
     @PutMapping("/actualizar-configuracion")
     public ResponseEntity<String> actualizarConfiguracion(
             @RequestParam Integer pokeApiId,
@@ -140,7 +133,6 @@ public class PokemonController {
         }
     }
 
-    // ─── Liberar ──────────────────────────────────────────────────────────────────
     @DeleteMapping("/liberar")
     public ResponseEntity<String> eliminarPokemon(@RequestParam Long id) {
         try {
@@ -155,7 +147,6 @@ public class PokemonController {
         }
     }
 
-    // ─── Búsquedas ────────────────────────────────────────────────────────────────
     @GetMapping("/buscarporentrenador")
     public ResponseEntity<List<PokemonDTO>> buscarPorEntrenador(@RequestParam Long idUsuarioPropietario) {
         List<PokemonDTO> lista = pokemonService.findByPropietario(idUsuarioPropietario);
@@ -188,7 +179,6 @@ public class PokemonController {
         }
     }
 
-    // ─── Sprites / Grito / Historia ───────────────────────────────────────────────
     @GetMapping("/{id}/sprites/front")
     public ResponseEntity<SpriteItemDTO> getSpriteFrente(@PathVariable Long id) {
         PokemonDTO pokemonLocal = obtenerPokemonLocal(id);
@@ -244,7 +234,6 @@ public class PokemonController {
         return ResponseEntity.ok(textoTraducido);
     }
 
-    // ─── Pokémon salvaje ──────────────────────────────────────────────────────────
     @GetMapping("/salvaje/{id}")
     public ResponseEntity<InformacionPokemonDTO> obtenerPokemonSalvaje(@PathVariable String id) {
         InformacionPokemonDTO detalle = PokemonHTTPRequestHandler.obtenerDetallePokemon(id);
@@ -255,15 +244,9 @@ public class PokemonController {
         }
     }
 
-    // ─── Admin ────────────────────────────────────────────────────────────────────
-
-    // listaAdminBase: combina lo mejor de ambas ramas.
-    // - De Nata: cruza datos de BD (configuraciones personalizadas) con los de la API.
-    // - De main_copy: logs de debug detallados y manejo defensivo de lista vacía.
     private List<PokemonDTO> listaAdminBase() {
         System.out.println("Iniciando carga de listaAdminBase...");
 
-        // Configuraciones personalizadas guardadas en BD (de Nata)
         List<PokemonDTO> personalizados = pokemonService.getAll();
 
         var datosMemoria = co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.getPokedexDatos();
@@ -280,7 +263,6 @@ public class PokemonController {
             System.out.println("DEBUG: Se encontraron " + datosMemoria.size() + " especies. Procesando...");
 
             for (var info : datosMemoria) {
-                // Cruce con BD: si hay configuración guardada, se usa (de Nata)
                 PokemonDTO configuracionBD = personalizados.stream()
                         .filter(p -> p.getPokeApiId() != null && p.getPokeApiId().equals(info.getId()))
                         .findFirst()
@@ -292,7 +274,6 @@ public class PokemonController {
                 dto.setNivel(configuracionBD != null ? configuracionBD.getNivel() : 1);
                 dto.setEstado(configuracionBD != null ? configuracionBD.getEstado() : "OK");
 
-                // Tipos
                 List<String> tipos = new ArrayList<>();
                 if (info.getListaTipos() != null) {
                     for (var t : info.getListaTipos()) {
@@ -303,14 +284,12 @@ public class PokemonController {
                 }
                 dto.setTipos(tipos);
 
-                // Ataques
                 List<String> ataques = PokemonHTTPRequestHandler.extraerCuatroPrimerosAtaques(info.getListaAtaques());
                 dto.setNombreAtaque1(ataques.size() > 0 ? ataques.get(0) : "---");
                 dto.setNombreAtaque2(ataques.size() > 1 ? ataques.get(1) : "---");
                 dto.setNombreAtaque3(ataques.size() > 2 ? ataques.get(2) : "---");
                 dto.setNombreAtaque4(ataques.size() > 3 ? ataques.get(3) : "---");
 
-                // Stats
                 dto.setSaludMaxima(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "hp"));
                 dto.setAtaque(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "attack"));
                 dto.setDefensa(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "defense"));
@@ -355,18 +334,14 @@ public class PokemonController {
         return ResponseEntity.ok(grito);
     }
 
-    // ─── Starter ──────────────────────────────────────────────────────────────────
-    // Se usa la versión completa de main_copy: carga stats, ataques y tipos reales
-    // desde la API, en lugar de valores hardcodeados de Nata.
     @PostMapping("/starter")
     public ResponseEntity<String> elegirStarter(@RequestParam String tipo, Authentication authentication) {
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
         int pokeApiId;
         switch (tipo.toLowerCase()) {
-            case "planta": pokeApiId = 1; break; // Bulbasaur
-            case "fuego":  pokeApiId = 4; break; // Charmander
-            default:       pokeApiId = 7; break; // Squirtle
+            case "fuego":  pokeApiId = 4; break; 
+            default:       pokeApiId = 7; break; 
         }
 
         InformacionPokemonDTO info = PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokeApiId));
@@ -412,7 +387,6 @@ public class PokemonController {
         return new ResponseEntity<>("Starter asignado correctamente", HttpStatus.CREATED);
     }
 
-    // ─── Helper privado ───────────────────────────────────────────────────────────
     private PokemonDTO obtenerPokemonLocal(Long id) {
         return pokemonService.getAll().stream()
                 .filter(p -> p.getId() == id)

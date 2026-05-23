@@ -118,7 +118,6 @@ public class JwtUtil {
     Map<String, Object> claims = new HashMap<>();
     claims.put("authorities", userDetails.getAuthorities());
 
-    // Añadir rol a las reclamaciones si userDetails es de nuestra clase User
     if (userDetails instanceof Usuario) {
     	Usuario user = (Usuario) userDetails;
       claims.put("role", user.getRol().name());
