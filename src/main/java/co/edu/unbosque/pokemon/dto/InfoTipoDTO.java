@@ -10,7 +10,6 @@ import com.google.gson.annotations.SerializedName;
  * los tipos elementales del Pokémon o las clases de daño de sus movimientos (Físico, Especial, Estado).
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class InfoTipoDTO {

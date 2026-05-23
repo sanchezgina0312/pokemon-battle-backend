@@ -10,7 +10,6 @@ import com.google.gson.annotations.SerializedName;
  * para aislar y deserializar correctamente la propiedad que almacena los detalles específicos del tipo.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class TipoPokemonDTO {

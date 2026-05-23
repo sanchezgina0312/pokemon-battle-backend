@@ -10,7 +10,6 @@ import com.google.gson.annotations.SerializedName;
  * de sus características.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class ReferenciaPokemonDTO {

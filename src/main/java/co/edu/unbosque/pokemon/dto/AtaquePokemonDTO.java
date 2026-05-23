@@ -11,7 +11,6 @@ import com.google.gson.annotations.SerializedName;
  * anida los detalles del movimiento dentro de una propiedad específica.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class AtaquePokemonDTO {

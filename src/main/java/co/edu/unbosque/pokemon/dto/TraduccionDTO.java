@@ -9,7 +9,6 @@ import com.google.gson.annotations.SerializedName;
  * para mapear y extraer directamente el fragmento de texto ya procesado y localizado en el idioma de destino.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class TraduccionDTO {

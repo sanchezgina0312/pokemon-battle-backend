@@ -10,7 +10,6 @@ import com.google.gson.annotations.SerializedName;
  * de cada criatura.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class GritoPokemonDTO {

@@ -10,7 +10,6 @@ import com.google.gson.annotations.SerializedName;
  * como su daño, precisión, puntos de poder (PP) y clasificaciones elementales.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class DetalleMovimientoDTO {

@@ -10,7 +10,6 @@ import java.util.Objects;
  * facilitando el flujo de datos entre la persistencia y la lógica de negocio.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class InventarioDTO {

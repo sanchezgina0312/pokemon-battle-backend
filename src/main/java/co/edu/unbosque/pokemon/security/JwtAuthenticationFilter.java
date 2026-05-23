@@ -59,11 +59,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String correo = null;
         String jwt = null;
 
-        // 1. Extraer el token del header
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
             try {
-                correo = jwtUtil.extractUsername(jwt); // extrae el correo (getUsername() = correo)
+                correo = jwtUtil.extractUsername(jwt); 
             } catch (Exception e) {
                 logger.error("Error al extraer el correo del token JWT", e);
                 filterChain.doFilter(request, response);
@@ -71,7 +70,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 2. Validar y establecer autenticación en el contexto
         if (correo != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             UserDetails userDetails;

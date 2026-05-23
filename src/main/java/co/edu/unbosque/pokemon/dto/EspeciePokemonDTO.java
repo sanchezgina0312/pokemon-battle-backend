@@ -11,7 +11,6 @@ import java.util.List;
  * informativo e histórico (Pokédex) que posee un Pokémon en sus diferentes versiones e idiomas.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class EspeciePokemonDTO {

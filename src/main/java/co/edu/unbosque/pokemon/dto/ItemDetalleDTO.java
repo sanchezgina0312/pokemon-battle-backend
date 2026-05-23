@@ -11,7 +11,6 @@ import com.google.gson.annotations.SerializedName;
  * costo comercial, recursos gráficos y descripciones contextuales.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class ItemDetalleDTO {
