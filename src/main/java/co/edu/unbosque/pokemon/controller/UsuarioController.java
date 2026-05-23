@@ -97,11 +97,15 @@ public class UsuarioController {
     @PutMapping("/actualizar")
     public ResponseEntity<String> actualizarUsuario(
             @RequestBody UsuarioDTO usuarioDTO) {
-        int status = usuarioService.updateById(usuarioDTO.getId(), usuarioDTO);
-        if (status == 0) {
-            return new ResponseEntity<>("Usuario actualizado exitosamente", HttpStatus.ACCEPTED);
-        } else {
-            return new ResponseEntity<>("Usuario no encontrado o error al actualizar", HttpStatus.NOT_FOUND);
+        try {
+            int status = usuarioService.updateById(usuarioDTO.getId(), usuarioDTO);
+            if (status == 0) {
+                return new ResponseEntity<>("Usuario actualizado exitosamente", HttpStatus.ACCEPTED);
+            } else {
+                return new ResponseEntity<>("Usuario no encontrado o error al actualizar", HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error al actualizar usuario: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

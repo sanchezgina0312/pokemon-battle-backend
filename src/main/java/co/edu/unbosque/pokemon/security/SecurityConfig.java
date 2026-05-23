@@ -42,40 +42,63 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/pokemon/auth/**",
                     "/usuario/login",
-                    "/usuario/crear",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/usuario/traducir",
                     "/pokemon/auth/enviar-codigo"
+                    // /usuario/crear ya NO está aquí — solo ADMIN puede crear
                 ).permitAll()
                 .anyRequest().access((authentication, context) -> {
                     var authObj = authentication.get();
 
+                    // Sin sesión válida → denegar
                     if (authObj == null || !authObj.isAuthenticated() ||
                         authObj instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
                         return new AuthorizationDecision(false);
                     }
 
+                    // Log para depuración — puedes quitarlo en producción
+                    System.out.println(">>> [SecurityConfig] Usuario: " + authObj.getName()
+                        + " | Authorities: " + authObj.getAuthorities()
+                        + " | Path: " + context.getRequest().getServletPath());
+
+                    // ADMINISTRADOR tiene acceso a todo
+                    // Se usa contains para cubrir variantes: ADMINISTRADOR, ROLE_ADMINISTRADOR
                     boolean isAdmin = authObj.getAuthorities().stream()
-                        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR")
-                                    || a.getAuthority().equals("ADMINISTRADOR"));
+                        .anyMatch(a ->
+                            a.getAuthority().equals("ROLE_ADMINISTRADOR") ||
+                            a.getAuthority().equals("ADMINISTRADOR") ||
+                            a.getAuthority().contains("ADMINISTRADOR")
+                        );
 
-                    if (isAdmin) return new AuthorizationDecision(true);
+                    if (isAdmin) {
+                        System.out.println(">>> [SecurityConfig] Acceso concedido como ADMINISTRADOR");
+                        return new AuthorizationDecision(true);
+                    }
 
+                    // Rutas exclusivas de ADMIN
                     String path = context.getRequest().getServletPath();
-                    boolean isAdminOnly = path.equals("/ataque/banear")
+                    boolean isAdminOnly =
+                            path.equals("/ataque/banear")
                         || path.equals("/pokemon/cargar")
                         || path.equals("/pokemon/cargarbd")
                         || path.equals("/usuario/mostrartodo")
                         || path.equals("/usuario/buscarpornombre")
                         || path.equals("/usuario/buscarporcorreo")
+                        || path.equals("/usuario/buscarporrol")
+                        || path.equals("/usuario/crear")
                         || path.equals("/usuario/actualizar")
                         || path.equals("/usuario/eliminar")
                         || path.equals("/auditoria/mostrartodo");
 
-                    if (isAdminOnly) return new AuthorizationDecision(false);
+                    if (isAdminOnly) {
+                        System.out.println(">>> [SecurityConfig] Ruta admin-only denegada para USUARIO: " + path);
+                        return new AuthorizationDecision(false);
+                    }
 
-                    boolean isUsuarioAllowed = path.startsWith("/captura/")
+                    // Rutas permitidas para USUARIO normal autenticado
+                    boolean isUsuarioAllowed =
+                            path.startsWith("/captura/")
                         || path.startsWith("/combate/")
                         || path.startsWith("/centropokemon/")
                         || path.startsWith("/tienda/")
@@ -85,7 +108,7 @@ public class SecurityConfig {
                         || path.startsWith("/usuario/genero")
                         || path.startsWith("/centropokemon");
 
-
+                    System.out.println(">>> [SecurityConfig] isUsuarioAllowed=" + isUsuarioAllowed + " para: " + path);
                     return new AuthorizationDecision(isUsuarioAllowed);
                 }))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
