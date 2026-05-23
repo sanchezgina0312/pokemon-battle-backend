@@ -22,68 +22,18 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * Configuración principal de seguridad de la aplicación.
- * <p>
- * Esta clase define:
- * </p>
- * <ul>
- *     <li>La autenticación mediante JWT.</li>
- *     <li>La autorización de endpoints según roles.</li>
- *     <li>La configuración de CORS.</li>
- *     <li>La política de sesiones stateless.</li>
- *     <li>El proveedor de autenticación y codificación de contraseñas.</li>
- * </ul>
- *
- * <p>
- * Se utiliza Spring Security para proteger los recursos de la API.
- * </p>
- *
- * @version 1.0
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    /**
-     * Filtro encargado de validar el token JWT en cada petición.
-     */
     private final JwtAuthenticationFilter jwtAuthFilter;
-
-    /**
-     * Servicio encargado de cargar los detalles del usuario.
-     */
     private final UserDetailsService userDetailsService;
 
-    /**
-     * Constructor de la configuración de seguridad.
-     *
-     * @param jwtAuthFilter filtro JWT utilizado para autenticar usuarios.
-     * @param userDetailsService servicio para obtener información de usuarios.
-     */
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, UserDetailsService userDetailsService) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
     }
 
-    /**
-     * Configura la cadena de filtros de seguridad de Spring Security.
-     * <p>
-     * Define:
-     * </p>
-     * <ul>
-     *     <li>Desactivación de CSRF.</li>
-     *     <li>Configuración de CORS.</li>
-     *     <li>Permisos de acceso a endpoints públicos.</li>
-     *     <li>Restricciones de acceso según rol.</li>
-     *     <li>Uso de sesiones stateless.</li>
-     *     <li>Registro del filtro JWT.</li>
-     * </ul>
-     *
-     * @param http objeto de configuración de seguridad HTTP.
-     * @return cadena de filtros de seguridad configurada.
-     * @throws Exception si ocurre un error durante la configuración.
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
@@ -114,7 +64,7 @@ public class SecurityConfig {
 
                     String path = context.getRequest().getServletPath();
 
-                    // Endpoints exclusivos del ADMINISTRADOR
+                    // Endpoints exclusivos del ADMINISTRADOR — denegar a USUARIO
                     boolean isAdminOnly = path.equals("/ataque/banear")
                         || path.equals("/pokemon/cargar")
                         || path.equals("/pokemon/cargarbd")
@@ -123,11 +73,11 @@ public class SecurityConfig {
                         || path.equals("/usuario/buscarporcorreo")
                         || path.equals("/usuario/actualizar")
                         || path.equals("/usuario/eliminar")
-                        || path.equals("/auditoria/mostrartodo");
+                        || path.equals("/auditoria/mostrartodo");  // <-- AGREGADO
 
                     if (isAdminOnly) return new AuthorizationDecision(false);
 
-                    // Endpoints permitidos para usuarios comunes
+                    // Endpoints permitidos para USUARIO común
                     boolean isUsuarioAllowed = path.startsWith("/captura/")
                         || path.startsWith("/combate/")
                         || path.startsWith("/centropokemon/")
@@ -148,15 +98,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * Configura el proveedor de autenticación de Spring Security.
-     * <p>
-     * Utiliza un {@link DaoAuthenticationProvider} con el servicio
-     * de usuarios y el codificador BCrypt.
-     * </p>
-     *
-     * @return proveedor de autenticación configurado.
-     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
@@ -164,40 +105,16 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    /**
-     * Obtiene el administrador de autenticación de Spring Security.
-     *
-     * @param config configuración de autenticación.
-     * @return administrador de autenticación.
-     * @throws Exception si ocurre un error al obtenerlo.
-     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    /**
-     * Define el codificador de contraseñas utilizado por la aplicación.
-     * <p>
-     * Se utiliza BCrypt para almacenar contraseñas de forma segura.
-     * </p>
-     *
-     * @return codificador de contraseñas BCrypt.
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Configura la política CORS de la aplicación.
-     * <p>
-     * Permite solicitudes desde el frontend Angular
-     * ejecutándose en localhost:4200.
-     * </p>
-     *
-     * @return configuración de CORS.
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -205,10 +122,8 @@ public class SecurityConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 }
