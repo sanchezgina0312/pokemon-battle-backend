@@ -63,8 +63,6 @@ public class SecurityConfig {
                     if (isAdmin) return new AuthorizationDecision(true);
 
                     String path = context.getRequest().getServletPath();
-
-                    // Endpoints exclusivos del ADMINISTRADOR — denegar a USUARIO
                     boolean isAdminOnly = path.equals("/ataque/banear")
                         || path.equals("/pokemon/cargar")
                         || path.equals("/pokemon/cargarbd")
@@ -73,11 +71,10 @@ public class SecurityConfig {
                         || path.equals("/usuario/buscarporcorreo")
                         || path.equals("/usuario/actualizar")
                         || path.equals("/usuario/eliminar")
-                        || path.equals("/auditoria/mostrartodo");  // <-- AGREGADO
+                        || path.equals("/auditoria/mostrartodo");
 
                     if (isAdminOnly) return new AuthorizationDecision(false);
 
-                    // Endpoints permitidos para USUARIO común
                     boolean isUsuarioAllowed = path.startsWith("/captura/")
                         || path.startsWith("/combate/")
                         || path.startsWith("/centropokemon/")
