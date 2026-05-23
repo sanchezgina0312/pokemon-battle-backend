@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -16,6 +20,7 @@ import co.edu.unbosque.pokemon.dto.DescripcionDTO;
 import co.edu.unbosque.pokemon.dto.EspeciePokemonDTO;
 import co.edu.unbosque.pokemon.dto.EstadisticaPokemonDTO;
 import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
+import co.edu.unbosque.pokemon.dto.ItemDetalleDTO;
 import co.edu.unbosque.pokemon.dto.ReferenciaPokemonDTO;
 import co.edu.unbosque.pokemon.dto.RespuestaDTO;
 import co.edu.unbosque.pokemon.dto.TipoPokemonDTO;
@@ -161,6 +166,41 @@ public class PokemonHTTPRequestHandler {
 		    }
 		    return 0;
 		}
+		public static List<ItemDetalleDTO> obtenerTodosLosItems() {
+		    String url = "https://pokeapi.co/api/v2/item?limit=50"; 
+		    HttpRequest solicitud = HttpRequest.newBuilder()
+		            .GET()
+		            .uri(URI.create(url))
+		            .build();
+		    
+		    try {
+		        HttpResponse<String> respuesta = HTTP_CLIENT.send(solicitud, HttpResponse.BodyHandlers.ofString());
+		        System.out.println("DEBUG: JSON recibido de API: " + respuesta.body());
+		        
+		        JsonObject jsonObject = JsonParser.parseString(respuesta.body()).getAsJsonObject();
+		        JsonArray results = jsonObject.getAsJsonArray("results");
+		        
+		        List<ItemDetalleDTO> lista = new ArrayList<>();
+		        
+		        for (int i = 0; i < results.size(); i++) {
+		            JsonObject itemJson = results.get(i).getAsJsonObject();
+		            
+		            ItemDetalleDTO item = new ItemDetalleDTO();
+		            item.setNombreIngles(itemJson.get("name").getAsString());
+		            
+		            String urlItem = itemJson.get("url").getAsString();
+		            String[] partes = urlItem.split("/");
+		            int id = Integer.parseInt(partes[partes.length - 1]); 
+		            item.setId(id);
+		            
+		            lista.add(item);
+		        }
+		        return lista;
+		    } catch (Exception e) {
+		        System.out.println("Error al obtener catálogo de items: " + e.getMessage());
+		        return new ArrayList<>();
+		    }
+	    }
 	public static void main(String[] args) {
 		cargarPokedex();
 

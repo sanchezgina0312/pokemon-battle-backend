@@ -30,7 +30,7 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
     @Override
     public int create(PokemonDTO data) {
         LanzadorDeException.verificarNombre(data.getApodo());
-        LanzadorDeException.verificarId(data.getIdUsuarioPropietario()); 
+        LanzadorDeException.verificarId(data.getIdUsuarioPropietario());
         Pokemon entity = mapper.map(data, Pokemon.class);
         if (entity.getEstado() == null) entity.setEstado("OK");
         if (entity.getNivel() == 0) entity.setNivel(1);
@@ -84,7 +84,7 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
         return 1;
     }
 
-    // --- MÉTODOS DE BÚSQUEDA ---
+    // ─── Búsquedas ────────────────────────────────────────────────────────────────
 
     public List<PokemonDTO> findByApodo(String apodo) {
         LanzadorDeException.verificarNombre(apodo);
@@ -127,22 +127,29 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
         return null;
     }
 
- 
     public PokemonDTO obtenerEspecieParaAdmin(Integer pokeApiId) {
+        Optional<Pokemon> configBD = pokemonRep.findFirstByPokeApiId(pokeApiId);
         InformacionPokemonDTO info = PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokeApiId));
+
         if (info != null) {
             PokemonDTO dto = new PokemonDTO();
             dto.setPokeApiId(pokeApiId);
-            dto.setApodo(info.getNombre().toUpperCase());
-            
-   
+            if (configBD.isPresent()) {
+                dto.setApodo(configBD.get().getApodo());
+                dto.setNivel(configBD.get().getNivel());
+                dto.setEstado(configBD.get().getEstado());
+            } else {
+                dto.setApodo(info.getNombre().toUpperCase());
+                dto.setNivel(1);
+                dto.setEstado("OK");
+            }
+
             List<String> ataques = PokemonHTTPRequestHandler.extraerCuatroPrimerosAtaques(info.getListaAtaques());
             dto.setNombreAtaque1(ataques.get(0));
             dto.setNombreAtaque2(ataques.get(1));
             dto.setNombreAtaque3(ataques.get(2));
             dto.setNombreAtaque4(ataques.get(3));
-            
-  
+
             List<String> tipos = new ArrayList<>();
             if (info.getListaTipos() != null) {
                 for (TipoPokemonDTO t : info.getListaTipos()) {
@@ -153,41 +160,58 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
             }
             dto.setTipos(tipos);
 
-            dto.setTipos(tipos);
-
             dto.setSaludMaxima(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "hp"));
-            
             dto.setAtaque(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "attack"));
-            
             dto.setDefensa(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "defense"));
-            
             dto.setVelocidad(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "speed"));
-    
-            
+
             return dto;
         }
         return null;
     }
 
-    private void enriquecerConTipos(PokemonDTO dto) {
-        if (dto.getPokeApiId() != null && dto.getPokeApiId() > 0) {
-            List<String> listaNombresTipos = new ArrayList<>();
-            InformacionPokemonDTO detalleApi = PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(dto.getPokeApiId()));
-            
-            if (detalleApi != null && detalleApi.getListaTipos() != null) {
-                for (TipoPokemonDTO t : detalleApi.getListaTipos()) {
-                    if (t.getInformacionTipo() != null && t.getInformacionTipo().getNombreTipo() != null) {
-                        listaNombresTipos.add(t.getInformacionTipo().getNombreTipo().toUpperCase());
-                    }
-                }
-            }
-            dto.setTipos(listaNombresTipos);
-        }
+    // ─── Admin: configuración de especie ─────────────────────────────────────────
+
+    /**
+     * Guarda o actualiza la configuración personalizada (apodo, nivel, estado)
+     * de una especie en la BD. Preservado de Nata.
+     */
+    public void actualizarConfiguracionEspecie(PokemonDTO data) {
+        Pokemon p = pokemonRep.findFirstByPokeApiId(data.getPokeApiId())
+                              .orElse(new Pokemon());
+        System.out.println("Antes de guardar: " + p.getApodo());
+        p.setPokeApiId(data.getPokeApiId());
+        p.setApodo(data.getApodo());
+        p.setNivel(data.getNivel());
+        p.setEstado(data.getEstado());
+        pokemonRep.save(p);
+        System.out.println("Después de guardar: " + p.getApodo() + p.getNivel() + p.getEstado());
     }
-    
+
+    /**
+     * Devuelve solo los campos de configuración (apodo, nivel, estado) de una
+     * especie guardada en BD, sin enriquecer con la PokeAPI. Preservado de Nata.
+     */
+    public PokemonDTO buscarConfiguracionEnBD(Integer pokeApiId) {
+        Optional<Pokemon> opt = pokemonRep.findFirstByPokeApiId(pokeApiId);
+        if (opt.isPresent()) {
+            Pokemon entity = opt.get();
+            PokemonDTO dto = new PokemonDTO();
+            dto.setPokeApiId(entity.getPokeApiId());
+            dto.setApodo(entity.getApodo());
+            dto.setNivel(entity.getNivel());
+            dto.setEstado(entity.getEstado());
+            return dto;
+        }
+        return null;
+    }
+
+    // ─── Combate ──────────────────────────────────────────────────────────────────
+
     /**
      * Incrementa la experiencia de un Pokémon específico en la base de datos.
-     * @param id Identificador del Pokémon.
+     * Al llegar a 100 xp sube de nivel y mejora ataque y defensa. Preservado de main_copy.
+     * @param id  Identificador del Pokémon.
      * @param exp Cantidad de puntos de experiencia a sumar.
      */
     public void sumarExperiencia(Long id, int exp) {
@@ -195,7 +219,7 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
         if (encontrado.isPresent()) {
             Pokemon p = encontrado.get();
             int nuevaExp = p.getExperienciaAcumulada() + exp;
-            
+
             if (nuevaExp >= 100) {
                 p.setNivel(p.getNivel() + 1);
                 p.setExperienciaAcumulada(nuevaExp - 100);
@@ -208,6 +232,27 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
         }
     }
 
+    // ─── Helper privado ───────────────────────────────────────────────────────────
+
+    private void enriquecerConTipos(PokemonDTO dto) {
+        if (dto.getPokeApiId() != null && dto.getPokeApiId() > 0) {
+            List<String> listaNombresTipos = new ArrayList<>();
+            InformacionPokemonDTO detalleApi = PokemonHTTPRequestHandler
+                    .obtenerDetallePokemon(String.valueOf(dto.getPokeApiId()));
+
+            if (detalleApi != null && detalleApi.getListaTipos() != null) {
+                for (TipoPokemonDTO t : detalleApi.getListaTipos()) {
+                    if (t.getInformacionTipo() != null && t.getInformacionTipo().getNombreTipo() != null) {
+                        listaNombresTipos.add(t.getInformacionTipo().getNombreTipo().toUpperCase());
+                    }
+                }
+            }
+            dto.setTipos(listaNombresTipos);
+        }
+    }
+
+    // ─── Utilidades de repositorio ────────────────────────────────────────────────
+
     @Override
     public long count() { return pokemonRep.count(); }
 
@@ -216,6 +261,7 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
         LanzadorDeException.verificarId(id);
         return pokemonRep.existsById(id);
     }
+
     public void setPokemonRep(PokemonRepository repo) { this.pokemonRep = repo; }
     public void setMapper(ModelMapper mapper) { this.mapper = mapper; }
 }

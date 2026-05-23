@@ -39,6 +39,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/pokemon/auth/**",
                     "/usuario/login",
@@ -50,6 +51,14 @@ public class SecurityConfig {
                 ).permitAll()
                 .anyRequest().access((authentication, context) -> {
                     var authObj = authentication.get();
+
+                    // Log detallado de Nata: útil para depurar quién llega y con qué rol
+                    if (authObj != null) {
+                        System.out.println("Usuario: " + authObj.getName());
+                        System.out.println("Autoridades detectadas: " + authObj.getAuthorities());
+                    } else {
+                        System.out.println("authObj es NULL (No hay usuario autenticado)");
+                    }
 
                     // Sin sesión válida → denegar
                     if (authObj == null || !authObj.isAuthenticated() ||
@@ -89,7 +98,11 @@ public class SecurityConfig {
                         || path.equals("/usuario/crear")
                         || path.equals("/usuario/actualizar")
                         || path.equals("/usuario/eliminar")
-                        || path.equals("/auditoria/mostrartodo");
+                        || path.equals("/auditoria/mostrartodo")
+                        // Preservado de Nata: el panel admin edita configuración de especies
+                        || path.equals("/pokemon/actualizar-configuracion")
+                        // Preservado de Nata: listar todo el inventario es operación de admin
+                        || path.equals("/inventario/listar-todo");
 
                     if (isAdminOnly) {
                         System.out.println(">>> [SecurityConfig] Ruta admin-only denegada para USUARIO: " + path);
