@@ -66,6 +66,10 @@ public class ItemDetalleDTO {
 	@SerializedName("flavor_text_entries")
 	private ArrayList<DescripcionDTO> listaDescripciones;
 
+	@SerializedName("url") // <--- Agrega esto
+    private String url;
+
+   
 	/**
 	 * Constructor por defecto de la clase.
 	 * Crea una nueva instancia vacía de {@code ItemDetalleDTO}.
@@ -111,7 +115,13 @@ public class ItemDetalleDTO {
 	public void setId(int id) {
 		this.id = id;
 	}
+	 public String getUrl() {
+	        return url;
+	    }
 
+	    public void setUrl(String url) {
+	        this.url = url;
+	    }
 	/**
 	 * Obtiene el nombre en inglés del ítem.
 	 *

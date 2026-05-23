@@ -58,4 +58,11 @@ public class InventarioController {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
+	@GetMapping("/listar-todo")
+	public ResponseEntity<List<InventarioDTO>> listarTodo() {
+		System.out.println("DEBUG: Se recibió la petición para listar todo el inventario.");
+	    List<InventarioDTO> lista = invSer.obtenerCatalogoCompleto();
+	    System.out.println("DEBUG: Se encontraron " + (lista != null ? lista.size() : "null") + " objetos.");
+	    return new ResponseEntity<>(lista, HttpStatus.OK);
+	}
 }

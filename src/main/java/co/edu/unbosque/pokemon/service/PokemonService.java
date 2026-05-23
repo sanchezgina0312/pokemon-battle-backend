@@ -127,22 +127,30 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
         return null;
     }
 
- 
     public PokemonDTO obtenerEspecieParaAdmin(Integer pokeApiId) {
+      
+        Optional<Pokemon> configBD = pokemonRep.findFirstByPokeApiId(pokeApiId);
+        
         InformacionPokemonDTO info = PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokeApiId));
+        
         if (info != null) {
             PokemonDTO dto = new PokemonDTO();
             dto.setPokeApiId(pokeApiId);
-            dto.setApodo(info.getNombre().toUpperCase());
-            
-   
+            if (configBD.isPresent()) {
+                dto.setApodo(configBD.get().getApodo());
+                dto.setNivel(configBD.get().getNivel());
+                dto.setEstado(configBD.get().getEstado());
+            } else {
+                dto.setApodo(info.getNombre().toUpperCase());
+                dto.setNivel(1); // Nivel por defecto
+                dto.setEstado("OK");
+            }
             List<String> ataques = PokemonHTTPRequestHandler.extraerCuatroPrimerosAtaques(info.getListaAtaques());
             dto.setNombreAtaque1(ataques.get(0));
             dto.setNombreAtaque2(ataques.get(1));
             dto.setNombreAtaque3(ataques.get(2));
             dto.setNombreAtaque4(ataques.get(3));
             
-  
             List<String> tipos = new ArrayList<>();
             if (info.getListaTipos() != null) {
                 for (TipoPokemonDTO t : info.getListaTipos()) {
@@ -152,17 +160,11 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
                 }
             }
             dto.setTipos(tipos);
-
-            dto.setTipos(tipos);
-
+            
             dto.setSaludMaxima(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "hp"));
-            
             dto.setAtaque(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "attack"));
-            
             dto.setDefensa(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "defense"));
-            
             dto.setVelocidad(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "speed"));
-    
             
             return dto;
         }
@@ -184,7 +186,32 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
             dto.setTipos(listaNombresTipos);
         }
     }
+    public void actualizarConfiguracionEspecie(PokemonDTO data) {
 
+        Pokemon p = pokemonRep.findFirstByPokeApiId(data.getPokeApiId())
+                              .orElse(new Pokemon());
+        System.out.println("Antes de guardar: " + p.getApodo());
+        p.setPokeApiId(data.getPokeApiId()); 
+        p.setApodo(data.getApodo());
+        p.setNivel(data.getNivel());
+        p.setEstado(data.getEstado());
+        pokemonRep.save(p);
+        System.out.println("Después de guardar: " + p.getApodo() + p.getNivel() + p.getEstado());
+    }public PokemonDTO buscarConfiguracionEnBD(Integer pokeApiId) {
+        Optional<Pokemon> opt = pokemonRep.findFirstByPokeApiId(pokeApiId);
+        
+        if (opt.isPresent()) {
+            Pokemon entity = opt.get();
+            PokemonDTO dto = new PokemonDTO();
+            dto.setPokeApiId(entity.getPokeApiId());
+            dto.setApodo(entity.getApodo());
+            dto.setNivel(entity.getNivel());
+            dto.setEstado(entity.getEstado());
+            return dto;
+        }
+      
+        return null;
+    }
     @Override
     public long count() { return pokemonRep.count(); }
 

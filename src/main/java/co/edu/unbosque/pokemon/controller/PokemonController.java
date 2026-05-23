@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +23,7 @@ import co.edu.unbosque.pokemon.dto.GritoPokemonDTO;
 import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
 import co.edu.unbosque.pokemon.dto.PokemonDTO;
 import co.edu.unbosque.pokemon.dto.SpriteItemDTO;
+import co.edu.unbosque.pokemon.dto.TipoPokemonDTO;
 import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.exception.IdInvalidoException;
 import co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler;
@@ -242,25 +244,39 @@ public class PokemonController {
 
     private List<PokemonDTO> listaAdminBase() {
         System.out.println("Iniciando carga de listaAdminBase...");
-        List<PokemonDTO> listaAdmin = new ArrayList<>();
         
+        // 1. Obtenemos configuraciones personalizadas de la BD
+        List<PokemonDTO> personalizados = pokemonService.getAll();
+        
+        // 2. Obtención de datos de memoria (Cacheada)
         var datosMemoria = co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.getPokedexDatos();
         
+        // IMPORTANTE: Solo cargamos la Pokedex si está REALMENTE vacía (esto evita el parpadeo)
         if (datosMemoria == null || datosMemoria.isEmpty()) {
-            System.out.println("Datos en memoria vacíos. Forzando carga de Pokedex...");
+            System.out.println("La Pokedex está vacía, cargando desde API...");
             co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.cargarPokedex();
             datosMemoria = co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.getPokedexDatos();
         }
         
+        List<PokemonDTO> listaAdmin = new ArrayList<>();
+        
         if (datosMemoria != null && !datosMemoria.isEmpty()) {
-            System.out.println("DEBUG: Se encontraron " + datosMemoria.size() + " especies. Procesando...");
-            
             for (var info : datosMemoria) {
+                // Buscamos configuración personalizada en BD
+                PokemonDTO configuracionBD = personalizados.stream()
+                    .filter(p -> p.getPokeApiId() != null && p.getPokeApiId().equals(info.getId()))
+                    .findFirst()
+                    .orElse(null);
+
                 PokemonDTO dto = new PokemonDTO();
                 dto.setPokeApiId(info.getId());
-                dto.setApodo(info.getNombre().toUpperCase());
                 
-                // 1. Mapeo de Tipos
+                // Si hay BD, usamos esos datos; si no, los de la API (Pokedex)
+                dto.setApodo(configuracionBD != null ? configuracionBD.getApodo() : info.getNombre().toUpperCase());
+                dto.setNivel(configuracionBD != null ? configuracionBD.getNivel() : 1);
+                dto.setEstado(configuracionBD != null ? configuracionBD.getEstado() : "OK");
+
+                // --- Procesamiento de Tipos ---
                 List<String> tipos = new ArrayList<>();
                 if (info.getListaTipos() != null) {
                     for (var t : info.getListaTipos()) {
@@ -271,22 +287,21 @@ public class PokemonController {
                 }
                 dto.setTipos(tipos);
                 
+                // --- Procesamiento de Ataques ---
                 List<String> ataques = PokemonHTTPRequestHandler.extraerCuatroPrimerosAtaques(info.getListaAtaques());
-                
                 dto.setNombreAtaque1(ataques.size() > 0 ? ataques.get(0) : "---");
                 dto.setNombreAtaque2(ataques.size() > 1 ? ataques.get(1) : "---");
                 dto.setNombreAtaque3(ataques.size() > 2 ? ataques.get(2) : "---");
                 dto.setNombreAtaque4(ataques.size() > 3 ? ataques.get(3) : "---");
                 
+                // --- Procesamiento de Stats ---
                 dto.setSaludMaxima(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "hp"));
                 dto.setAtaque(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "attack"));
                 dto.setDefensa(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "defense"));
                 dto.setVelocidad(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "speed"));
-                System.out.println("DEBUG: Procesando " + dto.getApodo() + " - Atk: " + dto.getAtaque() + " Def: " + dto.getDefensa());
+                
                 listaAdmin.add(dto);
             }
-        } else {
-            System.out.println("ERROR CRÍTICO: La lista de datosMemoria sigue vacía después de cargar.");
         }
         
         System.out.println("Se ha generado una lista con " + listaAdmin.size() + " elementos.");
@@ -302,8 +317,6 @@ public class PokemonController {
        PokemonDTO dto = pokemonService.obtenerEspecieParaAdmin(pokeApiId);
        return (dto != null) ? new ResponseEntity<>(dto, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
    }
-
-   // Métodos admin para detalles sin necesidad de búsqueda en BD local
    @GetMapping("/admin/especie/{pokeApiId}/sprites/front")
    public ResponseEntity<SpriteItemDTO> getSpriteFrenteAdmin(@PathVariable Integer pokeApiId) {
        InformacionPokemonDTO detalle = PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokeApiId));
@@ -330,6 +343,58 @@ public class PokemonController {
        pokemonService.create(starter);
        return new ResponseEntity<>("Starter asignado", HttpStatus.CREATED);
    }
-
-  
+   @PutMapping("/actualizar-configuracion")
+   public ResponseEntity<String> actualizarConfiguracion(
+       @RequestParam Integer pokeApiId, 
+       @RequestParam String apodo,
+       @RequestParam Integer nivel, 
+       @RequestParam String estado) {
+       
+       try {
+           PokemonDTO dto = new PokemonDTO();
+           dto.setPokeApiId(pokeApiId);
+           dto.setApodo(apodo);
+           dto.setNivel(nivel);
+           dto.setEstado(estado);
+           
+           pokemonService.actualizarConfiguracionEspecie(dto);
+           return new ResponseEntity<>("Configuración guardada", HttpStatus.OK);
+       } catch (Exception e) {
+           return new ResponseEntity<>("Error al guardar: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+       }
+   }
+   public PokemonDTO obtenerEspecieParaAdmin(Integer pokeApiId) {
+        PokemonDTO configBD = pokemonService.buscarConfiguracionEnBD(pokeApiId);
+        InformacionPokemonDTO info = PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokeApiId));
+        
+        if (info != null) {
+            PokemonDTO dto = new PokemonDTO();
+            dto.setPokeApiId(pokeApiId);
+            dto.setApodo(configBD != null ? configBD.getApodo() : info.getNombre().toUpperCase());
+            dto.setNivel(configBD != null ? configBD.getNivel() : 1);
+            dto.setEstado(configBD != null ? configBD.getEstado() : "OK");
+            List<String> ataques = PokemonHTTPRequestHandler.extraerCuatroPrimerosAtaques(info.getListaAtaques());
+            dto.setNombreAtaque1(ataques.get(0));
+            dto.setNombreAtaque2(ataques.get(1));
+            dto.setNombreAtaque3(ataques.get(2));
+            dto.setNombreAtaque4(ataques.get(3));
+            
+            List<String> tipos = new ArrayList<>();
+            if (info.getListaTipos() != null) {
+                for (TipoPokemonDTO t : info.getListaTipos()) {
+                    if (t.getInformacionTipo() != null) {
+                        tipos.add(t.getInformacionTipo().getNombreTipo().toUpperCase());
+                    }
+                }
+            }
+            dto.setTipos(tipos);
+            dto.setSaludMaxima(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "hp"));
+            dto.setAtaque(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "attack"));
+            dto.setDefensa(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "defense"));
+            dto.setVelocidad(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "speed"));
+            
+            return dto;
+        }
+        return null;
+    }
 }

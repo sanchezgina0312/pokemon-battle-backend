@@ -39,6 +39,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
+            		.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/pokemon/auth/**",
                     "/usuario/login",
@@ -50,7 +51,12 @@ public class SecurityConfig {
                 ).permitAll()
                 .anyRequest().access((authentication, context) -> {
                     var authObj = authentication.get();
-
+                    if (authObj != null) {
+                        System.out.println("Usuario: " + authObj.getName());
+                        System.out.println("Autoridades detectadas: " + authObj.getAuthorities());
+                    } else {
+                        System.out.println("authObj es NULL (No hay usuario autenticado)");
+                    }
                     if (authObj == null || !authObj.isAuthenticated() ||
                         authObj instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
                         return new AuthorizationDecision(false);
@@ -73,7 +79,9 @@ public class SecurityConfig {
                         || path.equals("/usuario/buscarporcorreo")
                         || path.equals("/usuario/actualizar")
                         || path.equals("/usuario/eliminar")
-                        || path.equals("/auditoria/mostrartodo");  // <-- AGREGADO
+                        || path.equals("/auditoria/mostrartodo")
+                        || path.equals("/pokemon/actualizar-configuracion")
+                    || path.equals("/inventario/listar-todo");
 
                     if (isAdminOnly) return new AuthorizationDecision(false);
 
@@ -95,7 +103,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
