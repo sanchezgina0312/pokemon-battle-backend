@@ -1,6 +1,7 @@
 package co.edu.unbosque.pokemon.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,4 +35,27 @@ public class CentroPokemonService {
 		}
 		return 1;
 	}
-}
+	
+
+	public int curarEquipo(List<Long> idsPokemon, Long idUsuarioPropietarioAutenticado) {
+		boolean algunoCurado = false;
+		
+		for (Long idPokemon : idsPokemon) {
+			Optional<Pokemon> pOpt = pokeRep.findById(idPokemon);
+			if (pOpt.isPresent()) {
+				Pokemon p = pOpt.get();
+                if (p.getIdUsuarioPropietario().equals(idUsuarioPropietarioAutenticado)) {
+                    p.setSaludActual(p.getSaludMaxima());
+                    p.setEstado("OK");
+                    p.setEstadoAlterado(null); 
+                    pokeRep.save(p);
+                    centroRep.save(new CentroPokemon(idUsuarioPropietarioAutenticado, idPokemon, LocalDateTime.now()));
+                    algunoCurado = true;
+                } else {
+                    System.out.println("⚠️ Intento de curar un Pokémon ajeno. ID Pokémon: " + idPokemon);
+                }
+			}
+		}
+		
+		return algunoCurado ? 0 : 1;
+	}}

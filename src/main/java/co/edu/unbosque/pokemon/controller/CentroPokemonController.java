@@ -1,15 +1,20 @@
 package co.edu.unbosque.pokemon.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.service.CentroPokemonService;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * Controlador REST que gestiona las operaciones del Centro Pokémon.
@@ -51,4 +56,16 @@ public class CentroPokemonController {
 		return (centroSer.curar(idPokemon) == 0) ? new ResponseEntity<>("Curado", HttpStatus.ACCEPTED)
 				: new ResponseEntity<>("No encontrado", HttpStatus.NOT_FOUND);
 	}
+
+		/**
+		 * Restaura la salud de todo el equipo Pokémon enviado.
+		 */
+	@PostMapping("/curarEquipo")
+    public ResponseEntity<String> curarEquipo(@RequestBody List<Long> idsPokemon, Authentication authentication) {
+        
+        Usuario usuarioAutenticado = (Usuario) authentication.getPrincipal();
+        return (centroSer.curarEquipo(idsPokemon, usuarioAutenticado.getId()) == 0) 
+                ? new ResponseEntity<>("Equipo Curado", HttpStatus.ACCEPTED)
+                : new ResponseEntity<>("No se curaron Pokémon (o no eran tuyos)", HttpStatus.NOT_FOUND);
+    }
 }
