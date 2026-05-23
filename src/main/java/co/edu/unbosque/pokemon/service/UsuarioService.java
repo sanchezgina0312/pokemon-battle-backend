@@ -13,7 +13,6 @@ import co.edu.unbosque.pokemon.dto.UsuarioDTO;
 import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.repository.UsuarioRepository;
 import co.edu.unbosque.pokemon.util.LanzadorDeException;
-import jakarta.transaction.Transactional;
 
 /**
  * Servicio encargado de gestionar las operaciones CRUD de la entidad Usuario.
@@ -117,7 +116,6 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	public int updateById(Long id, UsuarioDTO data) {
 		LanzadorDeException.verificarId(id);
 		LanzadorDeException.verificarNombre(data.getNombre());
-		// La contraseña es opcional en edición: solo se valida si viene con valor
 		if (data.getContrasenia() != null && !data.getContrasenia().isBlank()) {
 			LanzadorDeException.verificarContrasena(data.getContrasenia());
 		}
