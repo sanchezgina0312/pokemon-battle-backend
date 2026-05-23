@@ -34,7 +34,7 @@ import co.edu.unbosque.pokemon.service.UsuarioService;
  */
 @RestController
 @RequestMapping("/combate")
-@CrossOrigin(origins = { "http://localhost:8080/", "http://localhost:8081", "http://localhost:4200" })
+@CrossOrigin(origins = { "http://localhost:8080", "http://localhost:8081", "http://localhost:4200" })
 public class CombateController {
 
 	/**
