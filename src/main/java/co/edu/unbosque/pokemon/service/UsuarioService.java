@@ -149,6 +149,20 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 			return 1;
 		}
 	}
+	
+	/**
+	 * Incrementa el saldo de dinero de un usuario tras ganar un combate.
+	 * @param idUsuario Identificador del usuario.
+	 * @param cantidad Cantidad de dinero a sumar.
+	 */
+	public void sumarDinero(Long idUsuario, int cantidad) {
+	    Optional<Usuario> encontrado = usuarioRep.findById(idUsuario);
+	    if (encontrado.isPresent()) {
+	        Usuario u = encontrado.get();
+	        u.setDinero(u.getDinero() + cantidad);
+	        usuarioRep.save(u);
+	    }
+	}
 
 	public boolean findUsernameAlreadyTaken(String nombre) {
 		Optional<Usuario> encontrado = usuarioRep.findByNombre(nombre);
