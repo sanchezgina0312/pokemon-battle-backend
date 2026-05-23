@@ -2,9 +2,13 @@ package co.edu.unbosque.pokemon.repository;
 
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import co.edu.unbosque.pokemon.entity.Usuario;
+import jakarta.transaction.Transactional;
 
 /**
  * Interfaz de repositorio para la entidad Usuario.
@@ -54,4 +58,5 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
 	public boolean existsByCorreo(String correo);
 
 	public void deleteByNombre(String nombre);
+	
 }

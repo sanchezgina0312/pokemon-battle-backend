@@ -4,7 +4,13 @@ import java.util.Objects;
 
 /**
  * Objeto de Transferencia de Datos (DTO) que representa el inventario de ítems de un usuario.
- * Esta clase facilita el transporte de datos entre la persistencia y la lógica de negocio.
+ * <p>
+ * Esta clase se encarga de transportar la información sobre la cantidad de recursos, objetos o
+ * herramientas (como Pokéballs, pociones, etc.) que posee un entrenador específico dentro del sistema,
+ * facilitando el flujo de datos entre la persistencia y la lógica de negocio.
+ * </p>
+ *
+ * @version 1.0
  */
 public class InventarioDTO {
 
@@ -93,13 +99,13 @@ public class InventarioDTO {
         if (getClass() != obj.getClass())
             return false;
         InventarioDTO other = (InventarioDTO) obj;
-        return cantidad == other.cantidad && id == other.id && idItem == other.idItem 
+        return cantidad == other.cantidad && id == other.id && idItem == other.idItem
                 && idUsuario == other.idUsuario && Objects.equals(nombre, other.nombre);
     }
 
     @Override
     public String toString() {
-        return "InventarioDTO [id=" + id + ", idUsuario=" + idUsuario + ", idItem=" + idItem 
+        return "InventarioDTO [id=" + id + ", idUsuario=" + idUsuario + ", idItem=" + idItem
                 + ", cantidad=" + cantidad + ", nombre=" + nombre + "]";
     }
 }

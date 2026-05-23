@@ -12,7 +12,6 @@ import com.google.gson.annotations.SerializedName;
  * estructura de datos manejable para el sistema local.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class RespuestaDTO {

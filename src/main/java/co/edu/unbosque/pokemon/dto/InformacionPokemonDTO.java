@@ -11,7 +11,6 @@ import com.google.gson.annotations.SerializedName;
  * recursos multimedia de imágenes (sprites) y archivos de audio (gritos).
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class InformacionPokemonDTO {

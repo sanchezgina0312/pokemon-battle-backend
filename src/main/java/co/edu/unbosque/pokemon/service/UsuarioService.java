@@ -13,6 +13,7 @@ import co.edu.unbosque.pokemon.dto.UsuarioDTO;
 import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.repository.UsuarioRepository;
 import co.edu.unbosque.pokemon.util.LanzadorDeException;
+import jakarta.transaction.Transactional;
 
 /**
  * Servicio encargado de gestionar las operaciones CRUD de la entidad Usuario.
@@ -116,7 +117,10 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	public int updateById(Long id, UsuarioDTO data) {
 		LanzadorDeException.verificarId(id);
 		LanzadorDeException.verificarNombre(data.getNombre());
-		LanzadorDeException.verificarContrasena(data.getContrasenia());
+		// La contraseña es opcional en edición: solo se valida si viene con valor
+		if (data.getContrasenia() != null && !data.getContrasenia().isBlank()) {
+			LanzadorDeException.verificarContrasena(data.getContrasenia());
+		}
 		LanzadorDeException.verificarCorreoElectronico(data.getCorreo());
 
 		Optional<Usuario> encontrado = usuarioRep.findById(id);
@@ -148,6 +152,20 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 		} else {
 			return 1;
 		}
+	}
+	
+	/**
+	 * Incrementa el saldo de dinero de un usuario tras ganar un combate.
+	 * @param idUsuario Identificador del usuario.
+	 * @param cantidad Cantidad de dinero a sumar.
+	 */
+	public void sumarDinero(Long idUsuario, int cantidad) {
+	    Optional<Usuario> encontrado = usuarioRep.findById(idUsuario);
+	    if (encontrado.isPresent()) {
+	        Usuario u = encontrado.get();
+	        u.setDinero(u.getDinero() + cantidad);
+	        usuarioRep.save(u);
+	    }
 	}
 
 	public boolean findUsernameAlreadyTaken(String nombre) {
@@ -248,4 +266,6 @@ public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
 		this.passwordEncoder = passwordEncoder;
 	}
+	
+
 }

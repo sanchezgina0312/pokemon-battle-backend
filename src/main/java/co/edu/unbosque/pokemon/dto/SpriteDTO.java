@@ -9,7 +9,6 @@ import com.google.gson.annotations.SerializedName;
  * a las representaciones visuales estándar de la criatura en sus perspectivas de frente y de espalda.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class SpriteDTO {

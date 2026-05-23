@@ -11,7 +11,6 @@ import java.util.Objects;
  * de la API REST.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class CapturaDTO {
