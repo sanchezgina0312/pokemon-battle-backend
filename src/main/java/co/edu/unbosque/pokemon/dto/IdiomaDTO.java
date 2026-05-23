@@ -10,7 +10,6 @@ import com.google.gson.annotations.SerializedName;
  * lenguaje correspondiente (por ejemplo, español o inglés).
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class IdiomaDTO {

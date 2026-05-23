@@ -11,7 +11,6 @@ import java.util.Objects;
  * lógica de negocio y presentación.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class CentroPokemonDTO {

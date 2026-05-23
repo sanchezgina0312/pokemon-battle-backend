@@ -10,7 +10,6 @@ import com.google.gson.annotations.SerializedName;
  * provenientes de la PokeAPI.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class InformacionAtaqueDTO {

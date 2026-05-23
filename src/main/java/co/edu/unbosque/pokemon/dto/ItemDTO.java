@@ -10,7 +10,6 @@ import java.util.Objects;
  * y su efectividad de restauración en los combates.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class ItemDTO {

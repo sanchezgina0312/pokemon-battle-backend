@@ -11,7 +11,6 @@ import java.util.Objects;
  * el historial de peleas de los usuarios.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class CombateDTO {

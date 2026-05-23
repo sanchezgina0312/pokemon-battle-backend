@@ -10,7 +10,6 @@ import java.util.Objects;
  * (dinero) disponibles del usuario para interactuar con los módulos de combate y tienda.
  * </p>
  * 
- * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class UsuarioDTO {

@@ -11,7 +11,6 @@ import java.util.Objects;
  * incluyendo sus estadísticas de combate activas, su nivel, experiencia, los movimientos asignados 
  * y su condición actual.
  * </p>
- * * @author Integrantes del Proyecto
  * @version 1.0
  */
 public class PokemonDTO {
