@@ -1,5 +1,4 @@
 package co.edu.unbosque.pokemon.service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -21,75 +20,71 @@ import co.edu.unbosque.pokemon.util.LanzadorDeException;
 @Service
 public class TiendaService {
 
-    @Autowired
-    private UsuarioRepository userRep;
+	@Autowired
+	private UsuarioRepository userRep;
+	@Autowired
+	private ItemRepository itemRep;
+	@Autowired
+	private TiendaRepository tiendaRep;
+	@Autowired
+	private InventarioRepository invRep;
+	@Autowired
+	private ModelMapper mapper;
 
-    @Autowired
-    private ItemRepository itemRep;
+	/**
+	 * Realiza la compra de un ítem.
+	 * @return 0: Éxito, 1: No existe item/usuario, 2: Dinero insuficiente.
+	 */
+	public int realizarCompra(long idUsuario, long idItem) {
+		LanzadorDeException.verificarId(idUsuario);
+		LanzadorDeException.verificarId(idItem);
 
-    @Autowired
-    private TiendaRepository tiendaRep;
+		Optional<Usuario> usuarioOpt = userRep.findById(idUsuario);
+		Optional<Item> itemOpt = itemRep.findById(idItem);
 
-    @Autowired
-    private InventarioRepository invRep;
+		if (usuarioOpt.isEmpty() || itemOpt.isEmpty()) return 1;
 
-    @Autowired
-    private ModelMapper mapper;
+		Usuario user = usuarioOpt.get();
+		Item item = itemOpt.get();
+		int precioFinal = calcularPrecio(item);
 
-    @Autowired
-    private AuditoriaService auditoriaService;
+		if (user.getDinero() < precioFinal) return 2;
 
-    public int realizarCompra(long idUsuario, long idItem) {
-        LanzadorDeException.verificarId(idUsuario);
-        LanzadorDeException.verificarId(idItem);
+		// Deducción de dinero y persistencia
+		user.setDinero(user.getDinero() - precioFinal);
+		userRep.save(user);
 
-        Optional<Usuario> usuarioOpt = userRep.findById(idUsuario);
-        Optional<Item> itemOpt = itemRep.findById(idItem);
+		tiendaRep.save(new Tienda(idUsuario, idItem, LocalDateTime.now()));
+		actualizarMochila(idUsuario, idItem);
+		return 0;
+	}
 
-        if (usuarioOpt.isEmpty() || itemOpt.isEmpty()) return 1;
+	private int calcularPrecio(Item item) {
+		String nombre = item.getNombre().toUpperCase();
+		return switch (nombre) {
+			case "ANTIPARALIZ", "POKÉ BALL" -> 200;
+			case "SUPERBOLA", "CURA TOTAL" -> 600;
+			case "ULTRABOLA" -> 1200;
+			case "REVIVIR" -> 1500;
+			case "ANTÍDOTO" -> 100;
+			case "ANTIQUEMAR", "ANTIHIELO", "DESPERTAR" -> 250;
+			case "SUPERPOSICIÓN" -> 700;
+			case "REPELENTE" -> 300;
+			default -> item.getCosto();
+		};
+	}
 
-        Usuario user = usuarioOpt.get();
-        Item item = itemOpt.get();
+	private void actualizarMochila(long idUsuario, long idItem) {
+		Optional<List<Inventario>> invOpt = invRep.findByIdUsuario(idUsuario);
+		Inventario itemEnMochila = invOpt.flatMap(list -> 
+			list.stream().filter(i -> i.getIdItem() == idItem).findFirst()
+		).orElse(null);
 
-        int precioFinal = calcularPrecio(item);
-
-        if (user.getDinero() < precioFinal) return 2;
-
-        user.setDinero(user.getDinero() - precioFinal);
-        userRep.save(user);
-        tiendaRep.save(new Tienda(idUsuario, idItem, LocalDateTime.now()));
-        actualizarMochila(idUsuario, idItem);
-
-        auditoriaService.registrar("COMPRAR", "Item: " + item.getNombre() + " | Usuario ID: " + idUsuario);
-        return 0;
-    }
-
-    private int calcularPrecio(Item item) {
-        String nombre = item.getNombre().toUpperCase();
-        return switch (nombre) {
-            case "ANTIPARALIZ", "POKÉ BALL" -> 200;
-            case "SUPERBOLA", "CURA TOTAL" -> 600;
-            case "ULTRABOLA" -> 1200;
-            case "REVIVIR" -> 1500;
-            case "ANTÍDOTO" -> 100;
-            case "ANTIQUEMAR", "ANTIHIELO", "DESPERTAR" -> 250;
-            case "SUPERPOSICIÓN" -> 700;
-            case "REPELENTE" -> 300;
-            default -> item.getCosto();
-        };
-    }
-
-    private void actualizarMochila(long idUsuario, long idItem) {
-        Optional<List<Inventario>> invOpt = invRep.findByIdUsuario(idUsuario);
-        Inventario itemEnMochila = invOpt.flatMap(list ->
-            list.stream().filter(i -> i.getIdItem() == idItem).findFirst()
-        ).orElse(null);
-
-        if (itemEnMochila != null) {
-            itemEnMochila.setCantidad(itemEnMochila.getCantidad() + 1);
-            invRep.save(itemEnMochila);
-        } else {
-            invRep.save(new Inventario(idUsuario, idItem, 1));
-        }
-    }
+		if (itemEnMochila != null) {
+			itemEnMochila.setCantidad(itemEnMochila.getCantidad() + 1);
+			invRep.save(itemEnMochila);
+		} else {
+			invRep.save(new Inventario(idUsuario, idItem, 1));
+		}
+	}
 }

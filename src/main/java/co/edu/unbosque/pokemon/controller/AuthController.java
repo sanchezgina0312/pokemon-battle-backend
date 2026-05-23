@@ -3,7 +3,6 @@ package co.edu.unbosque.pokemon.controller;
 import co.edu.unbosque.pokemon.dto.UsuarioDTO;
 import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.security.JwtUtil;
-import co.edu.unbosque.pokemon.service.AuditoriaService;
 import co.edu.unbosque.pokemon.service.EmailService;
 import co.edu.unbosque.pokemon.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,12 +33,8 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UsuarioService userService;
-
     @Autowired
     private EmailService emailService;
-
-    @Autowired
-    private AuditoriaService auditoriaService;
 
     public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UsuarioService userService) {
         this.authenticationManager = authenticationManager;
@@ -66,16 +61,10 @@ public class AuthController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String jwt = jwtUtil.generateToken(userDetails);
 
-            if (userDetails instanceof Usuario user) {
-                auditoriaService.registrarLogin(
-                    user.getCorreo(),
-                    user.getRol().name(),
-                    user.getId()
-                );
-                return ResponseEntity.ok(new AuthResponse(jwt, user.getRol().name(), user.getId(), user.getNombre(), user.getGenero()));
-            }
-
-            return ResponseEntity.ok(new AuthResponse(jwt, null, null, null, null));
+            if (userDetails instanceof Usuario) {
+                Usuario user = (Usuario) userDetails;
+                return ResponseEntity.ok(new AuthResponse(jwt, user.getRol().name(), user.getId(), user.getNombre(), user.getGenero()));  }
+        return ResponseEntity.ok(new AuthResponse(jwt, null, null, null, null));
 
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -97,17 +86,18 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se pudo completar el registro.");
         }
     }
-
+    
     @PostMapping("/enviar-codigo")
     public ResponseEntity<String> enviarCodigoVerificacion(
-            @RequestParam String correo,
+            @RequestParam String correo, 
             @RequestParam String nombre) {
         try {
             String codigo = emailService.generarCodigoVerificacion();
             emailService.enviarCorreoCodigo(correo, codigo, nombre);
-            return new ResponseEntity<>(codigo, HttpStatus.OK);
+            // Devolvemos el código a Angular para que él valide
+            return new ResponseEntity<>(codigo, org.springframework.http.HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("Error al enviar el correo", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Error al enviar el correo", org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -117,6 +107,7 @@ public class AuthController {
 
         public String getCorreo() { return correo; }
         public void setCorreo(String correo) { this.correo = correo; }
+
         public String getContrasenia() { return contrasenia; }
         public void setContrasenia(String contrasenia) { this.contrasenia = contrasenia; }
     }
@@ -133,17 +124,21 @@ public class AuthController {
             this.role = role;
             this.id = id;
             this.nombre = nombre;
-            this.genero = genero;
-        }
+            this.genero=genero;
+            }
 
         public String getToken() { return token; }
         public void setToken(String token) { this.token = token; }
+
         public String getRole() { return role; }
         public void setRole(String role) { this.role = role; }
+
         public Long getId() { return id; }
         public void setId(Long id) { this.id = id; }
+
         public String getGenero() { return genero; }
         public void setGenero(String genero) { this.genero = genero; }
+        
         public String getNombre() { return nombre; }
         public void setNombre(String nombre) { this.nombre = nombre; }
     }
