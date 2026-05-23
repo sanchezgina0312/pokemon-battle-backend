@@ -135,7 +135,9 @@ public class SecurityConfig {
                         || path.startsWith("/inventario/")
                         || path.startsWith("/item/")
                         || path.startsWith("/pokemon/")
-                        || path.startsWith("/usuario/genero");
+                        || path.startsWith("/usuario/genero")
+                        || path.startsWith("/centropokemon");
+
 
                     return new AuthorizationDecision(isUsuarioAllowed);
                 }))
