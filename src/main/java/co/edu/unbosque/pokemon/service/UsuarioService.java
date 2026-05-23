@@ -14,174 +14,238 @@ import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.repository.UsuarioRepository;
 import co.edu.unbosque.pokemon.util.LanzadorDeException;
 
+/**
+ * Servicio encargado de gestionar las operaciones CRUD de la entidad Usuario.
+ * <p>
+ * Permite crear, consultar, actualizar y eliminar usuarios, así como realizar
+ * búsquedas por diferentes atributos como username, correo y rol.
+ * </p>
+ *
+ * <p>
+ * Utiliza UsuarioRepository para la persistencia, ModelMapper para la
+ * conversión entre entidades y DTOs, y LanzadorDeException para la validación
+ * de datos.
+ * </p>
+ * * @author Gina Sánchez
+ * 
+ * @version 1.0
+ */
 @Service
 public class UsuarioService implements CRUDOperation<UsuarioDTO> {
 
-    @Autowired
-    private UsuarioRepository usuarioRep;
+	@Autowired
+	private UsuarioRepository usuarioRep;
 
-    @Autowired
-    private ModelMapper mapper;
+	@Autowired
+	private ModelMapper mapper;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private AuditoriaService auditoriaService;
+	public UsuarioService() {
+	}
 
-    public UsuarioService() {}
+	@Override
+	public long count() {
+		return usuarioRep.count();
+	}
 
-    @Override
-    public long count() {
-        return usuarioRep.count();
-    }
+	@Override
+	public boolean exist(Long id) {
+		LanzadorDeException.verificarId(id);
+		return usuarioRep.existsById(id);
+	}
 
-    @Override
-    public boolean exist(Long id) {
-        LanzadorDeException.verificarId(id);
-        return usuarioRep.existsById(id);
-    }
+	@Override
+	public int create(UsuarioDTO data) {
+		LanzadorDeException.verificarNombre(data.getNombre());
+		LanzadorDeException.verificarContrasena(data.getContrasenia());
+		LanzadorDeException.verificarCorreoElectronico(data.getCorreo());
 
-    @Override
-    public int create(UsuarioDTO data) {
-        LanzadorDeException.verificarNombre(data.getNombre());
-        LanzadorDeException.verificarContrasena(data.getContrasenia());
-        LanzadorDeException.verificarCorreoElectronico(data.getCorreo());
-        LanzadorDeException.verificarCorreoDuplicado(usuarioRep.existsByCorreo(data.getCorreo()));
+		LanzadorDeException.verificarCorreoDuplicado(usuarioRep.existsByCorreo(data.getCorreo()));
 
-        if (data.getNombre() == null || data.getNombre().isBlank()) return 1;
-        if (data.getCorreo() == null || data.getCorreo().isBlank()) return 1;
-        if (data.getContrasenia() == null || data.getContrasenia().isBlank()) return 1;
+		if (data.getNombre() == null || data.getNombre().isBlank()) {
+			return 1;
+		}
 
-        Usuario entity = mapper.map(data, Usuario.class);
-        entity.setContrasenia(passwordEncoder.encode(data.getContrasenia()));
+		if (data.getCorreo() == null || data.getCorreo().isBlank()) {
+			return 1;
+		}
 
-        if (usuarioRep.existsByNombre(data.getNombre())) {
-            return 1;
-        } else {
-            usuarioRep.save(entity);
-            auditoriaService.registrarAccionPublica(data.getCorreo(), "REGISTRO", "Usuario: " + data.getNombre());
-            return 0;
-        }
-    }
+		if (data.getContrasenia() == null || data.getContrasenia().isBlank()) {
+			return 1;
+		}
 
-    @Override
-    public List<UsuarioDTO> getAll() {
-        Iterable<Usuario> entityList = usuarioRep.findAll();
-        List<UsuarioDTO> dtoList = new ArrayList<>();
-        entityList.forEach(entity -> dtoList.add(mapper.map(entity, UsuarioDTO.class)));
-        auditoriaService.registrar("CONSULTAR_TODO", "Usuario");
-        return dtoList;
-    }
+		Usuario entity = mapper.map(data, Usuario.class);
+		entity.setContrasenia(passwordEncoder.encode(data.getContrasenia()));
 
-    @Override
-    public int deleteById(Long id) {
-        LanzadorDeException.verificarId(id);
+		if (usuarioRep.existsByNombre(data.getNombre())) {
+			return 1;
+		} else {
+			usuarioRep.save(entity);
+			return 0;
+		}
+	}
 
-        if (usuarioRep.existsById(id)) {
-            usuarioRep.deleteById(id);
-            auditoriaService.registrar("ELIMINAR", "Usuario ID: " + id);
-            return 0;
-        }
+	@Override
+	public List<UsuarioDTO> getAll() {
+		Iterable<Usuario> entityList = usuarioRep.findAll();
+		List<UsuarioDTO> dtoList = new ArrayList<>();
 
-        return 1;
-    }
+		entityList.forEach((entity) -> {
+			UsuarioDTO dto = mapper.map(entity, UsuarioDTO.class);
+			dtoList.add(dto);
+		});
 
-    @Override
-    public int updateById(Long id, UsuarioDTO data) {
-        LanzadorDeException.verificarId(id);
-        LanzadorDeException.verificarNombre(data.getNombre());
-        LanzadorDeException.verificarContrasena(data.getContrasenia());
-        LanzadorDeException.verificarCorreoElectronico(data.getCorreo());
+		return dtoList;
+	}
 
-        Optional<Usuario> encontrado = usuarioRep.findById(id);
+	@Override
+	public int deleteById(Long id) {
+		LanzadorDeException.verificarId(id);
 
-        if (encontrado.isPresent()) {
-            Usuario temp = encontrado.get();
+		if (usuarioRep.existsById(id)) {
+			usuarioRep.deleteById(id);
+			return 0;
+		}
 
-            if (!temp.getNombre().equals(data.getNombre())) {
-                LanzadorDeException.verificarCorreoDuplicado(usuarioRep.existsByNombre(data.getNombre()));
-                if (usuarioRep.existsByNombre(data.getNombre())) return 1;
-            }
+		return 1;
+	}
 
-            temp.setNombre(data.getNombre());
-            temp.setCorreo(data.getCorreo());
-            temp.setIdiomaPreferido(data.getIdiomaPreferido());
-            temp.setDinero(data.getDinero());
+	@Override
+	public int updateById(Long id, UsuarioDTO data) {
+		LanzadorDeException.verificarId(id);
+		LanzadorDeException.verificarNombre(data.getNombre());
+		LanzadorDeException.verificarContrasena(data.getContrasenia());
+		LanzadorDeException.verificarCorreoElectronico(data.getCorreo());
 
-            if (data.getContrasenia() != null && !data.getContrasenia().isBlank()) {
-                temp.setContrasenia(passwordEncoder.encode(data.getContrasenia()));
-            }
+		Optional<Usuario> encontrado = usuarioRep.findById(id);
 
-            usuarioRep.save(temp);
-            auditoriaService.registrar("ACTUALIZAR", "Usuario ID: " + id);
-            return 0;
+		if (encontrado.isPresent()) {
+			Usuario temp = encontrado.get();
 
-        } else {
-            return 1;
-        }
-    }
+			if (!temp.getNombre().equals(data.getNombre())) {
 
-    public boolean findUsernameAlreadyTaken(String nombre) {
-        boolean resultado = usuarioRep.findByNombre(nombre).isPresent();
-        auditoriaService.registrar("CONSULTAR_NOMBRE_DISPONIBLE", "Usuario: " + nombre);
-        return resultado;
-    }
+				LanzadorDeException.verificarCorreoDuplicado(usuarioRep.existsByNombre(data.getNombre()));
+				if (usuarioRep.existsByNombre(data.getNombre())) {
+					return 1;
+				}
+			}
 
-    public List<UsuarioDTO> findByNombre(String nombre) {
-        LanzadorDeException.verificarNombre(nombre);
-        Optional<Usuario> encontrado = usuarioRep.findByNombre(nombre);
-        List<UsuarioDTO> dtoList = new ArrayList<>();
-        encontrado.ifPresent(u -> dtoList.add(mapper.map(u, UsuarioDTO.class)));
-        auditoriaService.registrar("CONSULTAR_POR_NOMBRE", "Usuario: " + nombre);
-        return dtoList;
-    }
+			temp.setNombre(data.getNombre());
+			temp.setCorreo(data.getCorreo());
+			temp.setIdiomaPreferido(data.getIdiomaPreferido());
+			temp.setDinero(data.getDinero());
 
-    public List<UsuarioDTO> findByCorreo(String correo) {
-        LanzadorDeException.verificarCorreoElectronico(correo);
-        Optional<Usuario> encontrado = usuarioRep.findByCorreo(correo);
-        List<UsuarioDTO> dtoList = new ArrayList<>();
-        encontrado.ifPresent(u -> dtoList.add(mapper.map(u, UsuarioDTO.class)));
-        auditoriaService.registrar("CONSULTAR_POR_CORREO", "Usuario: " + correo);
-        return dtoList;
-    }
+			if (data.getContrasenia() != null && !data.getContrasenia().isBlank()) {
+				temp.setContrasenia(passwordEncoder.encode(data.getContrasenia()));
+			}
 
-    public List<UsuarioDTO> findByRol(String rol) {
-        Optional<Usuario> encontrado = usuarioRep.findByRol(rol);
-        List<UsuarioDTO> dtoList = new ArrayList<>();
-        encontrado.ifPresent(u -> dtoList.add(mapper.map(u, UsuarioDTO.class)));
-        auditoriaService.registrar("CONSULTAR_POR_ROL", "Rol: " + rol);
-        return dtoList;
-    }
+			usuarioRep.save(temp);
 
-    public int login(String correo, String contrasenia) {
-        LanzadorDeException.verificarCorreoElectronico(correo);
-        Optional<Usuario> encontrado = usuarioRep.findByCorreo(correo);
+			return 0;
 
-        if (encontrado.isEmpty()) return 2;
+		} else {
+			return 1;
+		}
+	}
 
-        Usuario usuario = encontrado.get();
-        if (passwordEncoder.matches(contrasenia, usuario.getContrasenia())) return 0;
+	public boolean findUsernameAlreadyTaken(String nombre) {
+		Optional<Usuario> encontrado = usuarioRep.findByNombre(nombre);
+		return encontrado.isPresent();
+	}
 
-        return 1;
-    }
+	public List<UsuarioDTO> findByNombre(String nombre) {
+		LanzadorDeException.verificarNombre(nombre);
 
-    public int actualizarGenero(Long id, String genero) {
-        Optional<Usuario> encontrado = usuarioRep.findById(id);
-        if (encontrado.isPresent()) {
-            Usuario temp = encontrado.get();
-            temp.setGenero(genero);
-            usuarioRep.save(temp);
-            auditoriaService.registrar("ACTUALIZAR_GENERO", "Usuario ID: " + id);
-            return 0;
-        }
-        return 1;
-    }
+		Optional<Usuario> encontrado = usuarioRep.findByNombre(nombre);
+		List<UsuarioDTO> dtoList = new ArrayList<>();
 
-    public UsuarioRepository getUsuarioRep() { return usuarioRep; }
-    public void setUsuarioRep(UsuarioRepository usuarioRep) { this.usuarioRep = usuarioRep; }
-    public ModelMapper getMapper() { return mapper; }
-    public void setMapper(ModelMapper mapper) { this.mapper = mapper; }
-    public PasswordEncoder getPasswordEncoder() { return passwordEncoder; }
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) { this.passwordEncoder = passwordEncoder; }
+		encontrado.ifPresent(u -> dtoList.add(mapper.map(u, UsuarioDTO.class)));
+
+		return dtoList;
+	}
+
+	public List<UsuarioDTO> findByCorreo(String correo) {
+		LanzadorDeException.verificarCorreoElectronico(correo);
+
+		Optional<Usuario> encontrado = usuarioRep.findByCorreo(correo);
+		List<UsuarioDTO> dtoList = new ArrayList<>();
+
+		encontrado.ifPresent(u -> dtoList.add(mapper.map(u, UsuarioDTO.class)));
+
+		return dtoList;
+	}
+
+	public List<UsuarioDTO> findByRol(String rol) {
+		Optional<Usuario> encontrado = usuarioRep.findByRol(rol);
+		List<UsuarioDTO> dtoList = new ArrayList<>();
+
+		encontrado.ifPresent(u -> dtoList.add(mapper.map(u, UsuarioDTO.class)));
+
+		return dtoList;
+	}
+
+	/**
+	 * Valida las credenciales de un usuario por correo electrónico.
+	 * Usa PasswordEncoder para comparar la contraseña ingresada con el hash.
+	 *
+	 * @param correo      Correo electrónico del usuario
+	 * @param contrasenia Contraseña sin encriptar
+	 * @return 0 si las credenciales son válidas,
+	 *         1 si la contraseña es incorrecta,
+	 *         2 si el usuario no existe
+	 */
+	public int login(String correo, String contrasenia) {
+		LanzadorDeException.verificarCorreoElectronico(correo);
+
+		Optional<Usuario> encontrado = usuarioRep.findByCorreo(correo);
+
+		if (encontrado.isEmpty()) {
+			return 2;
+		}
+
+		Usuario usuario = encontrado.get();
+
+		if (passwordEncoder.matches(contrasenia, usuario.getContrasenia())) {
+			return 0;
+		}
+
+		return 1;
+	}
+
+	public int actualizarGenero(Long id, String genero) {
+	    Optional<Usuario> encontrado = usuarioRep.findById(id);
+	    if (encontrado.isPresent()) {
+	        Usuario temp = encontrado.get();
+	        temp.setGenero(genero);
+	        usuarioRep.save(temp);
+	        return 0; 
+	    }
+	    return 1; 
+	}
+		
+	public UsuarioRepository getUsuarioRep() {
+		return usuarioRep;
+	}
+
+	public void setUsuarioRep(UsuarioRepository usuarioRep) {
+		this.usuarioRep = usuarioRep;
+	}
+
+	public ModelMapper getMapper() {
+		return mapper;
+	}
+
+	public void setMapper(ModelMapper mapper) {
+		this.mapper = mapper;
+	}
+
+	public PasswordEncoder getPasswordEncoder() {
+		return passwordEncoder;
+	}
+
+	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+		this.passwordEncoder = passwordEncoder;
+	}
 }

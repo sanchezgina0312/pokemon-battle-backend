@@ -13,26 +13,25 @@ import co.edu.unbosque.pokemon.repository.PokemonRepository;
 
 @Service
 public class CentroPokemonService {
+	
+	@Autowired
+	private PokemonRepository pokeRep;
+	
+	@Autowired
+	private CentroPokemonRepository centroRep;
 
-    @Autowired
-    private PokemonRepository pokeRep;
+	public int curar(long idPokemon) {
+		Optional<Pokemon> pOpt = pokeRep.findById(idPokemon);
 
-    @Autowired
-    private CentroPokemonRepository centroRep;
+		if (pOpt.isPresent()) {
+			Pokemon p = pOpt.get();
+			p.setSaludActual(p.getSaludMaxima());
 
-    @Autowired
-    private AuditoriaService auditoriaService;
+			pokeRep.save(p);
+			centroRep.save(new CentroPokemon(p.getIdUsuarioPropietario(), idPokemon, LocalDateTime.now()));
 
-    public int curar(long idPokemon) {
-        Optional<Pokemon> pOpt = pokeRep.findById(idPokemon);
-        if (pOpt.isPresent()) {
-            Pokemon p = pOpt.get();
-            p.setSaludActual(p.getSaludMaxima());
-            pokeRep.save(p);
-            centroRep.save(new CentroPokemon(p.getIdUsuarioPropietario(), idPokemon, LocalDateTime.now()));
-            auditoriaService.registrar("CURAR", "Pokemon ID: " + idPokemon);
-            return 0;
-        }
-        return 1;
-    }
+			return 0;
+		}
+		return 1;
+	}
 }
