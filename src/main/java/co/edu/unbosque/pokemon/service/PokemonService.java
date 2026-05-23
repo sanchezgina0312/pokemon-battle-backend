@@ -184,6 +184,29 @@ public class PokemonService implements CRUDOperation<PokemonDTO> {
             dto.setTipos(listaNombresTipos);
         }
     }
+    
+    /**
+     * Incrementa la experiencia de un Pokémon específico en la base de datos.
+     * @param id Identificador del Pokémon.
+     * @param exp Cantidad de puntos de experiencia a sumar.
+     */
+    public void sumarExperiencia(Long id, int exp) {
+        Optional<Pokemon> encontrado = pokemonRep.findById(id);
+        if (encontrado.isPresent()) {
+            Pokemon p = encontrado.get();
+            int nuevaExp = p.getExperienciaAcumulada() + exp;
+            
+            if (nuevaExp >= 100) {
+                p.setNivel(p.getNivel() + 1);
+                p.setExperienciaAcumulada(nuevaExp - 100);
+                p.setAtaque(p.getAtaque() + 2);
+                p.setDefensa(p.getDefensa() + 2);
+            } else {
+                p.setExperienciaAcumulada(nuevaExp);
+            }
+            pokemonRep.save(p);
+        }
+    }
 
     @Override
     public long count() { return pokemonRep.count(); }

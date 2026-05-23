@@ -39,11 +39,14 @@ public class PokemonController {
     }
 
     @PostMapping("/capturar")
-    public ResponseEntity<String> crearPokemon(@RequestParam Integer pokeApiId, @RequestParam String apodo,
-            @RequestParam int nivel, @RequestParam int experienciaAcumulada, @RequestParam int saludActual,
-            @RequestParam int saludMaxima, @RequestParam String nombreAtaque1, @RequestParam String nombreAtaque2,
+    public ResponseEntity<String> crearPokemon(
+            @RequestParam Integer pokeApiId, @RequestParam String apodo,
+            @RequestParam int nivel, @RequestParam int experienciaAcumulada, 
+            @RequestParam int saludActual, @RequestParam int saludMaxima, 
+            @RequestParam String nombreAtaque1, @RequestParam String nombreAtaque2,
             @RequestParam String nombreAtaque3, @RequestParam String nombreAtaque4,
-            @RequestParam Long idUsuarioPropietario, @RequestParam String estado) {
+            @RequestParam Long idUsuarioPropietario, @RequestParam String estado,
+            @RequestParam int ataque, @RequestParam int defensa, @RequestParam int velocidad) {
 
         try {
             PokemonDTO nuevoPokemon = new PokemonDTO();
@@ -59,6 +62,9 @@ public class PokemonController {
             nuevoPokemon.setNombreAtaque4(nombreAtaque4);
             nuevoPokemon.setIdUsuarioPropietario(idUsuarioPropietario);
             nuevoPokemon.setEstado(estado);
+            nuevoPokemon.setAtaque(ataque);
+            nuevoPokemon.setDefensa(defensa);
+            nuevoPokemon.setVelocidad(velocidad);
 
             int status = pokemonService.create(nuevoPokemon);
 
