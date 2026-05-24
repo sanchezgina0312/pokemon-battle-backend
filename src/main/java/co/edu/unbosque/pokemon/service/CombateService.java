@@ -15,104 +15,139 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
+/**
+ * Servicio encargado de la lógica de combate entre Pokémon.
+ * 
+ * Incluye cálculo de daño, registro de combates, historial de peleas,
+ * recompensas y evolución de niveles.
+ */
 @Service
 public class CombateService {
 
-	@Autowired
-	private CombateRepository combateRep;
-	@Autowired
-	private ModelMapper mapper;
+    @Autowired
+    private CombateRepository combateRep;
 
-	private static final Map<String, Map<String, Double>> TABLA_EFECTIVIDAD = new HashMap<>();
+    @Autowired
+    private ModelMapper mapper;
 
-	static {
-		agregarEfectividad("normal", Map.of("roca", 0.5, "acero", 0.5, "fantasma", 0.0));
-		agregarEfectividad("fuego", Map.of("fuego", 0.5, "agua", 0.5, "planta", 2.0, "hielo", 2.0, "bicho", 2.0, "roca",
-				0.5, "dragon", 0.5, "acero", 2.0));
-		agregarEfectividad("agua",
-				Map.of("fuego", 2.0, "agua", 0.5, "planta", 0.5, "tierra", 2.0, "roca", 2.0, "dragon", 0.5));
-		agregarEfectividad("planta", Map.of("fuego", 0.5, "agua", 2.0, "planta", 0.5, "veneno", 0.5, "tierra", 2.0,
-				"volador", 0.5, "bicho", 0.5, "roca", 2.0, "acero", 0.5));
-		agregarEfectividad("electrico",
-				Map.of("agua", 2.0, "electrico", 0.5, "planta", 0.5, "tierra", 0.0, "volador", 2.0, "dragon", 0.5));
-		agregarEfectividad("hielo", Map.of("fuego", 0.5, "agua", 0.5, "planta", 2.0, "hielo", 0.5, "tierra", 2.0,
-				"volador", 2.0, "dragon", 2.0, "acero", 0.5));
-		agregarEfectividad("lucha", Map.of("normal", 2.0, "hielo", 2.0, "veneno", 0.5, "volador", 0.5, "psiquico", 0.5,
-				"bicho", 0.5, "roca", 2.0, "fantasma", 0.0, "acero", 2.0, "siniestro", 2.0));
-		agregarEfectividad("veneno",
-				Map.of("planta", 2.0, "veneno", 0.5, "tierra", 0.5, "roca", 0.5, "fantasma", 0.5, "acero", 0.0));
-		agregarEfectividad("tierra", Map.of("fuego", 2.0, "electrico", 2.0, "planta", 0.5, "veneno", 2.0, "volador",
-				0.0, "bicho", 0.5, "roca", 2.0, "acero", 2.0));
-		agregarEfectividad("volador",
-				Map.of("electrico", 0.5, "planta", 2.0, "lucha", 2.0, "bicho", 2.0, "roca", 0.5, "acero", 0.5));
-		agregarEfectividad("psiquico",
-				Map.of("lucha", 2.0, "veneno", 2.0, "psiquico", 0.5, "acero", 0.5, "siniestro", 0.0));
-		agregarEfectividad("bicho", Map.of("fuego", 0.5, "planta", 2.0, "lucha", 0.5, "veneno", 0.5, "volador", 0.5,
-				"psiquico", 2.0, "fantasma", 0.5, "acero", 0.5, "siniestro", 2.0));
-		agregarEfectividad("roca", Map.of("fuego", 2.0, "hielo", 2.0, "lucha", 0.5, "tierra", 0.5, "volador", 2.0,
-				"bicho", 2.0, "acero", 0.5));
-		agregarEfectividad("fantasma", Map.of("normal", 0.0, "psiquico", 2.0, "fantasma", 2.0, "siniestro", 0.5));
-		agregarEfectividad("dragon", Map.of("dragon", 2.0, "acero", 0.5));
-		agregarEfectividad("acero",
-				Map.of("fuego", 0.5, "agua", 0.5, "electrico", 0.5, "hielo", 2.0, "roca", 2.0, "acero", 0.5));
-		agregarEfectividad("siniestro", Map.of("lucha", 0.5, "psiquico", 2.0, "fantasma", 2.0, "siniestro", 0.5));
-	}
+    /**
+     * Tabla de efectividad entre tipos de Pokémon.
+     */
+    private static final Map<String, Map<String, Double>> TABLA_EFECTIVIDAD = new HashMap<>();
 
-	private static void agregarEfectividad(String tipo, Map<String, Double> debilidades) {
-		TABLA_EFECTIVIDAD.put(tipo, debilidades);
-	}
+    static {
+        agregarEfectividad("normal", Map.of("roca", 0.5, "acero", 0.5, "fantasma", 0.0));
+        agregarEfectividad("fuego", Map.of("fuego", 0.5, "agua", 0.5, "planta", 2.0, "hielo", 2.0, "bicho", 2.0, "roca",
+                0.5, "dragon", 0.5, "acero", 2.0));
+        agregarEfectividad("agua",
+                Map.of("fuego", 2.0, "agua", 0.5, "planta", 0.5, "tierra", 2.0, "roca", 2.0, "dragon", 0.5));
+        agregarEfectividad("planta", Map.of("fuego", 0.5, "agua", 2.0, "planta", 0.5, "veneno", 0.5, "tierra", 2.0,
+                "volador", 0.5, "bicho", 0.5, "roca", 2.0, "acero", 0.5));
+        agregarEfectividad("electrico",
+                Map.of("agua", 2.0, "electrico", 0.5, "planta", 0.5, "tierra", 0.0, "volador", 2.0, "dragon", 0.5));
+        agregarEfectividad("hielo", Map.of("fuego", 0.5, "agua", 0.5, "planta", 2.0, "hielo", 0.5, "tierra", 2.0,
+                "volador", 2.0, "dragon", 2.0, "acero", 0.5));
+        agregarEfectividad("lucha", Map.of("normal", 2.0, "hielo", 2.0, "veneno", 0.5, "volador", 0.5, "psiquico", 0.5,
+                "bicho", 0.5, "roca", 2.0, "fantasma", 0.0, "acero", 2.0, "siniestro", 2.0));
+        agregarEfectividad("veneno",
+                Map.of("planta", 2.0, "veneno", 0.5, "tierra", 0.5, "roca", 0.5, "fantasma", 0.5, "acero", 0.0));
+        agregarEfectividad("tierra", Map.of("fuego", 2.0, "electrico", 2.0, "planta", 0.5, "veneno", 2.0, "volador",
+                0.0, "bicho", 0.5, "roca", 2.0, "acero", 2.0));
+        agregarEfectividad("volador",
+                Map.of("electrico", 0.5, "planta", 2.0, "lucha", 2.0, "bicho", 2.0, "roca", 0.5, "acero", 0.5));
+        agregarEfectividad("psiquico",
+                Map.of("lucha", 2.0, "veneno", 2.0, "psiquico", 0.5, "acero", 0.5, "siniestro", 0.0));
+        agregarEfectividad("bicho", Map.of("fuego", 0.5, "planta", 2.0, "lucha", 0.5, "veneno", 0.5, "volador", 0.5,
+                "psiquico", 2.0, "fantasma", 0.5, "acero", 0.5, "siniestro", 2.0));
+        agregarEfectividad("roca", Map.of("fuego", 2.0, "hielo", 2.0, "lucha", 0.5, "tierra", 0.5, "volador", 2.0,
+                "bicho", 2.0, "acero", 0.5));
+        agregarEfectividad("fantasma", Map.of("normal", 0.0, "psiquico", 2.0, "fantasma", 2.0, "siniestro", 0.5));
+        agregarEfectividad("dragon", Map.of("dragon", 2.0, "acero", 0.5));
+        agregarEfectividad("acero",
+                Map.of("fuego", 0.5, "agua", 0.5, "electrico", 0.5, "hielo", 2.0, "roca", 2.0, "acero", 0.5));
+        agregarEfectividad("siniestro", Map.of("lucha", 0.5, "psiquico", 2.0, "fantasma", 2.0, "siniestro", 0.5));
+    }
 
-	public int calcularDanio(int nivel, int atk, int def, String tipoAtk, String tipoDef) {
+    /**
+     * Agrega la efectividad de un tipo contra otros tipos.
+     */
+    private static void agregarEfectividad(String tipo, Map<String, Double> debilidades) {
+        TABLA_EFECTIVIDAD.put(tipo, debilidades);
+    }
 
-		double multiplicador = 1.0;
+    /**
+     * Calcula el daño infligido en un combate Pokémon.
+     *
+     * @param nivel nivel del atacante
+     * @param atk ataque del Pokémon atacante
+     * @param def defensa del Pokémon defensor
+     * @param tipoAtk tipo del ataque
+     * @param tipoDef tipo del defensor
+     * @return daño final calculado
+     */
+    public int calcularDanio(int nivel, int atk, int def, String tipoAtk, String tipoDef) {
 
-		if (tipoAtk.equalsIgnoreCase("FIRE") && tipoDef.equalsIgnoreCase("GRASS")) {
-			multiplicador = 2.0;
-		}
+        double multiplicador = 1.0;
 
-		else if (tipoAtk.equalsIgnoreCase("WATER") && tipoDef.equalsIgnoreCase("FIRE")) {
-			multiplicador = 2.0;
-		}
+        if (tipoAtk.equalsIgnoreCase("FIRE") && tipoDef.equalsIgnoreCase("GRASS")) {
+            multiplicador = 2.0;
+        } else if (tipoAtk.equalsIgnoreCase("WATER") && tipoDef.equalsIgnoreCase("FIRE")) {
+            multiplicador = 2.0;
+        } else if (tipoAtk.equalsIgnoreCase("GRASS") && tipoDef.equalsIgnoreCase("WATER")) {
+            multiplicador = 2.0;
+        }
 
-		else if (tipoAtk.equalsIgnoreCase("GRASS") && tipoDef.equalsIgnoreCase("WATER")) {
-			multiplicador = 2.0;
-		}
+        double base = (((2.0 * nivel) / 5.0) + 2.0);
+        double daño = ((base * 40 * ((double) atk / def)) / 50.0) + 2.0;
 
-		double base = (((2.0 * nivel) / 5.0) + 2.0);
+        daño *= multiplicador;
 
-		double daño = ((base * 40 * ((double) atk / def)) / 50.0) + 2.0;
+        return Math.max(1, (int) daño);
+    }
 
-		daño *= multiplicador;
+    /**
+     * Registra un combate en la base de datos.
+     */
+    public CombateDTO crearRegistro(CombateDTO data) {
+        Combate entidad = mapper.map(data, Combate.class);
+        return mapper.map(combateRep.save(entidad), CombateDTO.class);
+    }
 
-		return Math.max(1, (int) daño);
-	}
+    /**
+     * Obtiene el historial de combates de un usuario.
+     */
+    public List<CombateDTO> historialPeleas(Long idUser) {
+        Optional<List<Combate>> encontrados = combateRep.findByIdUsuarioJugador(idUser);
 
-	public CombateDTO crearRegistro(CombateDTO data) {
-		Combate entidad = mapper.map(data, Combate.class);
-		return mapper.map(combateRep.save(entidad), CombateDTO.class);
-	}
+        List<CombateDTO> dtoList = new ArrayList<>();
 
-	public List<CombateDTO> historialPeleas(Long idUser) {
-		Optional<List<Combate>> encontrados = combateRep.findByIdUsuarioJugador(idUser);
-		List<CombateDTO> dtoList = new ArrayList<>();
-		if (encontrados.isPresent()) {
-			encontrados.get().forEach(ent -> dtoList.add(mapper.map(ent, CombateDTO.class)));
-		}
-		return dtoList;
-	}
+        if (encontrados.isPresent()) {
+            encontrados.get().forEach(ent ->
+                    dtoList.add(mapper.map(ent, CombateDTO.class)));
+        }
 
-	public Map<String, Object> calcularRecompensas(int nivelRival) {
-		int expGanada = (nivelRival * 10) + new Random().nextInt(20);
-		int dineroGanado = nivelRival * 5;
+        return dtoList;
+    }
 
-		Map<String, Object> recompensas = new HashMap<>();
-		recompensas.put("exp", expGanada);
-		recompensas.put("dinero", dineroGanado);
-		return recompensas;
-	}
+    /**
+     * Calcula las recompensas tras un combate.
+     */
+    public Map<String, Object> calcularRecompensas(int nivelRival) {
+        int expGanada = (nivelRival * 10) + new Random().nextInt(20);
+        int dineroGanado = nivelRival * 5;
 
-	public int calcularNuevoNivel(int nivelActual, int expActual, int expGanada) {
-		int nuevaExp = expActual + expGanada;
-		return Math.min(100, (nuevaExp / 100) + 1);
-	}
+        Map<String, Object> recompensas = new HashMap<>();
+        recompensas.put("exp", expGanada);
+        recompensas.put("dinero", dineroGanado);
+
+        return recompensas;
+    }
+
+    /**
+     * Calcula el nuevo nivel del Pokémon.
+     */
+    public int calcularNuevoNivel(int nivelActual, int expActual, int expGanada) {
+        int nuevaExp = expActual + expGanada;
+        return Math.min(100, (nuevaExp / 100) + 1);
+    }
 }

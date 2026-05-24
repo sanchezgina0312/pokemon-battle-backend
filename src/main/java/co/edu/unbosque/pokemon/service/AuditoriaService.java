@@ -13,12 +13,26 @@ import co.edu.unbosque.pokemon.entity.Auditoria;
 import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.repository.AuditoriaRepository;
 
+/**
+ * Servicio encargado de la gestión de auditoría del sistema.
+ * 
+ * Registra acciones realizadas por usuarios autenticados o anónimos,
+ * incluyendo login, acciones generales y eventos públicos.
+ */
 @Service
 public class AuditoriaService {
 
     @Autowired
     private AuditoriaRepository auditoriaRepository;
 
+    /**
+     * Registra una acción general realizada por el usuario autenticado.
+     * 
+     * Si no hay usuario autenticado, registra la acción como anónima.
+     *
+     * @param accion acción realizada (CREATE, UPDATE, DELETE, etc.)
+     * @param entidad entidad sobre la que se realizó la acción
+     */
     public void registrar(String accion, String entidad) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -42,27 +56,57 @@ public class AuditoriaService {
             }
         }
 
-        Auditoria auditoria = new Auditoria(idUsuario, correo, rol, accion, entidad, LocalDateTime.now());
+        Auditoria auditoria = new Auditoria(
+                idUsuario,
+                correo,
+                rol,
+                accion,
+                entidad,
+                LocalDateTime.now()
+        );
+
         auditoriaRepository.save(auditoria);
     }
 
+    /**
+     * Obtiene todos los registros de auditoría del sistema.
+     *
+     * @return lista de auditorías registradas
+     */
     public List<Auditoria> getAll() {
         return (List<Auditoria>) auditoriaRepository.findAll();
     }
-    
+
+    /**
+     * Registra específicamente un evento de login.
+     *
+     * @param correo correo del usuario
+     * @param rol rol del usuario
+     * @param idUsuario identificador del usuario
+     */
     public void registrarLogin(String correo, String rol, Long idUsuario) {
         Auditoria auditoria = new Auditoria(
-            idUsuario,
-            correo,
-            rol,
-            "LOGIN",
-            "Sesión",
-            LocalDateTime.now()
+                idUsuario,
+                correo,
+                rol,
+                "LOGIN",
+                "Sesión",
+                LocalDateTime.now()
         );
+
         auditoriaRepository.save(auditoria);
     }
-    
+
+    /**
+     * Registra una acción realizada por un usuario no autenticado.
+     *
+     * @param correo correo asociado (si existe)
+     * @param accion acción realizada
+     * @param entidad entidad afectada
+     */
     public void registrarAccionPublica(String correo, String accion, String entidad) {
-        auditoriaRepository.save(new Auditoria(null, correo, "ANONIMO", accion, entidad, LocalDateTime.now()));
+        auditoriaRepository.save(
+                new Auditoria(null, correo, "ANONIMO", accion, entidad, LocalDateTime.now())
+        );
     }
 }
