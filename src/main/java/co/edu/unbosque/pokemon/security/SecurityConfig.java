@@ -82,6 +82,7 @@ public class SecurityConfig {
                     String path = context.getRequest().getServletPath();
                     boolean isAdminOnly =
                             path.equals("/ataque/banear")
+     
                         || path.equals("/pokemon/cargar")
                         || path.equals("/pokemon/cargarbd")
                         || path.equals("/usuario/mostrartodo")
@@ -94,6 +95,11 @@ public class SecurityConfig {
                         || path.equals("/auditoria/mostrartodo")
                         || path.equals("/pokemon/actualizar-configuracion")
                         || path.equals("/inventario/listar-todo");
+                
+                    System.out.println("DEBUG - Analizando ruta: " + path);
+                    if (path.equals("/ataque/mostrartodo")) {
+                        System.out.println("DEBUG - Validando ataque/mostrartodo específicamente");
+                    }
 
                     if (isAdminOnly) {
                         System.out.println(">>> [SecurityConfig] Ruta admin-only denegada para USUARIO: " + path);
