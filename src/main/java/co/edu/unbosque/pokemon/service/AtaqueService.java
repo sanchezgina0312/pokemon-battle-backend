@@ -46,41 +46,43 @@ public class AtaqueService {
 			ataqueRep.save(a);
 		}
 	}
+	public List<AtaqueDTO> obtenerCatalogoAtaques() {
+	    Iterable<Ataque> existentes = ataqueRep.findAll();
+	    
+	    List<Ataque> listaExistentes = new ArrayList<>();
+	    existentes.forEach(listaExistentes::add);
 
-		public List<AtaqueDTO> obtenerCatalogoAtaques() {
-		    System.out.println("DEBUG: Consultando ataques desde la PokeAPI...");
-		    
-		    // Asumiendo que tienes un helper similar a PokemonHTTPRequestHandler para ataques
-		    List<ItemDetalleDTO> todosLosAtaques = PokemonHTTPRequestHandler.obtenerTodosLosAtaques(); 
+	    if (!listaExistentes.isEmpty()) {
+	        System.out.println("DEBUG: Cargando ataques desde la Base de Datos local.");
+	        return listaExistentes.stream()
+	            .map(a -> mapper.map(a, AtaqueDTO.class))
+	            .collect(Collectors.toList());
+	    }
 
-		    List<AtaqueDTO> dtoList = new ArrayList<>();
+	    System.out.println("DEBUG: Consultando ataques desde la PokeAPI por primera vez...");
+	    List<ItemDetalleDTO> todosLosAtaques = PokemonHTTPRequestHandler.obtenerTodosLosAtaques(); 
+	    List<AtaqueDTO> dtoList = new ArrayList<>();
 
-		    if (todosLosAtaques != null && !todosLosAtaques.isEmpty()) {
-		        for (ItemDetalleDTO item : todosLosAtaques) {
-		            AtaqueDTO dto = new AtaqueDTO();
-		            
-		            // Lógica de ID desde la URL igualita a la de Inventario
-		            if (item.getUrl() != null && !item.getUrl().isEmpty()) {
-		                try {
-		                    String[] partes = item.getUrl().split("/");
-		                    String idStr = partes[partes.length - 1];
-		                    dto.setId(Long.parseLong(idStr));
-		                } catch (NumberFormatException e) {
-		                    System.err.println("DEBUG: Error al convertir ID de ataque: " + item.getUrl());
-		                    dto.setId(0L);
-		                }
-		            }
-		            
-		            dto.setNombre(item.getNombreIngles());
-		          
-		            
-		            dtoList.add(dto);
-		        }
-		    } else {
-		        System.out.println("DEBUG: La lista de ataques recibida es nula o vacía.");
-		    }
-		    
-		    System.out.println("DEBUG: Se mapearon " + dtoList.size() + " ataques correctamente.");
-		    return dtoList;
-		}
+	    if (todosLosAtaques != null) {
+	        for (ItemDetalleDTO item : todosLosAtaques) {
+	            try {
+	                String[] partes = item.getUrl().split("/");
+	                long id = Long.parseLong(partes[partes.length - 1]);
+	                
+	                Ataque nuevaEntidad = new Ataque();
+	                nuevaEntidad.setId(id);
+	                nuevaEntidad.setNombre(item.getNombreIngles());
+	                nuevaEntidad.setPoderModificado(0); 
+	                nuevaEntidad.setEstaBaneado(false);
+	                
+	                ataqueRep.save(nuevaEntidad);
+	                dtoList.add(mapper.map(nuevaEntidad, AtaqueDTO.class));
+	            } catch (Exception e) {
+	                System.err.println("Error procesando el ataque: " + item.getNombreIngles());
+	            }
+	        }
+	    }
+	    
+	    return dtoList;
+	}
 }
