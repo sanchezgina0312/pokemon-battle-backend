@@ -15,6 +15,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controlador REST encargado de gestionar las operaciones relacionadas con la auditoría del sistema.
+ * 
+ * Expone endpoints para consultar los registros de auditoría almacenados,
+ * permitiendo el monitoreo de acciones realizadas dentro de la aplicación.
+ */
 @RestController
 @RequestMapping("/auditoria")
 @CrossOrigin(origins = { "http://localhost:8080", "http://localhost:8081", "http://localhost:4200" })
@@ -24,10 +30,23 @@ public class AuditoriaController {
     @Autowired
     private AuditoriaService auditoriaService;
 
-    @Operation(summary = "Obtener todos los registros de auditoría", description = "Retorna la lista completa de acciones registradas en el sistema.")
+    /**
+     * Obtiene todos los registros de auditoría almacenados en el sistema.
+     * 
+     * @return ResponseEntity con la lista de auditorías y un código HTTP:
+     *         <ul>
+     *             <li>202 (ACCEPTED) si existen registros</li>
+     *             <li>204 (NO_CONTENT) si no hay registros</li>
+     *         </ul>
+     */
+    @Operation(
+        summary = "Obtener todos los registros de auditoría",
+        description = "Retorna la lista completa de acciones registradas en el sistema."
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "202", description = "Lista de auditoría retornada exitosamente"),
-            @ApiResponse(responseCode = "204", description = "No hay registros de auditoría") })
+            @ApiResponse(responseCode = "204", description = "No hay registros de auditoría")
+    })
     @GetMapping("/mostrartodo")
     public ResponseEntity<List<Auditoria>> mostrarTodo() {
         List<Auditoria> lista = auditoriaService.getAll();

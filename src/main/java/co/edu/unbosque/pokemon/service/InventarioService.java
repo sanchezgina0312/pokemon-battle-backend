@@ -13,6 +13,12 @@ import co.edu.unbosque.pokemon.dto.ItemDetalleDTO;
 import co.edu.unbosque.pokemon.entity.Inventario;
 import co.edu.unbosque.pokemon.repository.InventarioRepository;
 
+/**
+ * Servicio encargado de la gestión del inventario (mochila) del usuario.
+ * 
+ * Permite consultar los ítems almacenados por usuario y obtener el catálogo
+ * completo de objetos desde una API externa, mapeándolos a DTOs internos.
+ */
 @Service
 public class InventarioService {
 
@@ -22,35 +28,49 @@ public class InventarioService {
     @Autowired
     private ModelMapper mapper;
 
+    /**
+     * Obtiene la mochila (inventario) de un usuario específico.
+     *
+     * @param idUser identificador del usuario
+     * @return lista de ítems en formato DTO
+     */
     public List<InventarioDTO> verMochila(Long idUser) {
         Optional<List<Inventario>> mochila = invRep.findByIdUsuario(idUser);
+
         List<InventarioDTO> dtoList = new ArrayList<>();
+
         if (mochila.isPresent()) {
-            mochila.get().forEach(ent -> dtoList.add(mapper.map(ent, InventarioDTO.class)));
+            mochila.get().forEach(ent ->
+                    dtoList.add(mapper.map(ent, InventarioDTO.class)));
         }
+
         return dtoList;
     }
 
     /**
-     * Obtiene el catálogo completo consultando la API externa y mapeando los datos
-     * al DTO de inventario, extrayendo el ID real desde la URL del recurso.
-     * * @return Lista de InventarioDTO con los ítems procesados.
+     * Obtiene el catálogo completo de ítems desde la API externa
+     * y lo convierte a DTOs internos del sistema.
+     *
+     * Este método extrae el ID del ítem desde la URL del recurso
+     * cuando no está disponible directamente.
+     *
+     * @return lista de InventarioDTO con los ítems disponibles
      */
     public List<InventarioDTO> obtenerCatalogoCompleto() {
         System.out.println("DEBUG: Consultando catálogo desde la API externa...");
-        
-        List<ItemDetalleDTO> todosLosItems = PokemonHTTPRequestHandler.obtenerTodosLosItems(); 
+
+        List<ItemDetalleDTO> todosLosItems =
+                PokemonHTTPRequestHandler.obtenerTodosLosItems();
 
         List<InventarioDTO> dtoList = new ArrayList<>();
 
         if (todosLosItems != null && !todosLosItems.isEmpty()) {
             for (ItemDetalleDTO item : todosLosItems) {
                 InventarioDTO dto = new InventarioDTO();
-               
+
                 if (item.getUrl() != null && !item.getUrl().isEmpty()) {
                     try {
                         String[] partes = item.getUrl().split("/");
-                    
                         String idStr = partes[partes.length - 1];
                         dto.setIdItem(Long.parseLong(idStr));
                     } catch (NumberFormatException e) {
@@ -58,19 +78,19 @@ public class InventarioService {
                         dto.setIdItem(0L);
                     }
                 } else {
-                   
                     dto.setIdItem(item.getId() > 0 ? (long) item.getId() : 0L);
                 }
-                
+
                 dto.setNombre(item.getNombreIngles());
-                dto.setCantidad(0); 
-               
+                dto.setCantidad(0);
+
                 dtoList.add(dto);
             }
         } else {
             System.out.println("DEBUG: La lista de items recibida es nula o vacía.");
         }
-        
+
         System.out.println("DEBUG: Se mapearon " + dtoList.size() + " objetos correctamente.");
         return dtoList;
-    }}
+    }
+}
