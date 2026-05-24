@@ -47,12 +47,10 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/usuario/traducir",
                     "/pokemon/auth/enviar-codigo"
-                    // /usuario/crear ya NO está aquí — solo ADMIN puede crear
                 ).permitAll()
                 .anyRequest().access((authentication, context) -> {
                     var authObj = authentication.get();
 
-                    // Log detallado de Nata: útil para depurar quién llega y con qué rol
                     if (authObj != null) {
                         System.out.println("Usuario: " + authObj.getName());
                         System.out.println("Autoridades detectadas: " + authObj.getAuthorities());
@@ -60,19 +58,15 @@ public class SecurityConfig {
                         System.out.println("authObj es NULL (No hay usuario autenticado)");
                     }
 
-                    // Sin sesión válida → denegar
                     if (authObj == null || !authObj.isAuthenticated() ||
                         authObj instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
                         return new AuthorizationDecision(false);
                     }
 
-                    // Log para depuración — puedes quitarlo en producción
                     System.out.println(">>> [SecurityConfig] Usuario: " + authObj.getName()
                         + " | Authorities: " + authObj.getAuthorities()
                         + " | Path: " + context.getRequest().getServletPath());
 
-                    // ADMINISTRADOR tiene acceso a todo
-                    // Se usa contains para cubrir variantes: ADMINISTRADOR, ROLE_ADMINISTRADOR
                     boolean isAdmin = authObj.getAuthorities().stream()
                         .anyMatch(a ->
                             a.getAuthority().equals("ROLE_ADMINISTRADOR") ||
@@ -85,7 +79,6 @@ public class SecurityConfig {
                         return new AuthorizationDecision(true);
                     }
 
-                    // Rutas exclusivas de ADMIN
                     String path = context.getRequest().getServletPath();
                     boolean isAdminOnly =
                             path.equals("/ataque/banear")
@@ -113,7 +106,6 @@ public class SecurityConfig {
                         return new AuthorizationDecision(false);
                     }
 
-                    // Rutas permitidas para USUARIO normal autenticado
                     boolean isUsuarioAllowed =
                             path.startsWith("/captura/")
                         || path.startsWith("/combate/")

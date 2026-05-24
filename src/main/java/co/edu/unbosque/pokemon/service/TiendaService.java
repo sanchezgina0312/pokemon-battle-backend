@@ -3,7 +3,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +27,7 @@ public class TiendaService {
 	private TiendaRepository tiendaRep;
 	@Autowired
 	private InventarioRepository invRep;
-	@Autowired
-	private ModelMapper mapper;
+	
 
 	/**
 	 * Realiza la compra de un ítem.
@@ -50,7 +48,6 @@ public class TiendaService {
 
 		if (user.getDinero() < precioFinal) return 2;
 
-		// Deducción de dinero y persistencia
 		user.setDinero(user.getDinero() - precioFinal);
 		userRep.save(user);
 
