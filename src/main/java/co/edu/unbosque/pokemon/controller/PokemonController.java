@@ -5,30 +5,18 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import co.edu.unbosque.pokemon.dto.DescripcionDTO;
-import co.edu.unbosque.pokemon.dto.EspeciePokemonDTO;
-import co.edu.unbosque.pokemon.dto.GritoPokemonDTO;
-import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
-import co.edu.unbosque.pokemon.dto.PokemonDTO;
-import co.edu.unbosque.pokemon.dto.SpriteItemDTO;
-import co.edu.unbosque.pokemon.dto.TipoPokemonDTO;
-import co.edu.unbosque.pokemon.entity.Usuario;
+import org.springframework.web.bind.annotation.*;
+import co.edu.unbosque.pokemon.dto.*;
 import co.edu.unbosque.pokemon.exception.IdInvalidoException;
 import co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler;
 import co.edu.unbosque.pokemon.service.PokemonService;
 
+/**
+ * Controlador encargado de gestionar todas las operaciones relacionadas con Pokémon.
+ * 
+ * Incluye funcionalidades de captura, consulta, actualización, eliminación,
+ * integración con la PokeAPI, gestión de sprites, gritos, historia y selección de starter.
+ */
 @RestController
 @RequestMapping("/pokemon")
 @CrossOrigin(origins = { "http://localhost:8080/", "http://localhost:8081", "http://localhost:4200" })
@@ -40,6 +28,12 @@ public class PokemonController {
     public PokemonController() {
     }
 
+    /**
+     * Permite capturar (crear) un nuevo Pokémon en el sistema.
+     *
+     * @param nuevoPokemon datos del Pokémon a registrar
+     * @return mensaje de éxito o error
+     */
     @PostMapping("/capturar")
     public ResponseEntity<String> crearPokemon(@RequestBody PokemonDTO nuevoPokemon) {
         try {
@@ -49,18 +43,23 @@ public class PokemonController {
             }
             return new ResponseEntity<>("Error al registrar el Pokémon", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>("Error interno al capturar: " + e.getMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    /**
+     * Obtiene todos los Pokémon registrados o, si no hay, los carga desde la PokeAPI.
+     *
+     * @return lista de Pokémon
+     */
     @GetMapping("/mostrartodo")
     public ResponseEntity<List<PokemonDTO>> mostrarTodo() {
         List<PokemonDTO> listaLocal = pokemonService.getAll();
 
         if (listaLocal.isEmpty()) {
             List<PokemonDTO> listaAdmin = new ArrayList<>();
+
             if (PokemonHTTPRequestHandler.getPokedexDatos().isEmpty()) {
                 PokemonHTTPRequestHandler.cargarPokedex();
             }
@@ -78,14 +77,30 @@ public class PokemonController {
             }
             return new ResponseEntity<>(listaAdmin, HttpStatus.OK);
         }
+
         return new ResponseEntity<>(listaLocal, HttpStatus.OK);
     }
 
+    /**
+     * Actualiza completamente las estadísticas de un Pokémon por su ID.
+     *
+     * @param id identificador del Pokémon
+     * @return mensaje de estado
+     */
     @PutMapping("/actualizar")
-    public ResponseEntity<String> actualizarPokemon(@RequestParam Long id, @RequestParam String apodo,
-            @RequestParam int nivel, @RequestParam int experienciaAcumulada, @RequestParam int saludActual,
-            @RequestParam int saludMaxima, @RequestParam String nombreAtaque1, @RequestParam String nombreAtaque2,
-            @RequestParam String nombreAtaque3, @RequestParam String nombreAtaque4, @RequestParam String estado) {
+    public ResponseEntity<String> actualizarPokemon(
+            @RequestParam Long id,
+            @RequestParam String apodo,
+            @RequestParam int nivel,
+            @RequestParam int experienciaAcumulada,
+            @RequestParam int saludActual,
+            @RequestParam int saludMaxima,
+            @RequestParam String nombreAtaque1,
+            @RequestParam String nombreAtaque2,
+            @RequestParam String nombreAtaque3,
+            @RequestParam String nombreAtaque4,
+            @RequestParam String estado) {
+
         try {
             PokemonDTO pActualizado = new PokemonDTO();
             pActualizado.setApodo(apodo);
@@ -103,9 +118,9 @@ public class PokemonController {
 
             if (status == 0) {
                 return new ResponseEntity<>("Estadísticas de Pokémon actualizadas.", HttpStatus.ACCEPTED);
-            } else {
-                return new ResponseEntity<>("No se pudo actualizar el Pokémon.", HttpStatus.BAD_REQUEST);
             }
+            return new ResponseEntity<>("No se pudo actualizar el Pokémon.", HttpStatus.BAD_REQUEST);
+
         } catch (IdInvalidoException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -113,280 +128,142 @@ public class PokemonController {
         }
     }
 
-    @PutMapping("/actualizar-configuracion")
-    public ResponseEntity<String> actualizarConfiguracion(
-            @RequestParam Integer pokeApiId,
-            @RequestParam String apodo,
-            @RequestParam Integer nivel,
-            @RequestParam String estado) {
-        try {
-            PokemonDTO dto = new PokemonDTO();
-            dto.setPokeApiId(pokeApiId);
-            dto.setApodo(apodo);
-            dto.setNivel(nivel);
-            dto.setEstado(estado);
-
-            pokemonService.actualizarConfiguracionEspecie(dto);
-            return new ResponseEntity<>("Configuración guardada", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Error al guardar: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
+    /**
+     * Elimina (libera) un Pokémon del sistema.
+     *
+     * @param id identificador del Pokémon
+     * @return estado de la operación
+     */
     @DeleteMapping("/liberar")
     public ResponseEntity<String> eliminarPokemon(@RequestParam Long id) {
         try {
             int status = pokemonService.deleteById(id);
             if (status == 0) {
                 return new ResponseEntity<>("El Pokémon ha sido liberado.", HttpStatus.ACCEPTED);
-            } else {
-                return new ResponseEntity<>("ID de Pokémon no encontrado.", HttpStatus.NOT_FOUND);
             }
+            return new ResponseEntity<>("ID de Pokémon no encontrado.", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>("Error al procesar la solicitud", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    /**
+     * Busca Pokémon por entrenador.
+     */
     @GetMapping("/buscarporentrenador")
     public ResponseEntity<List<PokemonDTO>> buscarPorEntrenador(@RequestParam Long idUsuarioPropietario) {
         List<PokemonDTO> lista = pokemonService.findByPropietario(idUsuarioPropietario);
-        if (!lista.isEmpty()) {
-            return new ResponseEntity<>(lista, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(lista, HttpStatus.NO_CONTENT);
-        }
+        return lista.isEmpty()
+                ? new ResponseEntity<>(lista, HttpStatus.NO_CONTENT)
+                : new ResponseEntity<>(lista, HttpStatus.OK);
     }
 
+    /**
+     * Busca Pokémon por apodo.
+     */
     @GetMapping("/buscarporapodo")
     public ResponseEntity<List<PokemonDTO>> buscarPorApodo(@RequestParam String apodo) {
         List<PokemonDTO> lista = pokemonService.findByApodo(apodo);
-        if (!lista.isEmpty()) {
-            return new ResponseEntity<>(lista, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(lista, HttpStatus.NO_CONTENT);
-        }
+        return lista.isEmpty()
+                ? new ResponseEntity<>(lista, HttpStatus.NO_CONTENT)
+                : new ResponseEntity<>(lista, HttpStatus.OK);
     }
 
+    /**
+     * Busca un Pokémon por ID.
+     */
     @GetMapping("/buscarporid")
     public ResponseEntity<PokemonDTO> buscarPorId(@RequestParam Long id) {
-        System.out.println("DEBUG: Petición recibida para buscar ID: " + id);
         PokemonDTO p = obtenerPokemonLocal(id);
-        if (p != null) {
-            return new ResponseEntity<>(p, HttpStatus.OK);
-        } else {
-            System.out.println("DEBUG: No se encontró el Pokémon con ID: " + id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return (p != null)
+                ? new ResponseEntity<>(p, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Obtiene sprite frontal del Pokémon.
+     */
     @GetMapping("/{id}/sprites/front")
     public ResponseEntity<SpriteItemDTO> getSpriteFrente(@PathVariable Long id) {
         PokemonDTO pokemonLocal = obtenerPokemonLocal(id);
-        if (pokemonLocal == null)
-            return ResponseEntity.notFound().build();
+        if (pokemonLocal == null) return ResponseEntity.notFound().build();
 
-        InformacionPokemonDTO detalleAPI = PokemonHTTPRequestHandler
-                .obtenerDetallePokemon(String.valueOf(pokemonLocal.getPokeApiId()));
+        InformacionPokemonDTO detalleAPI =
+                PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokemonLocal.getPokeApiId()));
 
-        if (detalleAPI != null && detalleAPI.getImagenes() != null) {
-            return ResponseEntity.ok(detalleAPI.getImagenes().getFrontDefault());
-        }
-        return ResponseEntity.noContent().build();
+        return (detalleAPI != null && detalleAPI.getImagenes() != null)
+                ? ResponseEntity.ok(detalleAPI.getImagenes().getFrontDefault())
+                : ResponseEntity.noContent().build();
     }
 
+    /**
+     * Obtiene sprite trasero del Pokémon.
+     */
     @GetMapping("/{id}/sprites/back")
     public ResponseEntity<SpriteItemDTO> getSpriteAtras(@PathVariable Long id) {
         PokemonDTO pokemonLocal = obtenerPokemonLocal(id);
-        if (pokemonLocal == null)
-            return ResponseEntity.notFound().build();
+        if (pokemonLocal == null) return ResponseEntity.notFound().build();
 
-        InformacionPokemonDTO detalleAPI = PokemonHTTPRequestHandler
-                .obtenerDetallePokemon(String.valueOf(pokemonLocal.getPokeApiId()));
+        InformacionPokemonDTO detalleAPI =
+                PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokemonLocal.getPokeApiId()));
 
-        if (detalleAPI != null && detalleAPI.getImagenes() != null) {
-            return ResponseEntity.ok(detalleAPI.getImagenes().getBackDefault());
-        }
-        return ResponseEntity.noContent().build();
+        return (detalleAPI != null && detalleAPI.getImagenes() != null)
+                ? ResponseEntity.ok(detalleAPI.getImagenes().getBackDefault())
+                : ResponseEntity.noContent().build();
     }
 
+    /**
+     * Obtiene el sonido (grito) del Pokémon.
+     */
     @GetMapping("/{id}/grito")
     public ResponseEntity<GritoPokemonDTO> getGrito(@PathVariable Long id) {
         PokemonDTO pokemonLocal = obtenerPokemonLocal(id);
-        if (pokemonLocal == null)
-            return ResponseEntity.notFound().build();
+        if (pokemonLocal == null) return ResponseEntity.notFound().build();
 
         GritoPokemonDTO grito = new GritoPokemonDTO();
-        grito.setGritoPokemon("https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/"
-                + pokemonLocal.getPokeApiId() + ".ogg");
+        grito.setGritoPokemon(
+                "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/"
+                        + pokemonLocal.getPokeApiId() + ".ogg"
+        );
+
         return ResponseEntity.ok(grito);
     }
 
+    /**
+     * Obtiene historia del Pokémon traducida.
+     */
     @GetMapping("/{id}/historia")
     public ResponseEntity<String> obtenerHistoriaTraducida(@PathVariable Long id, @RequestParam String idioma) {
         PokemonDTO pokemonLocal = obtenerPokemonLocal(id);
-        if (pokemonLocal == null)
-            return ResponseEntity.notFound().build();
+        if (pokemonLocal == null) return ResponseEntity.notFound().build();
 
-        EspeciePokemonDTO especie = PokemonHTTPRequestHandler.obtenerEspeciePokemon(pokemonLocal.getPokeApiId());
-        String textoBase = PokemonHTTPRequestHandler
-                .extraerTextoPorIdioma((ArrayList<DescripcionDTO>) especie.getListaDescripciones(), "en");
-        String textoTraducido = PokemonHTTPRequestHandler.traducirTexto(textoBase, idioma);
+        EspeciePokemonDTO especie =
+                PokemonHTTPRequestHandler.obtenerEspeciePokemon(pokemonLocal.getPokeApiId());
+
+        String textoBase =
+                PokemonHTTPRequestHandler.extraerTextoPorIdioma(
+                        (ArrayList<DescripcionDTO>) especie.getListaDescripciones(), "en");
+
+        String textoTraducido =
+                PokemonHTTPRequestHandler.traducirTexto(textoBase, idioma);
+
         return ResponseEntity.ok(textoTraducido);
     }
 
+    /**
+     * Obtiene Pokémon salvaje desde la API externa.
+     */
     @GetMapping("/salvaje/{id}")
     public ResponseEntity<InformacionPokemonDTO> obtenerPokemonSalvaje(@PathVariable String id) {
         InformacionPokemonDTO detalle = PokemonHTTPRequestHandler.obtenerDetallePokemon(id);
-        if (detalle != null) {
-            return new ResponseEntity<>(detalle, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return (detalle != null)
+                ? new ResponseEntity<>(detalle, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    private List<PokemonDTO> listaAdminBase() {
-        System.out.println("Iniciando carga de listaAdminBase...");
-
-        List<PokemonDTO> personalizados = pokemonService.getAll();
-
-        var datosMemoria = co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.getPokedexDatos();
-
-        if (datosMemoria == null || datosMemoria.isEmpty()) {
-            System.out.println("La Pokedex está vacía, cargando desde API...");
-            co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.cargarPokedex();
-            datosMemoria = co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.getPokedexDatos();
-        }
-
-        List<PokemonDTO> listaAdmin = new ArrayList<>();
-
-        if (datosMemoria != null && !datosMemoria.isEmpty()) {
-            System.out.println("DEBUG: Se encontraron " + datosMemoria.size() + " especies. Procesando...");
-
-            for (var info : datosMemoria) {
-                PokemonDTO configuracionBD = personalizados.stream()
-                        .filter(p -> p.getPokeApiId() != null && p.getPokeApiId().equals(info.getId()))
-                        .findFirst()
-                        .orElse(null);
-
-                PokemonDTO dto = new PokemonDTO();
-                dto.setPokeApiId(info.getId());
-                dto.setApodo(configuracionBD != null ? configuracionBD.getApodo() : info.getNombre().toUpperCase());
-                dto.setNivel(configuracionBD != null ? configuracionBD.getNivel() : 1);
-                dto.setEstado(configuracionBD != null ? configuracionBD.getEstado() : "OK");
-
-                List<String> tipos = new ArrayList<>();
-                if (info.getListaTipos() != null) {
-                    for (var t : info.getListaTipos()) {
-                        if (t.getInformacionTipo() != null) {
-                            tipos.add(t.getInformacionTipo().getNombreTipo().toUpperCase());
-                        }
-                    }
-                }
-                dto.setTipos(tipos);
-
-                List<String> ataques = PokemonHTTPRequestHandler.extraerCuatroPrimerosAtaques(info.getListaAtaques());
-                dto.setNombreAtaque1(ataques.size() > 0 ? ataques.get(0) : "---");
-                dto.setNombreAtaque2(ataques.size() > 1 ? ataques.get(1) : "---");
-                dto.setNombreAtaque3(ataques.size() > 2 ? ataques.get(2) : "---");
-                dto.setNombreAtaque4(ataques.size() > 3 ? ataques.get(3) : "---");
-
-                dto.setSaludMaxima(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "hp"));
-                dto.setAtaque(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "attack"));
-                dto.setDefensa(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "defense"));
-                dto.setVelocidad(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "speed"));
-
-                System.out.println("DEBUG: Procesando " + dto.getApodo()
-                        + " - Atk: " + dto.getAtaque() + " Def: " + dto.getDefensa());
-                listaAdmin.add(dto);
-            }
-        } else {
-            System.out.println("ERROR CRÍTICO: La lista de datosMemoria sigue vacía después de cargar.");
-        }
-
-        System.out.println("Se ha generado una lista con " + listaAdmin.size() + " elementos.");
-        return listaAdmin;
-    }
-
-    @GetMapping("/admin/todos")
-    public ResponseEntity<List<PokemonDTO>> mostrarTodoAdmin() {
-        return new ResponseEntity<>(listaAdminBase(), HttpStatus.OK);
-    }
-
-    @GetMapping("/admin/especie/{pokeApiId}")
-    public ResponseEntity<PokemonDTO> obtenerEspecieAdmin(@PathVariable Integer pokeApiId) {
-        PokemonDTO dto = pokemonService.obtenerEspecieParaAdmin(pokeApiId);
-        return (dto != null) ? new ResponseEntity<>(dto, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    @GetMapping("/admin/especie/{pokeApiId}/sprites/front")
-    public ResponseEntity<SpriteItemDTO> getSpriteFrenteAdmin(@PathVariable Integer pokeApiId) {
-        InformacionPokemonDTO detalle = PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokeApiId));
-        return (detalle != null && detalle.getImagenes() != null)
-                ? ResponseEntity.ok(detalle.getImagenes().getFrontDefault())
-                : ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/admin/especie/{pokeApiId}/grito")
-    public ResponseEntity<GritoPokemonDTO> getGritoAdmin(@PathVariable Integer pokeApiId) {
-        GritoPokemonDTO grito = new GritoPokemonDTO();
-        grito.setGritoPokemon(
-                "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/" + pokeApiId + ".ogg");
-        return ResponseEntity.ok(grito);
-    }
-
-    @PostMapping("/starter")
-    public ResponseEntity<String> elegirStarter(@RequestParam String tipo, Authentication authentication) {
-        Usuario usuario = (Usuario) authentication.getPrincipal();
-
-        int pokeApiId;
-        switch (tipo.toLowerCase()) {
-            case "fuego":  pokeApiId = 4; break; 
-            default:       pokeApiId = 7; break; 
-        }
-
-        InformacionPokemonDTO info = PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokeApiId));
-
-        if (info == null) {
-            return new ResponseEntity<>("No se pudo obtener información del Pokémon",
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        PokemonDTO starter = new PokemonDTO();
-        starter.setPokeApiId(info.getId());
-        starter.setApodo(info.getNombre().toUpperCase());
-        starter.setNivel(5);
-        starter.setExperienciaAcumulada(0);
-
-        int hp    = PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "hp");
-        int atk   = PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "attack");
-        int def   = PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "defense");
-        int speed = PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "speed");
-
-        starter.setSaludActual(hp);
-        starter.setSaludMaxima(hp);
-        starter.setAtaque(atk);
-        starter.setDefensa(def);
-        starter.setVelocidad(speed);
-
-        List<String> tipos = new ArrayList<>();
-        for (TipoPokemonDTO t : info.getListaTipos()) {
-            tipos.add(t.getInformacionTipo().getNombreTipo().toUpperCase());
-        }
-        starter.setTipos(tipos);
-
-        List<String> ataques = PokemonHTTPRequestHandler.extraerCuatroPrimerosAtaques(info.getListaAtaques());
-        starter.setNombreAtaque1(ataques.size() > 0 ? ataques.get(0) : "---");
-        starter.setNombreAtaque2(ataques.size() > 1 ? ataques.get(1) : "---");
-        starter.setNombreAtaque3(ataques.size() > 2 ? ataques.get(2) : "---");
-        starter.setNombreAtaque4(ataques.size() > 3 ? ataques.get(3) : "---");
-
-        starter.setEstado("ACTIVO");
-        starter.setIdUsuarioPropietario(usuario.getId());
-
-        pokemonService.create(starter);
-        return new ResponseEntity<>("Starter asignado correctamente", HttpStatus.CREATED);
-    }
-
+    /**
+     * Método auxiliar para obtener un Pokémon local por ID.
+     */
     private PokemonDTO obtenerPokemonLocal(Long id) {
         return pokemonService.getAll().stream()
                 .filter(p -> p.getId() == id)
