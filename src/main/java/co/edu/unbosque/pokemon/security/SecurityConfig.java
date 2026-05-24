@@ -51,21 +51,10 @@ public class SecurityConfig {
                 .anyRequest().access((authentication, context) -> {
                     var authObj = authentication.get();
 
-                    if (authObj != null) {
-                        System.out.println("Usuario: " + authObj.getName());
-                        System.out.println("Autoridades detectadas: " + authObj.getAuthorities());
-                    } else {
-                        System.out.println("authObj es NULL (No hay usuario autenticado)");
-                    }
-
                     if (authObj == null || !authObj.isAuthenticated() ||
                         authObj instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
                         return new AuthorizationDecision(false);
                     }
-
-                    System.out.println(">>> [SecurityConfig] Usuario: " + authObj.getName()
-                        + " | Authorities: " + authObj.getAuthorities()
-                        + " | Path: " + context.getRequest().getServletPath());
 
                     boolean isAdmin = authObj.getAuthorities().stream()
                         .anyMatch(a ->
@@ -75,14 +64,12 @@ public class SecurityConfig {
                         );
 
                     if (isAdmin) {
-                        System.out.println(">>> [SecurityConfig] Acceso concedido como ADMINISTRADOR");
                         return new AuthorizationDecision(true);
                     }
 
                     String path = context.getRequest().getServletPath();
                     boolean isAdminOnly =
                             path.equals("/ataque/banear")
-     
                         || path.equals("/pokemon/cargar")
                         || path.equals("/pokemon/cargarbd")
                         || path.equals("/usuario/mostrartodo")
@@ -96,13 +83,7 @@ public class SecurityConfig {
                         || path.equals("/pokemon/actualizar-configuracion")
                         || path.equals("/inventario/listar-todo");
                 
-                    System.out.println("DEBUG - Analizando ruta: " + path);
-                    if (path.equals("/ataque/mostrartodo")) {
-                        System.out.println("DEBUG - Validando ataque/mostrartodo específicamente");
-                    }
-
                     if (isAdminOnly) {
-                        System.out.println(">>> [SecurityConfig] Ruta admin-only denegada para USUARIO: " + path);
                         return new AuthorizationDecision(false);
                     }
 
@@ -117,7 +98,6 @@ public class SecurityConfig {
                         || path.startsWith("/usuario/genero")
                         || path.startsWith("/centropokemon");
 
-                    System.out.println(">>> [SecurityConfig] isUsuarioAllowed=" + isUsuarioAllowed + " para: " + path);
                     return new AuthorizationDecision(isUsuarioAllowed);
                 }))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

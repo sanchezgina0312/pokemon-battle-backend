@@ -17,7 +17,7 @@ public class AtaqueDTO {
 	 * El nombre identificador único del ataque.
 	 */
 	private String nombre;
-	private Long id; // Agrega este nuevo atributo
+	private Long id; 
 
 	
 	/**
