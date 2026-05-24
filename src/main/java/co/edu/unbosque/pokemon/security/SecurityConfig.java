@@ -89,6 +89,7 @@ public class SecurityConfig {
                     String path = context.getRequest().getServletPath();
                     boolean isAdminOnly =
                             path.equals("/ataque/banear")
+     
                         || path.equals("/pokemon/cargar")
                         || path.equals("/pokemon/cargarbd")
                         || path.equals("/usuario/mostrartodo")
@@ -99,10 +100,13 @@ public class SecurityConfig {
                         || path.equals("/usuario/actualizar")
                         || path.equals("/usuario/eliminar")
                         || path.equals("/auditoria/mostrartodo")
-                        // Preservado de Nata: el panel admin edita configuración de especies
                         || path.equals("/pokemon/actualizar-configuracion")
-                        // Preservado de Nata: listar todo el inventario es operación de admin
                         || path.equals("/inventario/listar-todo");
+                
+                    System.out.println("DEBUG - Analizando ruta: " + path);
+                    if (path.equals("/ataque/mostrartodo")) {
+                        System.out.println("DEBUG - Validando ataque/mostrartodo específicamente");
+                    }
 
                     if (isAdminOnly) {
                         System.out.println(">>> [SecurityConfig] Ruta admin-only denegada para USUARIO: " + path);

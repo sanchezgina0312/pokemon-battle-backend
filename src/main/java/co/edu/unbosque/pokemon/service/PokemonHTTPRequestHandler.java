@@ -201,6 +201,45 @@ public class PokemonHTTPRequestHandler {
 		        return new ArrayList<>();
 		    }
 	    }
+		public static List<ItemDetalleDTO> obtenerTodosLosAtaques() {
+		    // La URL correcta para ataques en PokeAPI es 'move'
+		    String url = "https://pokeapi.co/api/v2/move?limit=100"; 
+		    HttpRequest solicitud = HttpRequest.newBuilder()
+		            .GET()
+		            .uri(URI.create(url))
+		            .build();
+		    
+		    try {
+		        HttpResponse<String> respuesta = HTTP_CLIENT.send(solicitud, HttpResponse.BodyHandlers.ofString());
+		        System.out.println("DEBUG: JSON recibido de API (Ataques): " + respuesta.body());
+		        
+		        JsonObject jsonObject = JsonParser.parseString(respuesta.body()).getAsJsonObject();
+		        JsonArray results = jsonObject.getAsJsonArray("results");
+		        
+		        List<ItemDetalleDTO> lista = new ArrayList<>();
+		        
+		        for (int i = 0; i < results.size(); i++) {
+		            JsonObject ataqueJson = results.get(i).getAsJsonObject();
+		            
+		            ItemDetalleDTO ataque = new ItemDetalleDTO();
+		            ataque.setNombreIngles(ataqueJson.get("name").getAsString());
+		            
+		            // Extraemos el ID desde la URL igual que con los items
+		            String urlAtaque = ataqueJson.get("url").getAsString();
+		            String[] partes = urlAtaque.split("/");
+		            int id = Integer.parseInt(partes[partes.length - 1]); 
+		            ataque.setId(id);
+		            // También guardamos la URL por si la necesitas en el mapeo del Service
+		            ataque.setUrl(urlAtaque); 
+		            
+		            lista.add(ataque);
+		        }
+		        return lista;
+		    } catch (Exception e) {
+		        System.out.println("Error al obtener catálogo de ataques: " + e.getMessage());
+		        return new ArrayList<>();
+		    }
+		}
 	public static void main(String[] args) {
 		cargarPokedex();
 

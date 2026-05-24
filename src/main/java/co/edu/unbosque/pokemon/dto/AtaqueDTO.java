@@ -17,6 +17,8 @@ public class AtaqueDTO {
 	 * El nombre identificador único del ataque.
 	 */
 	private String nombre;
+	private Long id; // Agrega este nuevo atributo
+
 	
 	/**
 	 * Indicador de si el ataque se encuentra restringido o baneado para su uso en combates.
@@ -60,7 +62,13 @@ public class AtaqueDTO {
 	public String getNombre() {
 		return nombre;
 	}
+		public Long getId() {
+		    return id;
+		}
 
+		public void setId(Long id) {
+		    this.id = id;
+		}
 	/**
 	 * Establece el nombre del ataque.
 	 *
