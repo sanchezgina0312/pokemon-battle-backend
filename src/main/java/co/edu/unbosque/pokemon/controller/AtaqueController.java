@@ -1,14 +1,18 @@
 package co.edu.unbosque.pokemon.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import co.edu.unbosque.pokemon.dto.AtaqueDTO;
 import co.edu.unbosque.pokemon.service.AtaqueService;
 
 /**
@@ -48,5 +52,14 @@ public class AtaqueController {
 	public ResponseEntity<String> banear(@RequestParam String nombre) {
 		ataqueSer.cambiarEstadoBaneo(nombre, true);
 		return new ResponseEntity<>("Ataque baneado", HttpStatus.ACCEPTED);
+	}
+	@GetMapping("/mostrartodo")
+	public ResponseEntity<List<AtaqueDTO>> mostrarTodos() {
+	    System.out.println("DEBUG: Se recibió la petición para listar todos los ataques.");
+	    
+	    List<AtaqueDTO> lista = ataqueSer.obtenerCatalogoAtaques();
+	    
+	    System.out.println("DEBUG: Se encontraron " + (lista != null ? lista.size() : "null") + " ataques.");
+	    return new ResponseEntity<>(lista, HttpStatus.OK);
 	}
 }
