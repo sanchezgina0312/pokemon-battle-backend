@@ -3,18 +3,18 @@ package co.edu.unbosque.pokemon;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import co.edu.unbosque.pokemon.entity.Inventario;
 import co.edu.unbosque.pokemon.entity.Item;
+import co.edu.unbosque.pokemon.entity.Tienda;
 import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.repository.InventarioRepository;
 import co.edu.unbosque.pokemon.repository.ItemRepository;
@@ -25,152 +25,226 @@ import co.edu.unbosque.pokemon.service.TiendaService;
 /**
  * Clase de pruebas unitarias para {@link TiendaService}.
  * 
- * Valida el correcto funcionamiento del proceso de compra en la tienda,
- * incluyendo escenarios de éxito, errores por usuario o item inexistente,
- * dinero insuficiente y creación/actualización del inventario.
+ * <p>
+ * Esta clase valida el correcto funcionamiento de los métodos
+ * del servicio de tienda utilizando Mockito para simular
+ * los repositorios y evitar acceso a base de datos real.
+ * </p>
+ * 
+ * <p>
+ * Se prueban escenarios de compra exitosa,
+ * usuario o ítem inexistente, dinero insuficiente
+ * y actualización del inventario.
+ * </p>
  */
 class TiendaServiceTest {
 
+	/**
+	 * Mock del repositorio de usuarios.
+	 */
 	@Mock
 	private UsuarioRepository userRep;
 
+	/**
+	 * Mock del repositorio de ítems.
+	 */
 	@Mock
 	private ItemRepository itemRep;
 
+	/**
+	 * Mock del repositorio de tienda.
+	 */
 	@Mock
 	private TiendaRepository tiendaRep;
 
+	/**
+	 * Mock del repositorio de inventario.
+	 */
 	@Mock
 	private InventarioRepository invRep;
 
-	private ModelMapper mapper;
-
+	/**
+	 * Servicio que será probado.
+	 */
 	private TiendaService tiendaService;
 
+	/**
+	 * Usuario de prueba.
+	 */
 	private Usuario user;
 
+	/**
+	 * Ítem de prueba.
+	 */
 	private Item item;
 
-	private Inventario inventario;
-
 	/**
-	 * Configura los mocks y la inyección manual de dependencias
-	 * en {@link TiendaService} antes de cada prueba.
+	 * Inicializa el entorno de pruebas antes de cada test.
 	 */
 	@BeforeEach
 	void setUp() {
 
 		MockitoAnnotations.openMocks(this);
 
-		mapper = new ModelMapper();
-
 		tiendaService = new TiendaService();
+
+		user = new Usuario();
+		user.setId(1L);
+		user.setDinero(5000);
+
+		item = new Item();
+		item.setId(1L);
+		item.setNombre("ULTRABOLA");
+		item.setCosto(1000);
 
 		try {
 
-			Field f1 = TiendaService.class.getDeclaredField("userRep");
-			f1.setAccessible(true);
-			f1.set(tiendaService, userRep);
+			var campoUserRep = TiendaService.class.getDeclaredField("userRep");
+			campoUserRep.setAccessible(true);
+			campoUserRep.set(tiendaService, userRep);
 
-			Field f2 = TiendaService.class.getDeclaredField("itemRep");
-			f2.setAccessible(true);
-			f2.set(tiendaService, itemRep);
+			var campoItemRep = TiendaService.class.getDeclaredField("itemRep");
+			campoItemRep.setAccessible(true);
+			campoItemRep.set(tiendaService, itemRep);
 
-			Field f3 = TiendaService.class.getDeclaredField("tiendaRep");
-			f3.setAccessible(true);
-			f3.set(tiendaService, tiendaRep);
+			var campoTiendaRep = TiendaService.class.getDeclaredField("tiendaRep");
+			campoTiendaRep.setAccessible(true);
+			campoTiendaRep.set(tiendaService, tiendaRep);
 
-			Field f4 = TiendaService.class.getDeclaredField("invRep");
-			f4.setAccessible(true);
-			f4.set(tiendaService, invRep);
-
-			Field f5 = TiendaService.class.getDeclaredField("mapper");
-			f5.setAccessible(true);
-			f5.set(tiendaService, mapper);
+			var campoInvRep = TiendaService.class.getDeclaredField("invRep");
+			campoInvRep.setAccessible(true);
+			campoInvRep.set(tiendaService, invRep);
 
 		} catch (Exception e) {
 			fail("Error configurando mocks: " + e.getMessage());
 		}
-
-		user = new Usuario();
-		user.setId(1L);
-		user.setDinero(2000);
-
-		item = new Item();
-		item.setId(1L);
-		item.setNombre("POKE BALL");
-		item.setCosto(200);
-
-		inventario = new Inventario();
-		inventario.setIdUsuario(1L);
-		inventario.setIdItem(1L);
-		inventario.setCantidad(1);
 	}
 
 	/**
-	 * Verifica una compra exitosa:
-	 * usuario y item existen, hay dinero suficiente y se actualiza inventario.
+	 * Prueba una compra realizada exitosamente.
 	 */
 	@Test
-	void testCompraExitosa() {
+	void testRealizarCompraSuccess() {
 
-		when(userRep.findById(1L)).thenReturn(Optional.of(user));
-		when(itemRep.findById(1L)).thenReturn(Optional.of(item));
-		when(invRep.findByIdUsuario(1L)).thenReturn(Optional.of(List.of(inventario)));
+		when(userRep.findById(1L))
+				.thenReturn(Optional.of(user));
+
+		when(itemRep.findById(1L))
+				.thenReturn(Optional.of(item));
+
+		when(invRep.findByIdUsuario(1L))
+				.thenReturn(Optional.of(new ArrayList<>()));
 
 		int result = tiendaService.realizarCompra(1L, 1L);
 
 		assertEquals(0, result);
 
+		assertEquals(3800, user.getDinero());
+
 		verify(userRep).save(any(Usuario.class));
-		verify(tiendaRep).save(any());
+
+		verify(tiendaRep).save(any(Tienda.class));
+
 		verify(invRep).save(any(Inventario.class));
 	}
 
 	/**
-	 * Verifica el caso donde el usuario o el item no existen.
+	 * Prueba la compra cuando el usuario no existe.
 	 */
 	@Test
-	void testUsuarioOItemNoExiste() {
+	void testRealizarCompraUsuarioNoExiste() {
 
-		when(userRep.findById(1L)).thenReturn(Optional.empty());
-		when(itemRep.findById(1L)).thenReturn(Optional.of(item));
+		when(userRep.findById(1L))
+				.thenReturn(Optional.empty());
+
+		when(itemRep.findById(1L))
+				.thenReturn(Optional.of(item));
 
 		int result = tiendaService.realizarCompra(1L, 1L);
 
 		assertEquals(1, result);
+
+		verify(userRep, never()).save(any());
+
+		verify(tiendaRep, never()).save(any());
+
+		verify(invRep, never()).save(any());
 	}
 
 	/**
-	 * Verifica el caso donde el usuario no tiene dinero suficiente para comprar.
+	 * Prueba la compra cuando el ítem no existe.
 	 */
 	@Test
-	void testDineroInsuficiente() {
+	void testRealizarCompraItemNoExiste() {
 
-		user.setDinero(50);
+		when(userRep.findById(1L))
+				.thenReturn(Optional.of(user));
 
-		when(userRep.findById(1L)).thenReturn(Optional.of(user));
-		when(itemRep.findById(1L)).thenReturn(Optional.of(item));
+		when(itemRep.findById(1L))
+				.thenReturn(Optional.empty());
+
+		int result = tiendaService.realizarCompra(1L, 1L);
+
+		assertEquals(1, result);
+
+		verify(userRep, never()).save(any());
+
+		verify(tiendaRep, never()).save(any());
+
+		verify(invRep, never()).save(any());
+	}
+
+	/**
+	 * Prueba la compra cuando el usuario no tiene suficiente dinero.
+	 */
+	@Test
+	void testRealizarCompraDineroInsuficiente() {
+
+		user.setDinero(100);
+
+		when(userRep.findById(1L))
+				.thenReturn(Optional.of(user));
+
+		when(itemRep.findById(1L))
+				.thenReturn(Optional.of(item));
 
 		int result = tiendaService.realizarCompra(1L, 1L);
 
 		assertEquals(2, result);
+
+		verify(userRep, never()).save(any());
+
+		verify(tiendaRep, never()).save(any());
+
+		verify(invRep, never()).save(any());
 	}
 
 	/**
-	 * Verifica la creación de un nuevo item en el inventario cuando no existe previamente.
+	 * Prueba la actualización del inventario
+	 * cuando el ítem ya existe en la mochila.
 	 */
 	@Test
-	void testItemNuevoEnInventario() {
+	void testActualizarMochilaItemExistente() {
 
-		when(userRep.findById(1L)).thenReturn(Optional.of(user));
-		when(itemRep.findById(1L)).thenReturn(Optional.of(item));
-		when(invRep.findByIdUsuario(1L)).thenReturn(Optional.empty());
+		Inventario inventario = new Inventario(1L, 1L, 2);
+
+		List<Inventario> lista = List.of(inventario);
+
+		when(userRep.findById(1L))
+				.thenReturn(Optional.of(user));
+
+		when(itemRep.findById(1L))
+				.thenReturn(Optional.of(item));
+
+		when(invRep.findByIdUsuario(1L))
+				.thenReturn(Optional.of(lista));
 
 		int result = tiendaService.realizarCompra(1L, 1L);
 
 		assertEquals(0, result);
 
-		verify(invRep).save(any(Inventario.class));
+		assertEquals(3, inventario.getCantidad());
+
+		verify(invRep).save(inventario);
 	}
 }
