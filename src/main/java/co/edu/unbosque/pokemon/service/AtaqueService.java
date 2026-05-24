@@ -16,56 +16,29 @@ import co.edu.unbosque.pokemon.dto.ItemDetalleDTO;
 import co.edu.unbosque.pokemon.entity.Ataque;
 import co.edu.unbosque.pokemon.repository.AtaqueRepository;
 
-/**
- * Servicio encargado de la gestión de ataques dentro del sistema Pokémon.
- * <p>
- * Permite actualizar el poder de los ataques, cambiar su estado de baneo
- * y consultar los ataques que han sido baneados.
- * </p>
- * <p>
- * Utiliza AtaqueRepository para el acceso a datos y ModelMapper para la
- * conversión entre entidades y DTOs.
- * </p>
- */
 @Service
 public class AtaqueService {
 
-    @Autowired
-    private AtaqueRepository ataqueRep;
+	@Autowired
+	private AtaqueRepository ataqueRep;
 
-    @Autowired
-    private ModelMapper mapper;
+	@Autowired
+	private ModelMapper mapper;
 
-    public int actualizarPoder(String nombre, Integer nuevoPoder) {
-        Optional<Ataque> encontrado = ataqueRep.findById(nombre);
-        if (encontrado.isPresent()) {
-            Ataque a = encontrado.get();
-            a.setPoderModificado(nuevoPoder);
-            ataqueRep.save(a);
-            return 0;
-        }
-        return 1;
-    }
+	public int actualizarPoder(String nombre, Integer nuevoPoder) {
+		Optional<Ataque> encontrado = ataqueRep.findById(nombre);
 
-    public void cambiarEstadoBaneo(String nombre, boolean estado) {
-        Optional<Ataque> encontrado = ataqueRep.findById(nombre);
-        if (encontrado.isPresent()) {
-            Ataque a = encontrado.get();
-            a.setEstaBaneado(estado);
-            ataqueRep.save(a);
-        }
-    }
+		if (encontrado.isPresent()) {
+			Ataque a = encontrado.get();
+			a.setPoderModificado(nuevoPoder);
+			ataqueRep.save(a);
+			return 0;
+		}
+		return 1;
+	}
 
-    public List<AtaqueDTO> obtenerAtaquesBaneados() {
-        Optional<List<Ataque>> baneados = ataqueRep.findByEstaBaneadoTrue();
-        List<AtaqueDTO> dtoList = new ArrayList<>();
-        if (baneados.isPresent()) {
-            baneados.get().forEach(ent ->
-                dtoList.add(mapper.map(ent, AtaqueDTO.class))
-            );
-        }
-        return dtoList;
-    }
+	public void cambiarEstadoBaneo(String nombre, boolean estado) {
+		Optional<Ataque> encontrado = ataqueRep.findById(nombre);
 
 		if (encontrado.isPresent()) {
 			Ataque a = encontrado.get();
@@ -111,5 +84,5 @@ public class AtaqueService {
 	    }
 	    
 	    return dtoList;
-	}
+}
 }
