@@ -26,7 +26,6 @@ import co.edu.unbosque.pokemon.dto.InventarioDTO;
  */
 @RestController
 @RequestMapping("/inventario")
-@CrossOrigin(origins = {"http://localhost:8080/", "http://localhost:8081", "http://localhost:4200"})
 public class InventarioController {
 
 	/**
