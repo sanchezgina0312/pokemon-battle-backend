@@ -19,7 +19,6 @@ import co.edu.unbosque.pokemon.service.PokemonService;
  */
 @RestController
 @RequestMapping("/pokemon")
-@CrossOrigin(origins = { "http://localhost:8080/", "http://localhost:8081", "http://localhost:4200" })
 public class PokemonController {
 
     @Autowired

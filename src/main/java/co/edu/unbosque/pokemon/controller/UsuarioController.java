@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/usuario")
-@CrossOrigin(origins = { "http://localhost:8080", "http://localhost:8081", "http://localhost:4200" })
 @Tag(name = "Usuario", description = "Controlador para la gestión de entrenadores y administradores del juego utilizando DTOs")
 public class UsuarioController {
 

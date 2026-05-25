@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody;
  */
 @RestController
 @RequestMapping("/centropokemon")
-@CrossOrigin(origins = {"http://localhost:8080/", "http://localhost:8081", "http://localhost:4200"})
 public class CentroPokemonController {
 
 	/**

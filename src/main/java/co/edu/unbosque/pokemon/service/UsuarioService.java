@@ -19,17 +19,14 @@ import co.edu.unbosque.pokemon.util.LanzadorDeException;
  * <p>
  * Implementa operaciones CRUD, autenticación, búsquedas por diferentes campos
  * y manejo de datos sensibles como contraseñas encriptadas.
- * </p>
- *
  * <p>
  * Utiliza:
  * <ul>
- *   <li>UsuarioRepository para acceso a datos</li>
- *   <li>ModelMapper para conversión entidad-DTO</li>
- *   <li>PasswordEncoder para encriptación de contraseñas</li>
- *   <li>LanzadorDeException para validaciones de negocio</li>
+ * <li>UsuarioRepository para acceso a datos</li>
+ * <li>ModelMapper para conversión entidad-DTO</li>
+ * <li>PasswordEncoder para encriptación de contraseñas</li>
+ * <li>LanzadorDeException para validaciones de negocio</li>
  * </ul>
- * </p>
  */
 @Service
 public class UsuarioService implements CRUDOperation<UsuarioDTO> {

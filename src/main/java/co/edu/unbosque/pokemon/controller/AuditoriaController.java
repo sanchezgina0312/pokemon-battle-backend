@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/auditoria")
-@CrossOrigin(origins = { "http://localhost:8080", "http://localhost:8081", "http://localhost:4200" })
 @Tag(name = "Auditoria")
 public class AuditoriaController {
 
