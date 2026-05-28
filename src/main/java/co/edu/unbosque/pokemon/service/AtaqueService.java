@@ -13,15 +13,29 @@ import co.edu.unbosque.pokemon.dto.ItemDetalleDTO;
 import co.edu.unbosque.pokemon.entity.Ataque;
 import co.edu.unbosque.pokemon.repository.AtaqueRepository;
 
+/**
+ * Servicio encargado de la gestión de ataques, permitiendo la consulta,
+ * actualización de estadísticas y control de estados de baneo de los ataques
+ * Pokémon.
+ */
 @Service
 public class AtaqueService {
 
+	/** Repositorio para la persistencia de los ataques. */
 	@Autowired
 	private AtaqueRepository ataqueRep;
-
+	
+	/** Mapeador para transformar entidades de base de datos a objetos DTO. */
 	@Autowired
 	private ModelMapper mapper;
 
+	/**
+     * Actualiza el poder base de un ataque específico en la base de datos.
+     *
+     * @param nombre     Nombre del ataque a modificar.
+     * @param nuevoPoder El nuevo valor de poder a asignar.
+     * @return 0 si la actualización fue exitosa, 1 si el ataque no fue encontrado.
+     */
 	public int actualizarPoder(String nombre, Integer nuevoPoder) {
 		Optional<Ataque> encontrado = ataqueRep.findById(nombre);
 
@@ -34,6 +48,12 @@ public class AtaqueService {
 		return 1;
 	}
 
+	/**
+     * Cambia el estado de baneo de un ataque (activo o inhabilitado).
+     *
+     * @param nombre Nombre del ataque.
+     * @param estado {@code true} para banear el ataque, {@code false} para habilitarlo.
+     */
 	public void cambiarEstadoBaneo(String nombre, boolean estado) {
 		Optional<Ataque> encontrado = ataqueRep.findById(nombre);
 

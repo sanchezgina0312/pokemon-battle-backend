@@ -332,61 +332,64 @@ public class PokemonController {
 	}
 
 	/**
-	 * Genera una lista completa de todos los Pokémon disponibles (configurados y
-	 * nativos) para uso administrativo. * @return Lista completa de
-	 * {@link PokemonDTO}.
+	 * Genera una lista completa de todos los Pokémon disponibles para uso
+	 * administrativo. *
+	 * 
+	 * @return Lista completa de {@link PokemonDTO}.
 	 */
 	private List<PokemonDTO> listaAdminBase() {
-
 		List<PokemonDTO> personalizados = pokemonService.getAll();
-
-		var datosMemoria = co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.getPokedexDatos();
+		var datosMemoria = PokemonHTTPRequestHandler.getPokedexDatos();
 
 		if (datosMemoria == null || datosMemoria.isEmpty()) {
-			co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.cargarPokedex();
-			datosMemoria = co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.getPokedexDatos();
+			PokemonHTTPRequestHandler.cargarPokedex();
+			datosMemoria = PokemonHTTPRequestHandler.getPokedexDatos();
 		}
 
 		List<PokemonDTO> listaAdmin = new ArrayList<>();
 
-		if (datosMemoria != null && !datosMemoria.isEmpty()) {
+		if (datosMemoria == null || datosMemoria.isEmpty()) {
+			return listaAdmin;
+		}
 
-			for (var info : datosMemoria) {
-				PokemonDTO configuracionBD = personalizados.stream()
-						.filter(p -> p.getPokeApiId() != null && p.getPokeApiId().equals(info.getId())).findFirst()
-						.orElse(null);
+		for (var info : datosMemoria) {
+			PokemonDTO configuracionBD = null;
+			for (PokemonDTO p : personalizados) {
+				if (p.getPokeApiId() != null && p.getPokeApiId().equals(info.getId())) {
+					configuracionBD = p;
+					break;
+				}
+			}
 
-				PokemonDTO dto = new PokemonDTO();
-				dto.setPokeApiId(info.getId());
-				dto.setApodo(configuracionBD != null ? configuracionBD.getApodo() : info.getNombre().toUpperCase());
-				dto.setNivel(configuracionBD != null ? configuracionBD.getNivel() : 1);
-				dto.setEstado(configuracionBD != null ? configuracionBD.getEstado() : "OK");
+			PokemonDTO dto = new PokemonDTO();
+			dto.setPokeApiId(info.getId());
+			dto.setApodo(configuracionBD != null ? configuracionBD.getApodo() : info.getNombre().toUpperCase());
+			dto.setNivel(configuracionBD != null ? configuracionBD.getNivel() : 1);
+			dto.setEstado(configuracionBD != null ? configuracionBD.getEstado() : "OK");
 
-				List<String> tipos = new ArrayList<>();
-				if (info.getListaTipos() != null) {
-					for (var t : info.getListaTipos()) {
-						if (t.getInformacionTipo() != null) {
-							tipos.add(t.getInformacionTipo().getNombreTipo().toUpperCase());
-						}
+			// 4. Simplificación de tipos
+			List<String> tipos = new ArrayList<>();
+			if (info.getListaTipos() != null) {
+				for (var t : info.getListaTipos()) {
+					if (t.getInformacionTipo() != null) {
+						tipos.add(t.getInformacionTipo().getNombreTipo().toUpperCase());
 					}
 				}
-				dto.setTipos(tipos);
-
-				List<String> ataques = PokemonHTTPRequestHandler.extraerCuatroPrimerosAtaques(info.getListaAtaques());
-				dto.setNombreAtaque1(ataques.size() > 0 ? ataques.get(0) : "---");
-				dto.setNombreAtaque2(ataques.size() > 1 ? ataques.get(1) : "---");
-				dto.setNombreAtaque3(ataques.size() > 2 ? ataques.get(2) : "---");
-				dto.setNombreAtaque4(ataques.size() > 3 ? ataques.get(3) : "---");
-
-				dto.setSaludMaxima(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "hp"));
-				dto.setAtaque(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "attack"));
-				dto.setDefensa(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "defense"));
-				dto.setVelocidad(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "speed"));
-
-				listaAdmin.add(dto);
 			}
-		} else {
+			dto.setTipos(tipos);
 
+			List<String> ataques = PokemonHTTPRequestHandler.extraerCuatroPrimerosAtaques(info.getListaAtaques());
+			dto.setNombreAtaque1(ataques.get(0));
+			dto.setNombreAtaque2(ataques.get(1));
+			dto.setNombreAtaque3(ataques.get(2));
+			dto.setNombreAtaque4(ataques.get(3));
+
+			dto.setSaludMaxima(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "hp"));
+			dto.setAtaque(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "attack"));
+			dto.setDefensa(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "defense"));
+			dto.setVelocidad(PokemonHTTPRequestHandler.extraerStat(info.getListaEstadisticas(), "speed"));
+
+			listaAdmin.add(dto);
 		}
 
 		return listaAdmin;
