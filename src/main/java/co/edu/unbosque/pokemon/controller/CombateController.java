@@ -3,7 +3,6 @@ package co.edu.unbosque.pokemon.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -100,6 +99,20 @@ public class CombateController {
 		}
 	}
 
+	/**
+	 * Calcula el daño base que infligirá un ataque en un combate.
+	 * <p>
+	 * Recibe los parámetros necesarios mediante un mapa, procesa el cálculo a
+	 * través del servicio de combates y retorna el resultado entero. Si los datos
+	 * proporcionados no son válidos, responde con un estado HTTP 400 (Bad Request).
+	 * </p>
+	 * * @param params Mapa que contiene: "nivel" (Integer), "atk" (Integer), "def"
+	 * (Integer), "tipoAtk" (String) y "tipoDef" (String).
+	 * 
+	 * @return Un {@link ResponseEntity} que contiene el valor del daño calculado y
+	 *         el estado HTTP {@link HttpStatus#OK} (200), o un error 400 en caso de
+	 *         excepción.
+	 */
 	@PostMapping("/calcular-danio")
 	public ResponseEntity<Integer> calcularDanio(@RequestBody Map<String, Object> params) {
 		try {
