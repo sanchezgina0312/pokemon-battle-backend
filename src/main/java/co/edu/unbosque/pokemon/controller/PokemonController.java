@@ -26,12 +26,6 @@ import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.exception.IdInvalidoException;
 import co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler;
 import co.edu.unbosque.pokemon.service.PokemonService;
-import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
-import co.edu.unbosque.pokemon.dto.PokemonDTO;
-import co.edu.unbosque.pokemon.dto.TipoPokemonDTO;
-import co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Controlador REST que gestiona las operaciones principales de los Pokémon,
