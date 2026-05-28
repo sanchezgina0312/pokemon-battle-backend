@@ -26,6 +26,12 @@ import co.edu.unbosque.pokemon.entity.Usuario;
 import co.edu.unbosque.pokemon.exception.IdInvalidoException;
 import co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler;
 import co.edu.unbosque.pokemon.service.PokemonService;
+import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
+import co.edu.unbosque.pokemon.dto.PokemonDTO;
+import co.edu.unbosque.pokemon.dto.TipoPokemonDTO;
+import co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Controlador REST que gestiona las operaciones principales de los Pokémon,
@@ -339,7 +345,7 @@ public class PokemonController {
 	 */
 	private List<PokemonDTO> listaAdminBase() {
 		List<PokemonDTO> personalizados = pokemonService.getAll();
-		var datosMemoria = PokemonHTTPRequestHandler.getPokedexDatos();
+		List<InformacionPokemonDTO> datosMemoria = PokemonHTTPRequestHandler.getPokedexDatos();
 
 		if (datosMemoria == null || datosMemoria.isEmpty()) {
 			PokemonHTTPRequestHandler.cargarPokedex();
@@ -352,7 +358,7 @@ public class PokemonController {
 			return listaAdmin;
 		}
 
-		for (var info : datosMemoria) {
+		for (InformacionPokemonDTO info : datosMemoria) {
 			PokemonDTO configuracionBD = null;
 			for (PokemonDTO p : personalizados) {
 				if (p.getPokeApiId() != null && p.getPokeApiId().equals(info.getId())) {
@@ -367,10 +373,9 @@ public class PokemonController {
 			dto.setNivel(configuracionBD != null ? configuracionBD.getNivel() : 1);
 			dto.setEstado(configuracionBD != null ? configuracionBD.getEstado() : "OK");
 
-			// 4. Simplificación de tipos
 			List<String> tipos = new ArrayList<>();
 			if (info.getListaTipos() != null) {
-				for (var t : info.getListaTipos()) {
+				for (TipoPokemonDTO t : info.getListaTipos()) {
 					if (t.getInformacionTipo() != null) {
 						tipos.add(t.getInformacionTipo().getNombreTipo().toUpperCase());
 					}
