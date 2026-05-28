@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import co.edu.unbosque.pokemon.dto.DescripcionDTO;
 import co.edu.unbosque.pokemon.dto.EspeciePokemonDTO;
 import co.edu.unbosque.pokemon.dto.GritoPokemonDTO;
 import co.edu.unbosque.pokemon.dto.InformacionPokemonDTO;
@@ -311,8 +310,7 @@ public class PokemonController {
 			return ResponseEntity.notFound().build();
 
 		EspeciePokemonDTO especie = PokemonHTTPRequestHandler.obtenerEspeciePokemon(pokemonLocal.getPokeApiId());
-		String textoBase = PokemonHTTPRequestHandler
-				.extraerTextoPorIdioma((ArrayList<DescripcionDTO>) especie.getListaDescripciones(), "en");
+		String textoBase = PokemonHTTPRequestHandler.extraerTextoPorIdioma(especie.getListaDescripciones(), "en");
 		String textoTraducido = PokemonHTTPRequestHandler.traducirTexto(textoBase, idioma);
 		return ResponseEntity.ok(textoTraducido);
 	}
@@ -339,14 +337,12 @@ public class PokemonController {
 	 * {@link PokemonDTO}.
 	 */
 	private List<PokemonDTO> listaAdminBase() {
-		System.out.println("Iniciando carga de listaAdminBase...");
 
 		List<PokemonDTO> personalizados = pokemonService.getAll();
 
 		var datosMemoria = co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.getPokedexDatos();
 
 		if (datosMemoria == null || datosMemoria.isEmpty()) {
-			System.out.println("La Pokedex está vacía, cargando desde API...");
 			co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.cargarPokedex();
 			datosMemoria = co.edu.unbosque.pokemon.service.PokemonHTTPRequestHandler.getPokedexDatos();
 		}
@@ -390,10 +386,9 @@ public class PokemonController {
 				listaAdmin.add(dto);
 			}
 		} else {
-			System.out.println("ERROR CRÍTICO: La lista de datosMemoria sigue vacía después de cargar.");
+
 		}
 
-		System.out.println("Se ha generado una lista con " + listaAdmin.size() + " elementos.");
 		return listaAdmin;
 	}
 
@@ -451,15 +446,7 @@ public class PokemonController {
 	public ResponseEntity<String> elegirStarter(@RequestParam String tipo, Authentication authentication) {
 		Usuario usuario = (Usuario) authentication.getPrincipal();
 
-		int pokeApiId;
-		switch (tipo.toLowerCase()) {
-		case "fuego":
-			pokeApiId = 4;
-			break;
-		default:
-			pokeApiId = 7;
-			break;
-		}
+		int pokeApiId = "fuego".equalsIgnoreCase(tipo) ? 4 : 7;
 
 		InformacionPokemonDTO info = PokemonHTTPRequestHandler.obtenerDetallePokemon(String.valueOf(pokeApiId));
 

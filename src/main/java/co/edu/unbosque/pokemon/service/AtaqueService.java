@@ -2,15 +2,12 @@ package co.edu.unbosque.pokemon.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
 import co.edu.unbosque.pokemon.dto.AtaqueDTO;
 import co.edu.unbosque.pokemon.dto.ItemDetalleDTO;
 import co.edu.unbosque.pokemon.entity.Ataque;
@@ -46,43 +43,40 @@ public class AtaqueService {
 			ataqueRep.save(a);
 		}
 	}
+
 	public List<AtaqueDTO> obtenerCatalogoAtaques() {
-	    Iterable<Ataque> existentes = ataqueRep.findAll();
-	    
-	    List<Ataque> listaExistentes = new ArrayList<>();
-	    existentes.forEach(listaExistentes::add);
+		Iterable<Ataque> existentes = ataqueRep.findAll();
 
-	    if (!listaExistentes.isEmpty()) {
-	        System.out.println("DEBUG: Cargando ataques desde la Base de Datos local.");
-	        return listaExistentes.stream()
-	            .map(a -> mapper.map(a, AtaqueDTO.class))
-	            .collect(Collectors.toList());
-	    }
+		List<Ataque> listaExistentes = new ArrayList<>();
+		existentes.forEach(ataque -> listaExistentes.add(ataque));
 
-	    System.out.println("DEBUG: Consultando ataques desde la PokeAPI por primera vez...");
-	    List<ItemDetalleDTO> todosLosAtaques = PokemonHTTPRequestHandler.obtenerTodosLosAtaques(); 
-	    List<AtaqueDTO> dtoList = new ArrayList<>();
+		if (!listaExistentes.isEmpty()) {
+			return listaExistentes.stream().map(a -> mapper.map(a, AtaqueDTO.class)).collect(Collectors.toList());
+		}
 
-	    if (todosLosAtaques != null) {
-	        for (ItemDetalleDTO item : todosLosAtaques) {
-	            try {
-	                String[] partes = item.getUrl().split("/");
-	                long id = Long.parseLong(partes[partes.length - 1]);
-	                
-	                Ataque nuevaEntidad = new Ataque();
-	                nuevaEntidad.setId(id);
-	                nuevaEntidad.setNombre(item.getNombreIngles());
-	                nuevaEntidad.setPoderModificado(0); 
-	                nuevaEntidad.setEstaBaneado(false);
-	                
-	                ataqueRep.save(nuevaEntidad);
-	                dtoList.add(mapper.map(nuevaEntidad, AtaqueDTO.class));
-	            } catch (Exception e) {
-	                System.err.println("Error procesando el ataque: " + item.getNombreIngles());
-	            }
-	        }
-	    }
-	    
-	    return dtoList;
-}
+		List<ItemDetalleDTO> todosLosAtaques = PokemonHTTPRequestHandler.obtenerTodosLosAtaques();
+		List<AtaqueDTO> dtoList = new ArrayList<>();
+
+		if (todosLosAtaques != null) {
+			for (ItemDetalleDTO item : todosLosAtaques) {
+				try {
+					String[] partes = item.getUrl().split("/");
+					long id = Long.parseLong(partes[partes.length - 1]);
+
+					Ataque nuevaEntidad = new Ataque();
+					nuevaEntidad.setId(id);
+					nuevaEntidad.setNombre(item.getNombreIngles());
+					nuevaEntidad.setPoderModificado(0);
+					nuevaEntidad.setEstaBaneado(false);
+
+					ataqueRep.save(nuevaEntidad);
+					dtoList.add(mapper.map(nuevaEntidad, AtaqueDTO.class));
+				} catch (Exception e) {
+					System.err.println("Error procesando el ataque: " + item.getNombreIngles());
+				}
+			}
+		}
+
+		return dtoList;
+	}
 }
