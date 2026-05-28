@@ -16,86 +16,73 @@ import co.edu.unbosque.pokemon.dto.ItemDetalleDTO;
 import co.edu.unbosque.pokemon.entity.Ataque;
 import co.edu.unbosque.pokemon.repository.AtaqueRepository;
 
-/**
- * Servicio encargado de la gestión de ataques dentro del sistema Pokémon.
- * <p>
- * Permite actualizar el poder de los ataques, cambiar su estado de baneo
- * y consultar los ataques que han sido baneados.
- * </p>
- * <p>
- * Utiliza AtaqueRepository para el acceso a datos y ModelMapper para la
- * conversión entre entidades y DTOs.
- * </p>
- */
 @Service
 public class AtaqueService {
 
-    @Autowired
-    private AtaqueRepository ataqueRep;
+	@Autowired
+	private AtaqueRepository ataqueRep;
 
-    @Autowired
-    private ModelMapper mapper;
+	@Autowired
+	private ModelMapper mapper;
 
-    public int actualizarPoder(String nombre, Integer nuevoPoder) {
-        Optional<Ataque> encontrado = ataqueRep.findById(nombre);
-        if (encontrado.isPresent()) {
-            Ataque a = encontrado.get();
-            a.setPoderModificado(nuevoPoder);
-            ataqueRep.save(a);
-            return 0;
-        }
-        return 1;
-    }
+	public int actualizarPoder(String nombre, Integer nuevoPoder) {
+		Optional<Ataque> encontrado = ataqueRep.findById(nombre);
 
-    public void cambiarEstadoBaneo(String nombre, boolean estado) {
-        Optional<Ataque> encontrado = ataqueRep.findById(nombre);
-        if (encontrado.isPresent()) {
-            Ataque a = encontrado.get();
-            a.setEstaBaneado(estado);
-            ataqueRep.save(a);
-        }
-    }
+		if (encontrado.isPresent()) {
+			Ataque a = encontrado.get();
+			a.setPoderModificado(nuevoPoder);
+			ataqueRep.save(a);
+			return 0;
+		}
+		return 1;
+	}
 
-    public List<AtaqueDTO> obtenerAtaquesBaneados() {
-        Optional<List<Ataque>> baneados = ataqueRep.findByEstaBaneadoTrue();
-        List<AtaqueDTO> dtoList = new ArrayList<>();
-        if (baneados.isPresent()) {
-            baneados.get().forEach(ent ->
-                dtoList.add(mapper.map(ent, AtaqueDTO.class))
-            );
-        }
-        return dtoList;
-    }
+	public void cambiarEstadoBaneo(String nombre, boolean estado) {
+		Optional<Ataque> encontrado = ataqueRep.findById(nombre);
 
-    public List<AtaqueDTO> obtenerCatalogoAtaques() {
-        System.out.println("DEBUG: Consultando ataques desde la PokeAPI...");
+		if (encontrado.isPresent()) {
+			Ataque a = encontrado.get();
+			a.setEstaBaneado(estado);
+			ataqueRep.save(a);
+		}
+	}
+	public List<AtaqueDTO> obtenerCatalogoAtaques() {
+	    Iterable<Ataque> existentes = ataqueRep.findAll();
+	    
+	    List<Ataque> listaExistentes = new ArrayList<>();
+	    existentes.forEach(listaExistentes::add);
 
-        List<ItemDetalleDTO> todosLosAtaques = PokemonHTTPRequestHandler.obtenerTodosLosAtaques();
-        List<AtaqueDTO> dtoList = new ArrayList<>();
+	    if (!listaExistentes.isEmpty()) {
+	        System.out.println("DEBUG: Cargando ataques desde la Base de Datos local.");
+	        return listaExistentes.stream()
+	            .map(a -> mapper.map(a, AtaqueDTO.class))
+	            .collect(Collectors.toList());
+	    }
 
-        if (todosLosAtaques != null && !todosLosAtaques.isEmpty()) {
-            for (ItemDetalleDTO item : todosLosAtaques) {
-                AtaqueDTO dto = new AtaqueDTO();
+	    System.out.println("DEBUG: Consultando ataques desde la PokeAPI por primera vez...");
+	    List<ItemDetalleDTO> todosLosAtaques = PokemonHTTPRequestHandler.obtenerTodosLosAtaques(); 
+	    List<AtaqueDTO> dtoList = new ArrayList<>();
 
-                if (item.getUrl() != null && !item.getUrl().isEmpty()) {
-                    try {
-                        String[] partes = item.getUrl().split("/");
-                        String idStr = partes[partes.length - 1];
-                        dto.setId(Long.parseLong(idStr));
-                    } catch (NumberFormatException e) {
-                        System.err.println("DEBUG: Error al convertir ID de ataque: " + item.getUrl());
-                        dto.setId(0L);
-                    }
-                }
-
-                dto.setNombre(item.getNombreIngles());
-                dtoList.add(dto);
-            }
-        } else {
-            System.out.println("DEBUG: La lista de ataques recibida es nula o vacía.");
-        }
-
-        System.out.println("DEBUG: Se mapearon " + dtoList.size() + " ataques correctamente.");
-        return dtoList;
-    }
+	    if (todosLosAtaques != null) {
+	        for (ItemDetalleDTO item : todosLosAtaques) {
+	            try {
+	                String[] partes = item.getUrl().split("/");
+	                long id = Long.parseLong(partes[partes.length - 1]);
+	                
+	                Ataque nuevaEntidad = new Ataque();
+	                nuevaEntidad.setId(id);
+	                nuevaEntidad.setNombre(item.getNombreIngles());
+	                nuevaEntidad.setPoderModificado(0); 
+	                nuevaEntidad.setEstaBaneado(false);
+	                
+	                ataqueRep.save(nuevaEntidad);
+	                dtoList.add(mapper.map(nuevaEntidad, AtaqueDTO.class));
+	            } catch (Exception e) {
+	                System.err.println("Error procesando el ataque: " + item.getNombreIngles());
+	            }
+	        }
+	    }
+	    
+	    return dtoList;
+}
 }

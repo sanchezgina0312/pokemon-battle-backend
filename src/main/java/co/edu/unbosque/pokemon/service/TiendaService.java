@@ -22,7 +22,6 @@ import co.edu.unbosque.pokemon.util.LanzadorDeException;
  * <p>
  * Gestiona la compra de ítems, validación de usuarios, cálculo de precios
  * dinámicos, registro de transacciones y actualización del inventario del usuario.
- * </p>
  */
 @Service
 public class TiendaService {
@@ -45,20 +44,19 @@ public class TiendaService {
      * <p>
      * Flujo:
      * <ul>
-     *   <li>Valida IDs</li>
-     *   <li>Busca usuario e ítem</li>
-     *   <li>Calcula precio final</li>
-     *   <li>Verifica dinero disponible</li>
-     *   <li>Descuenta dinero</li>
-     *   <li>Registra compra</li>
-     *   <li>Actualiza inventario</li>
+     * <li>Valida IDs</li>
+     * <li>Busca usuario e ítem</li>
+     * <li>Calcula precio final</li>
+     * <li>Verifica dinero disponible</li>
+     * <li>Descuenta dinero</li>
+     * <li>Registra compra</li>
+     * <li>Actualiza inventario</li>
      * </ul>
-     * </p>
      *
      * @param idUsuario identificador del usuario comprador.
      * @param idItem identificador del ítem a comprar.
      * @return 0 si la compra fue exitosa, 1 si no existe usuario o ítem,
-     *         2 si el usuario no tiene suficiente dinero.
+     * 2 si el usuario no tiene suficiente dinero.
      */
     public int realizarCompra(long idUsuario, long idItem) {
         LanzadorDeException.verificarId(idUsuario);
@@ -91,7 +89,6 @@ public class TiendaService {
      *
      * <p>
      * Algunos ítems tienen precio fijo independiente del valor en base de datos.
-     * </p>
      *
      * @param item ítem a evaluar.
      * @return precio final del ítem.
@@ -118,7 +115,6 @@ public class TiendaService {
      * <p>
      * Si el ítem ya existe en la mochila, incrementa su cantidad.
      * Si no existe, lo crea con cantidad inicial de 1.
-     * </p>
      *
      * @param idUsuario identificador del usuario.
      * @param idItem identificador del ítem.

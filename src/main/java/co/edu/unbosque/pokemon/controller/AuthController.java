@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/pokemon/auth")
-@CrossOrigin(origins = "*")
 @Tag(name = "Autenticación", description = "API para el ingreso y registro al sistema de Batallas Pokémon")
 public class AuthController {
 
