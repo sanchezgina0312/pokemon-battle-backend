@@ -32,7 +32,7 @@ public class PokemonHTTPRequestHandler {
 	private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2)
 			.connectTimeout(Duration.ofSeconds(10)).build();
 
-	private static ArrayList<InformacionPokemonDTO> pokedexDatos = new ArrayList<>();
+	private static List<InformacionPokemonDTO> pokedexDatos = new ArrayList<>();
 
 	/**
 	 * Carga los primeros 151 Pokémon desde la PokeAPI y los almacena en memoria.
@@ -173,7 +173,7 @@ public class PokemonHTTPRequestHandler {
 	 *
 	 * @return lista de Pokémon almacenados
 	 */
-	public static ArrayList<InformacionPokemonDTO> getPokedexDatos() {
+	public static List<InformacionPokemonDTO> getPokedexDatos() {
 		return pokedexDatos;
 	}
 
@@ -182,8 +182,9 @@ public class PokemonHTTPRequestHandler {
 	 *
 	 * @param pokedexDatos lista de Pokémon
 	 */
-	public static void setPokedexDatos(ArrayList<InformacionPokemonDTO> pokedexDatos) {
-		PokemonHTTPRequestHandler.pokedexDatos = pokedexDatos;
+	public static void setPokedexDatos(List<InformacionPokemonDTO> pokedexDatos) {
+		PokemonHTTPRequestHandler.pokedexDatos = (pokedexDatos != null) ? new ArrayList<>(pokedexDatos)
+				: new ArrayList<>();
 	}
 
 	/**
@@ -294,10 +295,16 @@ public class PokemonHTTPRequestHandler {
 		}
 	}
 
+	/**
+	 * Método de ejecución principal para pruebas de integración de la clase. Valida
+	 * la carga de datos de la PokeAPI, filtrado por idioma y traducciones.
+	 *
+	 * @param args Argumentos de la línea de comandos.
+	 */
 	public static void main(String[] args) {
 		cargarPokedex();
 
-		ArrayList<InformacionPokemonDTO> info = getPokedexDatos();
+		List<InformacionPokemonDTO> info = getPokedexDatos();
 
 		System.out.println("--- PRUEBA DE TODO EL PROYECTO POKEMON ---\n");
 
@@ -328,8 +335,7 @@ public class PokemonHTTPRequestHandler {
 		System.out.println("\n--- 2. Probando si filtra por idioma ---");
 		EspeciePokemonDTO pikachuEspecie = obtenerEspeciePokemon(25);
 		if (pikachuEspecie != null) {
-			ArrayList<DescripcionDTO> descripciones = (ArrayList<DescripcionDTO>) pikachuEspecie
-					.getListaDescripciones();
+			List<DescripcionDTO> descripciones = pikachuEspecie.getListaDescripciones();
 			String historiaES = extraerTextoPorIdioma(descripciones, "es");
 			String historiaEN = extraerTextoPorIdioma(descripciones, "en");
 			System.out.println("Pikachu dice en Español: " + historiaES);

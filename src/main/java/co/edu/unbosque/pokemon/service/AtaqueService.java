@@ -44,6 +44,18 @@ public class AtaqueService {
 		}
 	}
 
+	/**
+	 * Obtiene el catálogo completo de ataques disponibles.
+	 * <p>
+	 * Este método implementa una lógica de carga bajo demanda: primero consulta los
+	 * ataques almacenados en la base de datos local. Si la base de datos está
+	 * vacía, realiza una petición a la PokeAPI para obtener todos los ataques, los
+	 * registra en el sistema local y retorna la lista mapeada a {@link AtaqueDTO}.
+	 * </p>
+	 *
+	 * @return Una lista de {@link AtaqueDTO} con todos los ataques disponibles en
+	 *         el sistema.
+	 */
 	public List<AtaqueDTO> obtenerCatalogoAtaques() {
 		Iterable<Ataque> existentes = ataqueRep.findAll();
 
