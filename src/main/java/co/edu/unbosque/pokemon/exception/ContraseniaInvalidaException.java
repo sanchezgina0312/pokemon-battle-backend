@@ -13,11 +13,6 @@ package co.edu.unbosque.pokemon.exception;
 public class ContraseniaInvalidaException extends RuntimeException {
 
 	/**
-	 * Identificador único de serialización para la clase.
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
 	 * Construye una nueva instancia de {@code ContraseniaInvalidaException} con el
 	 * mensaje de detalle especificado.
 	 *

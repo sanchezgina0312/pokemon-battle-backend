@@ -3,7 +3,6 @@ package co.edu.unbosque.pokemon.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,18 +40,18 @@ public class CombateController {
 	 */
 	@Autowired
 	private CombateService combateSer;
-	
+
 	/**
-     * Servicio que gestiona la lógica de persistencia y estado de los Pokémon.
-     * Utilizado para actualizar niveles y experiencia tras los combates.
-     */
+	 * Servicio que gestiona la lógica de persistencia y estado de los Pokémon.
+	 * Utilizado para actualizar niveles y experiencia tras los combates.
+	 */
 	@Autowired
 	private PokemonService pokemonSer;
-	
+
 	/**
-     * Servicio que gestiona la lógica de cuentas de usuario.
-     * Utilizado para actualizar el saldo de dinero del entrenador.
-     */
+	 * Servicio que gestiona la lógica de cuentas de usuario. Utilizado para
+	 * actualizar el saldo de dinero del entrenador.
+	 */
 	@Autowired
 	private UsuarioService usuarioSer;
 
@@ -100,50 +99,65 @@ public class CombateController {
 		}
 	}
 
+	/**
+	 * Calcula el daño base que infligirá un ataque en un combate.
+	 * <p>
+	 * Recibe los parámetros necesarios mediante un mapa, procesa el cálculo a
+	 * través del servicio de combates y retorna el resultado entero. Si los datos
+	 * proporcionados no son válidos, responde con un estado HTTP 400 (Bad Request).
+	 * </p>
+	 * * @param params Mapa que contiene: "nivel" (Integer), "atk" (Integer), "def"
+	 * (Integer), "tipoAtk" (String) y "tipoDef" (String).
+	 * 
+	 * @return Un {@link ResponseEntity} que contiene el valor del daño calculado y
+	 *         el estado HTTP {@link HttpStatus#OK} (200), o un error 400 en caso de
+	 *         excepción.
+	 */
 	@PostMapping("/calcular-danio")
 	public ResponseEntity<Integer> calcularDanio(@RequestBody Map<String, Object> params) {
-	    try {
-	        int nivel = (int) params.get("nivel");
-	        int atk = (int) params.get("atk");
-	        int def = (int) params.get("def");
-	        String tipoAtk = (String) params.get("tipoAtk");
-	        String tipoDef = (String) params.get("tipoDef");
+		try {
+			int nivel = (int) params.get("nivel");
+			int atk = (int) params.get("atk");
+			int def = (int) params.get("def");
+			String tipoAtk = (String) params.get("tipoAtk");
+			String tipoDef = (String) params.get("tipoDef");
 
-	        int danio = combateSer.calcularDanio(nivel, atk, def, tipoAtk, tipoDef);
-	        return new ResponseEntity<>(danio, HttpStatus.OK);
-	    } catch (Exception e) {
-	        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-	    }
+			int danio = combateSer.calcularDanio(nivel, atk, def, tipoAtk, tipoDef);
+			return new ResponseEntity<>(danio, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
 	}
-	
+
 	/**
-     * Procesa la finalización de un combate, calculando y otorgando las recompensas 
-     * correspondientes al usuario y su Pokémon.
-     * <p>
-     * Calcula experiencia basada en el nivel del rival y el dinero ganado, 
-     * delegando la persistencia a los servicios correspondientes.
-     * </p>
-     * * @param request Mapa que contiene "idPokemon" (Long) y "nivelRival" (int).
-     * @return un mapa de las recompensas otorgadas (exp y dinero).
-     */
+	 * Procesa la finalización de un combate, calculando y otorgando las recompensas
+	 * correspondientes al usuario y su Pokémon.
+	 * <p>
+	 * Calcula experiencia basada en el nivel del rival y el dinero ganado,
+	 * delegando la persistencia a los servicios correspondientes.
+	 * </p>
+	 * * @param request Mapa que contiene "idPokemon" (Long) y "nivelRival" (int).
+	 * 
+	 * @return un mapa de las recompensas otorgadas (exp y dinero).
+	 */
 	@PostMapping("/finalizar")
 	public ResponseEntity<Map<String, Object>> finalizarCombate(@RequestBody Map<String, Object> request) {
-		
+
 		Long idPokemon = Long.valueOf(request.get("idPokemon").toString());
-	    Long idUsuario = Long.valueOf(request.get("idUsuario").toString());
-	    int nivelRival = (int) request.get("nivelRival");
-	    
-	    int expGanada = (nivelRival * 10);
-	    int dineroGanado = (nivelRival * 5);
-	    
-	    pokemonSer.sumarExperiencia(idPokemon, expGanada);
-	    usuarioSer.sumarDinero(idUsuario, dineroGanado);
-	    
-	    Map<String, Object> response = new HashMap<>();
-	    response.put("expGanada", expGanada);
-	    response.put("dineroGanado", dineroGanado);
-	    response.put("mensaje", "Recompensas procesadas");
-	    
-	    return ResponseEntity.ok(response);
+		Long idUsuario = Long.valueOf(request.get("idUsuario").toString());
+		int nivelRival = (int) request.get("nivelRival");
+
+		int expGanada = (nivelRival * 10);
+		int dineroGanado = (nivelRival * 5);
+
+		pokemonSer.sumarExperiencia(idPokemon, expGanada);
+		usuarioSer.sumarDinero(idUsuario, dineroGanado);
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("expGanada", expGanada);
+		response.put("dineroGanado", dineroGanado);
+		response.put("mensaje", "Recompensas procesadas");
+
+		return ResponseEntity.ok(response);
 	}
 }
